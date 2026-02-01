@@ -22,11 +22,13 @@ Integration: Added project vision, complete tech stack, API standards, and domai
 Build a professional, high-trust booking platform for a massage therapy business that bridges the gap between customer convenience and administrative control. The system prioritizes a seamless "happy path" for customers—booking a single service with a down-payment—while providing the business owner with robust tools to manage availability and verify payments.
 
 **Core Value Propositions**:
+
 - **Simplicity**: One booking = One service. No complex carts or multi-day logic.
 - **Reliability**: Zero double-bookings via atomic database transactions.
 - **Transparency**: Clear pricing, down-payment rules, and instant confirmation (Email + ICS).
 
 **Happy Path User Flow**:
+
 1. Service selection with clear price and duration display
 2. Calendar scheduling with disabled/unavailable dates grayed out
 3. Simple form (Name, Email, Phone)
@@ -85,6 +87,7 @@ Every external dependency is a liability. Add dependencies only when building th
 ## Technology Standards
 
 **Mandatory Stack**:
+
 - **Framework**: Next.js (App Router preferred for server components)
 - **Language**: TypeScript 5.x (strict mode enabled) compiling to ES2022
 - **Styling**: Tailwind CSS
@@ -101,6 +104,7 @@ Every external dependency is a liability. Add dependencies only when building th
 - **Calendar Files**: ics package for ICS generation
 
 **Code Quality**:
+
 - `any` type strictly forbidden; use `unknown` with narrowing.
 - Use Zod schemas to validate runtime data at system boundaries.
 - Use discriminated unions for state and events.
@@ -132,12 +136,14 @@ Every external dependency is a liability. Add dependencies only when building th
 - Instantiate clients outside hot paths; inject for testability.
 
 **File Organization**:
+
 - Use kebab-case filenames (e.g., `user-session.ts`, `data-service.ts`).
 - Keep tests, types, and helpers near their implementation.
 - Reuse and extend shared utilities before creating new ones.
 - Follow Next.js App Router conventions for pages, layouts, and route handlers.
 
 **Testing Requirements**:
+
 - **Unit Tests**: Every function, component, hook using Jest or Vitest.
 - **Integration Tests**: API routes, database interactions, third-party service integrations.
 - **E2E Tests**: Critical user flows using Playwright or Cypress.
@@ -148,6 +154,7 @@ Every external dependency is a liability. Add dependencies only when building th
 - **TDD Workflow**: (1) Write failing test, (2) Write minimum code to pass, (3) Refactor.
 
 **Responsive Design Requirements**:
+
 - Mobile-first approach using Tailwind's responsive utilities (design for 375px width first).
 - Breakpoints: `sm` (640px), `md` (768px), `lg` (1024px), `xl` (1280px), `2xl` (1536px).
 - Touch targets minimum 44px tall for accessibility.
@@ -156,12 +163,14 @@ Every external dependency is a liability. Add dependencies only when building th
 - Typography scales appropriately across breakpoints.
 
 **UI/UX Guidelines**:
+
 - Use MUI DataGrid for admin dashboard scannability (filtering "Today's Bookings", "Pending Payments").
 - Service listing and calendar components built in Storybook first.
 - Stripe Elements integrated for payment collection.
 - All interactive MUI components styled consistently with Tailwind or minimal `sx` prop usage.
 
 **Dependency Management**:
+
 - All packages installed via `pnpm add` (production) or `pnpm add -D` (dev).
 - Lock file (`pnpm-lock.yaml`) committed to repository.
 - Audit dependencies monthly: `pnpm audit`.
@@ -172,16 +181,19 @@ Every external dependency is a liability. Add dependencies only when building th
 ## API Design Principles
 
 **RESTful Standards**:
+
 - Follow standard HTTP verbs (GET, POST, PATCH, DELETE).
 - All endpoints defined in `spec/openapi.yaml` before implementation (OpenAPI-First).
 - API responses follow consistent JSON structure with proper error codes.
 
 **Idempotency**:
+
 - Payment and Booking Creation endpoints MUST be idempotent to prevent duplicate charges on network retries.
 - Use idempotency keys for Stripe PaymentIntents.
 - Database transactions ensure atomic booking creation (no race conditions).
 
 **Validation**:
+
 - All API inputs validated using Zod schemas before processing.
 - Return structured error responses with field-level validation messages.
 
@@ -190,21 +202,25 @@ Every external dependency is a liability. Add dependencies only when building th
 **Single-Service Booking Model** (strict 1:1 relationship):
 
 **Service Entity**:
+
 - Fields: `id`, `name`, `description`, `durationMin`, `priceCents`, `downpaymentCents`
 - Represents the product catalog (e.g., "Deep Tissue - 60min")
 
 **Booking Entity**:
+
 - Fields: `id`, `customerEmail`, `serviceId`, `startTime` (UTC), `endTime` (UTC), `status`, `stripePaymentIntentId`
 - Status values: `PENDING`, `CONFIRMED`, `COMPLETED`, `CANCELLED`
 - Transactional record with foreign key to Service
 
 **Availability Computation**:
+
 - Availability is NOT stored as open slots—calculated on-the-fly
 - Formula: `BusinessHours - (ExistingBookings + BufferTime)`
 - **Buffer Rule**: 15-minute cleanup buffer enforced after every booking
 - Zero double-bookings via atomic database transactions with row-level locking
 
 **Schema Management**:
+
 - Prisma migrations track all schema changes
 - Migration files committed to repository
 - Database constraints enforce referential integrity
@@ -269,29 +285,34 @@ Every external dependency is a liability. Add dependencies only when building th
 Feature development follows a phased approach to manage complexity and ensure solid foundations:
 
 **Phase 1: Foundation**
+
 - Initialize Next.js with TypeScript, Tailwind, Storybook, and MUI
 - Define `spec/openapi.yaml` API specification
 - Set up Prisma with Service and Booking schema
 - Configure PostgreSQL database
 
 **Phase 2: Core Logic (TDD Focus)**
+
 - Implement `AvailabilityService` (Backend): Calculate slots based on business hours and existing bookings
 - Implement `BookingService` (Backend): Transactional logic to create bookings with row-level locking
 - Unit and integration tests for all business logic
 
 **Phase 3: Customer Frontend**
+
 - Build Service Listing components in Storybook
 - Build Calendar component with disabled date logic
 - Integrate Stripe Elements for payment collection
 - Implement booking form with Zod validation
 
 **Phase 4: Admin Panel**
+
 - Build Dashboard with authentication
 - Implement MUI DataGrid for booking management
 - Add "Mark as Paid" and "Cancel Booking" features
 - Admin-specific E2E tests
 
 **Phase 5: Notifications & Webhooks**
+
 - Implement Stripe webhooks for payment confirmation
 - Create ICS generation logic using `ics` package
 - Set up email templates with calendar attachments
