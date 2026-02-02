@@ -1,15 +1,15 @@
 <!-- 
-SYNC IMPACT REPORT (Constitution v1.3.0)
+SYNC IMPACT REPORT (Constitution v1.4.0)
 ==========================================
-Integration: Added project vision, complete tech stack, API standards, and domain model.
-- Version: 1.2.0 → 1.3.0 (MINOR: Added project vision, mandated libraries, API/data model specs)
-- Status: Comprehensive project definition with massage therapy booking platform vision
+Integration: Added modular payments, documentation standards, deployment, and booking cap.
+- Version: 1.3.0 → 1.4.0 (MINOR: Added deployment + payments modularity + admin booking cap)
+- Status: Expanded operational and extensibility requirements
 - Ratified: 2026-02-01
-- Last Amended: 2026-02-01
-- New Sections: Project Vision, API Design Principles, Data Model, Component Documentation
-- Tech Stack Additions: MUI, Prisma, PostgreSQL, React Query, Stripe, Storybook, OpenAPI
-- Required Libraries: Zod validation, date-fns, ics generation
-- Domain Rules: Single-service bookings, 15-min buffer, idempotency requirements
+- Last Amended: 2026-02-02
+- New Sections: Deployment & Hosting
+- Tech Stack Additions: Modular payment provider interface
+- Required Policies: Method documentation (purpose, params, return types)
+- Domain Rules: Max bookings per day configurable by admin
 - Templates aligned: ✅ plan-template.md, ✅ spec-template.md, ✅ tasks-template.md
 - No breaking changes (additive only)
 ==========================================
@@ -98,7 +98,7 @@ Every external dependency is a liability. Add dependencies only when building th
 - **Database**: PostgreSQL via Prisma ORM
 - **State Management**: React Query (TanStack Query) for server state; React Context for simple client state
 - **API Specification**: OpenAPI (Swagger) 3.0 - all endpoints defined in `spec/openapi.yaml` before implementation
-- **Payments**: Stripe (PaymentIntents API)
+- **Payments**: Stripe (PaymentIntents API) via a modular payment provider interface so additional methods can be integrated later without core refactors
 - **Validation**: Zod schemas at system boundaries (API inputs, form submissions)
 - **Date Handling**: date-fns library
 - **Calendar Files**: ics package for ICS generation
@@ -114,6 +114,7 @@ Every external dependency is a liability. Add dependencies only when building th
 - Run repository lint and format scripts before commit.
 - No dead code, commented-out code, or console.log statements in production.
 - If a component is hard to mock in Storybook, it's too coupled—refactor.
+- Public methods, services, hooks, and utilities MUST be documented with purpose, params, and return types.
 
 **Type System**:
 
@@ -178,6 +179,14 @@ Every external dependency is a liability. Add dependencies only when building th
 - Remove unused dependencies immediately.
 - Do not install a library if native solution or simple helper suffices (exceptions: date-fns, Zod, stripe-js).
 
+## Deployment & Hosting
+
+- Deployment targets MUST include Vercel as the primary hosting option.
+- Alternative low-cost hosting providers may be used when required; document rationale and trade-offs.
+- Environment variables managed via hosting provider secrets; no secrets in code or repo.
+- Production deployments must include database migrations and smoke checks.
+- Use preview deployments for every pull request.
+
 ## API Design Principles
 
 **RESTful Standards**:
@@ -215,8 +224,9 @@ Every external dependency is a liability. Add dependencies only when building th
 **Availability Computation**:
 
 - Availability is NOT stored as open slots—calculated on-the-fly
-- Formula: `BusinessHours - (ExistingBookings + BufferTime)`
+- Formula: `BusinessHours - (ExistingBookings + BufferTime)` subject to daily booking cap
 - **Buffer Rule**: 15-minute cleanup buffer enforced after every booking
+- **Daily Cap Rule**: Admin-configurable maximum number of bookings per day; bookings beyond cap are blocked
 - Zero double-bookings via atomic database transactions with row-level locking
 
 **Schema Management**:
@@ -224,6 +234,11 @@ Every external dependency is a liability. Add dependencies only when building th
 - Prisma migrations track all schema changes
 - Migration files committed to repository
 - Database constraints enforce referential integrity
+
+**Admin Settings**:
+
+- System settings include `maxBookingsPerDay` configurable by admin
+- Changes to settings are audited and take effect immediately
 
 ## Security & Data
 
@@ -309,6 +324,7 @@ Feature development follows a phased approach to manage complexity and ensure so
 - Build Dashboard with authentication
 - Implement MUI DataGrid for booking management
 - Add "Mark as Paid" and "Cancel Booking" features
+- Add "Max bookings per day" setting with validation and audit trail
 - Admin-specific E2E tests
 
 **Phase 5: Notifications & Webhooks**
@@ -326,4 +342,4 @@ This constitution supersedes all other development practices. All pull requests 
 
 **Compliance Review**: Random feature audits verify constitution compliance quarterly. Non-compliance findings are escalated and resolved before next release.
 
-**Version**: 1.3.0 | **Ratified**: 2026-02-01 | **Last Amended**: 2026-02-01
+**Version**: 1.4.0 | **Ratified**: 2026-02-01 | **Last Amended**: 2026-02-02
