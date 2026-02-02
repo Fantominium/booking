@@ -91,7 +91,7 @@ Every external dependency is a liability. Add dependencies only when building th
 - **Framework**: Next.js (App Router preferred for server components)
 - **Language**: TypeScript 5.x (strict mode enabled) compiling to ES2022
 - **Styling**: Tailwind CSS
-- **Component Library**: MUI (Material UI) Base or Core for complex interactive elements (DatePickers, Modals); style with Tailwind or MUI's `sx` prop sparingly
+- **Component Library**: MUI (Material UI) Base or Core for complex interactive elements (DatePickers, Modals); style with Tailwind or MUI's `sx` prop as needed or instructed
 - **Design System**: Storybook (all atomic components must be documented)
 - **Package Manager**: pnpm (no npm or yarn)
 - **Module System**: Pure ES modules only (no CommonJS)
@@ -147,17 +147,18 @@ Every external dependency is a liability. Add dependencies only when building th
 
 - **Unit Tests**: Every function, component, hook using Jest or Vitest.
 - **Integration Tests**: API routes, database interactions, third-party service integrations.
-- **E2E Tests**: Critical user flows using Playwright or Cypress.
+- **E2E Tests**: Critical user flows using Playwright.
 - **Storybook**: Every UI component must have a Storybook story documented.
 - Test files colocated with source: `component.tsx` → `component.test.tsx`.
-- Minimum 80% code coverage for unit tests; 100% for critical paths.
+- Minimum 90% code coverage for unit tests; 100% for critical paths.
+- Do not introduce any form of test bloat, keep tests meaningful and focused.
 - All tests must pass before merge; flaky tests are bugs.
 - **TDD Workflow**: (1) Write failing test, (2) Write minimum code to pass, (3) Refactor.
 
 **Responsive Design Requirements**:
 
 - Mobile-first approach using Tailwind's responsive utilities (design for 375px width first).
-- Breakpoints: `sm` (640px), `md` (768px), `lg` (1024px), `xl` (1280px), `2xl` (1536px).
+- Breakpoints: `sm` (640px), `md` (768px), `lg` (1024px), `xl` (1280px).
 - Touch targets minimum 44px tall for accessibility.
 - Test on real devices and Chrome DevTools device emulation.
 - Images use Next.js Image component with responsive sizes.
