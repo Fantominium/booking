@@ -391,6 +391,18 @@ test('Authorization middleware blocks unauthenticated users') // A01
 - **Payments**: Stripe.js for Elements
 - **Forms**: React Hook Form + Zod validation
 
+### Functional Programming Architecture (NON-NEGOTIABLE)
+
+- **React Components**: Functional components ONLY using React hooks. NO class components permitted. All state managed via `useState`, `useReducer`, `useContext`. Side effects isolated in `useEffect` hooks.
+- **Pure Service Functions**: All business logic (AvailabilityService, BookingService, PaymentService, etc.) implemented as pure functions. Pure functions have identical input/output mapping with zero side effects. Services are stateless and fully testable.
+- **Immutable Data Transformations**: All data updates use immutable patterns—spread operators, `.map()`, `.filter()`, `.reduce()`, never direct mutation via `.push()`, `.splice()`, or property reassignment. Immutability enforced at TypeScript level using `as const`, `Readonly<>` utility types.
+- **Custom Hooks for Logic Reuse**: Complex component logic extracted into custom hooks (e.g., `useForm`, `useFetch`, `useValidation`) for reusability and testability. Each hook is a pure function returning state and handlers.
+- **Function Composition**: Services composed from smaller pure functions for clarity and reusability. Database access, external API calls, and data transformation each wrapped in dedicated pure functions returning Promise-based results.
+- **Error Handling via Discriminated Unions**: Errors represented as discriminated union types (success | error cases) rather than exceptions. Example: `type Result<T> = {ok: true, data: T} | {ok: false, error: string}`.
+- **Dependencies as Arguments**: Services receive dependencies (Prisma client, Stripe client, email service) as function arguments (dependency injection), never as global singletons. Enables testing via mock dependencies.
+- **Safe JSX Patterns**: All JSX uses functional composition. No inline event handlers (`onClick={() => ...}` forbidden; use `onClick={handleClick}`). No JSX nesting >50 lines (extract components). No `dangerouslySetInnerHTML` (use safe sanitization). All props explicitly typed with TypeScript interfaces.
+- **Closure-Based Factories**: Higher-order functions and closures used to create factories and composable utilities. Example: `createService(config) => ({ method1, method2 })` returns an object of pure functions.
+
 ### Backend
 
 - **Runtime**: Node.js 18+
@@ -401,6 +413,7 @@ test('Authorization middleware blocks unauthenticated users') // A01
 - **Validation**: Zod schemas
 - **API**: REST via Next.js route handlers
 - **Date/Time**: date-fns
+- **Payment Provider Interface**: Abstract `PaymentProvider` interface in `lib/services/payment-provider.interface.ts` with methods: `createPaymentIntent()`, `confirmPayment()`, `handleWebhook()`, `refund()`. Stripe class implements this interface (see Task T083.pre). Future payment methods (PayPal, Square, etc.) must implement same interface to ensure modularity and avoid core refactors.
 
 ### External Services
 
@@ -420,6 +433,8 @@ test('Authorization middleware blocks unauthenticated users') // A01
 - **Package Manager**: pnpm
 - **Git**: GitHub (version control)
 - **Monitoring**: (TBD) Sentry or similar
+- **Linting**: ESLint with functional programming rules (T017.5) and safe JSX validation (T017.6)
+- **Pre-commit Hooks**: Husky git hooks (T017.7) to prevent commits with class-based or unsafe JSX patterns
 
 ---
 

@@ -6,7 +6,7 @@
 
 **Source Documents**:
 
-- [IMPL_PLAN.md](IMPL_PLAN.md) - Technical stack and architecture decisions
+- [plan.md](plan.md) - Technical stack and architecture decisions
 - [spec.md](spec.md) - User stories with priorities (P1, P2, P3)
 - [.specify/data-model.md](.specify/data-model.md) - 7 entities with relationships
 - [.specify/contracts/openapi.yaml](.specify/contracts/openapi.yaml) - 28 API endpoints
@@ -15,7 +15,7 @@
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
-**Tests**: NOT INCLUDED - The specification does not explicitly request TDD approach or test generation. Tests can be added later if needed.
+**Tests**: INCLUDED - Following the constitution's **NON-NEGOTIABLE TDD requirement**, all tests are written FIRST before implementation. Tests must FAIL initially, then pass after implementation.
 
 ---
 
@@ -50,6 +50,9 @@
 - [ ] T015 Create project directory structure: app/, components/, lib/, services/, types/
 - [ ] T016 [P] Create .env.local.example with all required environment variables documented
 - [ ] T017 [P] Setup GitHub Actions CI/CD workflow for linting and security scanning (npm audit, Snyk)
+- [ ] T017.5 [P] Configure ESLint rules to enforce functional programming patterns in .eslintrc.json: forbid `class` keyword, forbid `new` operator (with exceptions list for frameworks), forbid `this` binding patterns, enforce pure function pattern checks
+- [ ] T017.6 [P] Configure ESLint rules to enforce clean JSX patterns: forbid inline event handlers `onClick={() => ...}`, forbid `dangerouslySetInnerHTML`, enforce explicit TypeScript prop types, forbid anonymous functions in JSX props
+- [ ] T017.7 [P] Create pre-commit git hook (Husky) to run functional programming validation checks and prevent commits with class-based or unsafe JSX patterns
 
 ---
 
@@ -104,6 +107,14 @@
 - [ ] T046 [P] Setup security headers (CSP, HSTS) in next.config.js (FR-048)
 - [ ] T047 [P] Implement rate limiting middleware in lib/middleware/rate-limit.ts (FR-043)
 
+### Test Infrastructure Setup
+
+- [ ] T048 Setup Jest/Vitest test framework with TypeScript support
+- [ ] T049 [P] Configure Playwright for E2E testing
+- [ ] T050 [P] Create test database setup and teardown utilities in tests/setup/db.ts
+- [ ] T051 [P] Create Stripe mock/test fixtures in tests/fixtures/stripe.ts
+- [ ] T052 [P] Create test factories for entities in tests/factories/
+
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
 ---
@@ -116,50 +127,119 @@
 
 **Independent Test**: Navigate through booking flow from service selection → date/time picker → checkout → Stripe payment → success page with calendar download. Verify booking appears in database with CONFIRMED status and confirmation email sent.
 
-### Customer Service Catalog
+### Tests for Customer Service Catalog (TDD) 🧪
 
-- [ ] T048 [P] [US1] Create Service model types in types/service.ts
-- [ ] T049 [P] [US1] Implement GET /api/services endpoint in app/api/services/route.ts
-- [ ] T050 [P] [US1] Implement GET /api/services/[serviceId] endpoint in app/api/services/[serviceId]/route.ts
-- [ ] T051 [US1] Create ServiceCard component in components/booking/ServiceCard.tsx with Storybook story
-- [ ] T052 [US1] Create ServiceCatalog page in app/book/page.tsx displaying all active services
+> **TDD**: Write these tests FIRST, ensure they FAIL before implementation
 
-### Availability Calculation & Display
+- [ ] T052.5 [P] [US1] Unit test for email validation (Zod schema) in tests/unit/email-validation.test.ts: Verify valid emails accepted, invalid formats rejected
+- [ ] T053 [P] [US1] Contract test for GET /api/services in tests/contract/services.test.ts
+- [ ] T054 [P] [US1] Contract test for GET /api/services/[serviceId] in tests/contract/services.test.ts
+- [ ] T055 [P] [US1] Component test for ServiceCard in components/booking/ServiceCard.test.tsx
 
-- [ ] T053 [P] [US1] Implement availability calculation logic in lib/services/availability.ts (business hours, date overrides, buffer time, daily cap)
-- [ ] T054 [P] [US1] Implement GET /api/availability/[serviceId] endpoint in app/api/availability/[serviceId]/route.ts
-- [ ] T055 [US1] Create DatePicker component in components/booking/DatePicker.tsx with unavailable dates grayed out
-- [ ] T056 [US1] Create TimeSlotPicker component in components/booking/TimeSlotPicker.tsx showing available times
-- [ ] T057 [US1] Create booking flow page in app/book/[serviceId]/page.tsx with date/time selection
+### Customer Service Catalog Implementation
 
-### Guest Checkout & Payment
+- [ ] T056 [P] [US1] Create Service model types in types/service.ts
+- [ ] T057 [P] [US1] Implement GET /api/services endpoint in app/api/services/route.ts
+- [ ] T058 [P] [US1] Implement GET /api/services/[serviceId] endpoint in app/api/services/[serviceId]/route.ts
+- [ ] T059 [US1] Create ServiceCard component in components/booking/ServiceCard.tsx with Storybook story
+- [ ] T060 [US1] Create ServiceCatalog page in app/book/page.tsx displaying all active services
 
-- [ ] T058 [P] [US1] Create Booking model types in types/booking.ts
-- [ ] T059 [P] [US1] Implement Stripe Elements integration in components/payment/StripePaymentForm.tsx
-- [ ] T060 [P] [US1] Create checkout form with guest details (name, email, phone) in components/booking/CheckoutForm.tsx
-- [ ] T061 [US1] Implement POST /api/payment-intents endpoint in app/api/payment-intents/route.ts to create PaymentIntent
-- [ ] T062 [US1] Implement POST /api/bookings endpoint in app/api/bookings/route.ts with atomic transaction and row-level locking (FR-004)
-- [ ] T063 [US1] Implement automatic refund on booking conflict in lib/services/payment.ts (FR-007b)
+### Tests for Availability Calculation (TDD) 🧪
 
-### Payment Confirmation & Webhooks
+> **TDD**: Write these tests FIRST - Critical business logic requiring comprehensive test coverage
 
-- [ ] T064 [P] [US1] Implement Stripe webhook handler in app/api/webhooks/stripe/[token]/route.ts with signature verification (FR-041)
-- [ ] T065 [P] [US1] Implement webhook event processing for payment_intent.succeeded in lib/services/booking.ts
-- [ ] T066 [P] [US1] Implement idempotency handling for webhook retries in lib/services/payment.ts
-- [ ] T067 [US1] Update booking status to CONFIRMED on successful payment in BookingService
+- [ ] T061 [P] [US1] Unit test for availability calculation with business hours in tests/unit/availability.test.ts
+- [ ] T062 [P] [US1] Unit test for availability with date overrides in tests/unit/availability.test.ts
+- [ ] T063 [P] [US1] Unit test for availability with buffer time logic in tests/unit/availability.test.ts
+- [ ] T064 [P] [US1] Unit test for availability with daily booking cap in tests/unit/availability.test.ts
+- [ ] T065 [P] [US1] Contract test for GET /api/availability/[serviceId] in tests/contract/availability.test.ts
+- [ ] T066 [P] [US1] Component test for DatePicker in components/booking/DatePicker.test.tsx
+- [ ] T067 [P] [US1] Component test for TimeSlotPicker in components/booking/TimeSlotPicker.test.tsx
 
-### Email & Calendar Integration
+### Availability Calculation & Display Implementation
 
-- [ ] T068 [P] [US1] Create ICS calendar file generation in lib/services/ics.ts with booking details and 24-hour reminder
-- [ ] T069 [P] [US1] Create booking confirmation email template in lib/email/templates/booking-confirmation.tsx
-- [ ] T070 [P] [US1] Implement BullMQ email worker in workers/email-worker.ts with exponential backoff (1, 5, 15 min)
-- [ ] T071 [US1] Queue confirmation email job on booking confirmation in lib/services/booking.ts
-- [ ] T072 [US1] Create success page in app/book/success/page.tsx displaying booking details and ICS download
+- [ ] T068 [P] [US1] Implement availability calculation logic in lib/services/availability.ts (business hours, date overrides, buffer time, daily cap)
+- [ ] T069 [P] [US1] Implement GET /api/availability/[serviceId] endpoint in app/api/availability/[serviceId]/route.ts
+- [ ] T070 [US1] Create DatePicker component in components/booking/DatePicker.tsx with unavailable dates grayed out
+- [ ] T071 [US1] Create TimeSlotPicker component in components/booking/TimeSlotPicker.tsx showing available times
+- [ ] T072 [US1] Create booking flow page in app/book/[serviceId]/page.tsx with date/time selection
 
-### Payment Audit Logging
+### Tests for Guest Checkout & Payment (TDD) 🧪
 
-- [ ] T073 [P] [US1] Implement payment audit logging in lib/services/audit.ts for all payment operations (FR-044)
-- [ ] T074 [US1] Log INTENT_CREATED, PAYMENT_CONFIRMED, PAYMENT_FAILED, REFUND_ISSUED events in PaymentAuditLog
+> **TDD**: Write these tests FIRST - Critical payment flow with security implications
+
+- [ ] T073 [P] [US1] Unit test for booking validation (Zod schema) in tests/unit/booking-validation.test.ts
+- [ ] T074 [P] [US1] Integration test for atomic booking creation with row-level locking in tests/integration/booking.test.ts
+- [ ] T075 [P] [US1] Integration test for concurrent booking conflict detection in tests/integration/booking-conflict.test.ts
+- [ ] T076 [P] [US1] Integration test for automatic refund on conflict in tests/integration/payment-refund.test.ts
+- [ ] T077 [P] [US1] Contract test for POST /api/payment-intents in tests/contract/payment.test.ts
+- [ ] T078 [P] [US1] Contract test for POST /api/bookings in tests/contract/bookings.test.ts
+- [ ] T079 [P] [US1] Component test for CheckoutForm validation in components/booking/CheckoutForm.test.tsx
+
+### Guest Checkout & Payment Implementation
+
+- [ ] T080 [P] [US1] Create Booking model types in types/booking.ts
+- [ ] T081 [P] [US1] Implement Stripe Elements integration in components/payment/StripePaymentForm.tsx
+- [ ] T082 [P] [US1] Create checkout form with guest details (name, email, phone) in components/booking/CheckoutForm.tsx
+- [ ] T083 [US1] Implement POST /api/payment-intents endpoint in app/api/payment-intents/route.ts to create PaymentIntent
+- [ ] T083.pre [P] [BLOCKING] Define abstract PaymentProvider interface in lib/services/payment-provider.interface.ts with methods: createPaymentIntent(amount, currency), confirmPayment(paymentIntentId), handleWebhook(event), refund(paymentIntentId, amount). Document each method with JSDoc (purpose, @param, @returns, @throws). Stripe class (T084) implements this interface. **Must complete before T084.**
+- [ ] T084 [US1] Implement POST /api/bookings endpoint in app/api/bookings/route.ts with atomic transaction and row-level locking (FR-004)
+- [ ] T085 [US1] Implement automatic refund on booking conflict in lib/services/payment.ts (FR-007b)
+- [ ] T085.5 [P] [US1] Implement refund SLA monitoring in lib/jobs/refund-sla-monitor.ts: Query PaymentAuditLog for REFUND_ISSUED events older than 5+ minutes without REFUND_COMPLETED status. If SLA exceeded, log alert with booking ID and refund amount for admin follow-up.
+
+### Tests for Payment Confirmation & Webhooks (TDD) 🧪
+
+> **TDD**: Write these tests FIRST - Security-critical webhook handling
+
+- [ ] T086 [P] [US1] Integration test for webhook signature verification in tests/integration/webhook.test.ts
+- [ ] T087 [P] [US1] Integration test for webhook with invalid signature (must reject) in tests/integration/webhook.test.ts
+- [ ] T088 [P] [US1] Integration test for idempotent webhook processing in tests/integration/webhook.test.ts
+- [ ] T089 [P] [US1] Integration test for payment_intent.succeeded event in tests/integration/webhook.test.ts
+- [ ] T090 [P] [US1] Integration test for payment_intent.payment_failed event in tests/integration/webhook.test.ts
+
+### Payment Confirmation & Webhooks Implementation
+
+- [ ] T091 [P] [US1] Implement Stripe webhook handler in app/api/webhooks/stripe/[token]/route.ts with signature verification (FR-041)
+- [ ] T092 [P] [US1] Implement webhook event processing for payment_intent.succeeded in lib/services/booking.ts
+- [ ] T093 [P] [US1] Implement idempotency handling for webhook retries in lib/services/payment.ts
+- [ ] T094 [US1] Update booking status to CONFIRMED on successful payment in BookingService
+
+### Tests for Email & Calendar Integration (TDD) 🧪
+
+> **TDD**: Write these tests FIRST - Verify email delivery and ICS format
+
+- [ ] T095 [P] [US1] Unit test for ICS generation with valid RFC 5545 format in tests/unit/ics.test.ts
+- [ ] T096 [P] [US1] Integration test for email job queueing in tests/integration/email-queue.test.ts
+- [ ] T096.5 [P] [US1] Integration test for refund notification email queueing when automatic refund issued in tests/integration/refund-email.test.ts
+- [ ] T097 [P] [US1] Integration test for email worker retry logic (1, 5, 15 min) in tests/integration/email-worker.test.ts
+- [ ] T098 [P] [US1] Integration test for email delivery failure and admin alert in tests/integration/email-failure.test.ts
+
+### Email & Calendar Integration Implementation
+
+- [ ] T099 [P] [US1] Create ICS calendar file generation in lib/services/ics.ts with booking details and 24-hour reminder
+- [ ] T100 [P] [US1] Create booking confirmation email template in lib/email/templates/booking-confirmation.tsx
+- [ ] T101 [P] [US1] Implement BullMQ email worker in workers/email-worker.ts with exponential backoff (1, 5, 15 min)
+- [ ] T102 [US1] Queue confirmation email job on booking confirmation in lib/services/booking.ts
+- [ ] T103 [US1] Create success page in app/book/success/page.tsx displaying booking details and ICS download
+
+### Tests for Payment Audit Logging (TDD) 🧪
+
+> **TDD**: Write these tests FIRST - Verify audit trail completeness
+
+- [ ] T104 [P] [US1] Integration test for audit log creation on all payment events in tests/integration/audit.test.ts
+- [ ] T105 [P] [US1] Integration test verifying no sensitive data in audit logs in tests/integration/audit-security.test.ts
+
+### Payment Audit Logging Implementation
+
+- [ ] T106 [P] [US1] Implement payment audit logging in lib/services/audit.ts for all payment operations (FR-044)
+- [ ] T107 [US1] Log INTENT_CREATED, PAYMENT_CONFIRMED, PAYMENT_FAILED, REFUND_ISSUED events in PaymentAuditLog
+
+### End-to-End Test for User Story 1 (TDD) 🧪
+
+- [ ] T108 [US1] E2E test for complete booking flow (service selection → payment → confirmation) in tests/e2e/booking-flow.spec.ts
+- [ ] T212 [US1] [P] Verify WCAG 2.2 Level AA contrast ratios for all text (SC-011)
+- [ ] T213 [US1] [P] Add semantic HTML and ARIA labels for screen reader accessibility (FR-033b)
+- [ ] T214 [US1] Run Lighthouse accessibility audit and achieve 100 score (SC-005)
 
 **Checkpoint**: User Story 1 complete - Full customer booking flow functional with payment processing and email notifications
 
@@ -173,35 +253,59 @@
 
 **Independent Test**: Login to admin panel → Navigate to Availability Management → Update Monday hours from 9 AM-5 PM to 10 AM-6 PM → Save → Verify customer calendar reflects new hours. Add date override for Christmas → Verify date becomes unavailable.
 
-### Business Hours Configuration
+### Tests for Business Hours Configuration (TDD) 🧪
 
-- [ ] T075 [P] [US2] Create BusinessHours model types in types/availability.ts
-- [ ] T076 [P] [US2] Implement GET /api/admin/business-hours endpoint in app/api/admin/business-hours/route.ts
-- [ ] T077 [P] [US2] Implement PUT /api/admin/business-hours endpoint to update operating hours
-- [ ] T078 [US2] Create BusinessHoursForm component in components/admin/BusinessHoursForm.tsx for day-by-day configuration
-- [ ] T079 [US2] Create Availability Management page in app/admin/availability/page.tsx
+> **TDD**: Write these tests FIRST - Verify availability updates correctly
 
-### Date Overrides Configuration
+- [ ] T109 [P] [US2] Contract test for GET /api/admin/business-hours in tests/contract/admin-availability.test.ts
+- [ ] T110 [P] [US2] Contract test for PUT /api/admin/business-hours in tests/contract/admin-availability.test.ts
+- [ ] T111 [P] [US2] Integration test for immediate availability refresh after hours change in tests/integration/availability-refresh.test.ts
 
-- [ ] T080 [P] [US2] Create DateOverride model types in types/availability.ts
-- [ ] T081 [P] [US2] Implement GET /api/admin/date-overrides endpoint in app/api/admin/date-overrides/route.ts
-- [ ] T082 [P] [US2] Implement POST /api/admin/date-overrides endpoint to create date override
-- [ ] T083 [P] [US2] Implement DELETE /api/admin/date-overrides/[id] endpoint to remove override
-- [ ] T084 [US2] Create DateOverrideForm component in components/admin/DateOverrideForm.tsx with reason field
-- [ ] T085 [US2] Add date override management section to Availability Management page
+### Business Hours Configuration Implementation
 
-### System Settings Configuration
+- [ ] T112 [P] [US2] Create BusinessHours model types in types/availability.ts
+- [ ] T113 [P] [US2] Implement GET /api/admin/business-hours endpoint in app/api/admin/business-hours/route.ts
+- [ ] T114 [P] [US2] Implement PUT /api/admin/business-hours endpoint to update operating hours
+- [ ] T115 [US2] Create BusinessHoursForm component in components/admin/BusinessHoursForm.tsx for day-by-day configuration
+- [ ] T116 [US2] Create Availability Management page in app/admin/availability/page.tsx
 
-- [ ] T086 [P] [US2] Create SystemSettings model types in types/settings.ts
-- [ ] T087 [P] [US2] Implement GET /api/admin/settings endpoint in app/api/admin/settings/route.ts
-- [ ] T088 [P] [US2] Implement PATCH /api/admin/settings endpoint to update max bookings per day and buffer time
-- [ ] T089 [US2] Create SystemSettingsForm component in components/admin/SystemSettingsForm.tsx
-- [ ] T090 [US2] Add system settings section to Availability Management page
+### Tests for Date Overrides Configuration (TDD) 🧪
+
+> **TDD**: Write these tests FIRST
+
+- [ ] T117 [P] [US2] Contract test for POST /api/admin/date-overrides in tests/contract/admin-availability.test.ts
+- [ ] T118 [P] [US2] Contract test for DELETE /api/admin/date-overrides/[id] in tests/contract/admin-availability.test.ts
+- [ ] T119 [P] [US2] Integration test for date override taking precedence over business hours in tests/integration/date-override.test.ts
+
+### Date Overrides Configuration Implementation
+
+- [ ] T120 [P] [US2] Create DateOverride model types in types/availability.ts
+- [ ] T121 [P] [US2] Implement GET /api/admin/date-overrides endpoint in app/api/admin/date-overrides/route.ts
+- [ ] T122 [P] [US2] Implement POST /api/admin/date-overrides endpoint to create date override
+- [ ] T123 [P] [US2] Implement DELETE /api/admin/date-overrides/[id] endpoint to remove override
+- [ ] T124 [US2] Create DateOverrideForm component in components/admin/DateOverrideForm.tsx with reason field
+- [ ] T125 [US2] Add date override management section to Availability Management page
+
+### Tests for System Settings Configuration (TDD) 🧪
+
+> **TDD**: Write these tests FIRST
+
+- [ ] T126 [P] [US2] Contract test for PATCH /api/admin/settings in tests/contract/admin-settings.test.ts
+- [ ] T127 [P] [US2] Integration test for max bookings per day enforcement in tests/integration/booking-cap.test.ts
+- [ ] T128 [P] [US2] Integration test for buffer time calculation in tests/integration/buffer-time.test.ts
+
+### System Settings Configuration Implementation
+
+- [ ] T129 [P] [US2] Create SystemSettings model types in types/settings.ts
+- [ ] T130 [P] [US2] Implement GET /api/admin/settings endpoint in app/api/admin/settings/route.ts
+- [ ] T131 [P] [US2] Implement PATCH /api/admin/settings endpoint to update max bookings per day and buffer time
+- [ ] T132 [US2] Create SystemSettingsForm component in components/admin/SystemSettingsForm.tsx
+- [ ] T133 [US2] Add system settings section to Availability Management page
 
 ### Immediate Availability Refresh
 
-- [ ] T091 [US2] Implement cache invalidation for availability changes in lib/cache/availability.ts (FR-015)
-- [ ] T092 [US2] Verify customer-facing calendar reflects changes immediately without restart
+- [ ] T134 [US2] Implement cache invalidation for availability changes in lib/cache/availability.ts (FR-015)
+- [ ] T135 [US2] Verify customer-facing calendar reflects changes immediately without restart
 
 **Checkpoint**: User Story 2 complete - Admin can fully control business availability and settings
 
@@ -215,36 +319,59 @@
 
 **Independent Test**: Login to admin panel → Navigate to Booking Management → Filter by "Confirmed" status → Select booking with unpaid balance → Click "Mark Balance as Paid" → Verify status updates to COMPLETED. Cancel a booking → Verify time slot becomes available again and customer receives cancellation email.
 
-### Admin Booking List & Dashboard
+### Tests for Admin Booking List & Dashboard (TDD) 🧪
 
-- [ ] T093 [P] [US3] Implement GET /api/admin/bookings endpoint with filtering (status, date range) in app/api/admin/bookings/route.ts
-- [ ] T094 [P] [US3] Implement GET /api/admin/bookings/[id] endpoint for booking details in app/api/admin/bookings/[id]/route.ts
-- [ ] T095 [P] [US3] Implement GET /api/admin/dashboard/today endpoint for today's schedule in app/api/admin/dashboard/today/route.ts
-- [ ] T096 [P] [US3] Implement GET /api/admin/dashboard/pending-actions endpoint for unpaid balances and email failures in app/api/admin/dashboard/pending-actions/route.ts
-- [ ] T097 [US3] Create BookingList component in components/admin/BookingList.tsx with MUI DataGrid for filtering and sorting
-- [ ] T098 [US3] Create Dashboard page in app/admin/page.tsx with today's schedule and pending actions
-- [ ] T099 [US3] Create Booking Management page in app/admin/bookings/page.tsx with filterable list
+> **TDD**: Write these tests FIRST
 
-### Payment Status Management
+- [ ] T136 [P] [US3] Contract test for GET /api/admin/bookings with filters in tests/contract/admin-bookings.test.ts
+- [ ] T137 [P] [US3] Contract test for GET /api/admin/dashboard/today in tests/contract/admin-dashboard.test.ts
+- [ ] T138 [P] [US3] Integration test for authorization checks on admin endpoints in tests/integration/admin-auth.test.ts
 
-- [ ] T100 [P] [US3] Implement POST /api/admin/bookings/[id]/mark-paid endpoint in app/api/admin/bookings/[id]/mark-paid/route.ts
-- [ ] T101 [US3] Update booking status to COMPLETED and log payment completion in lib/services/booking.ts
-- [ ] T102 [US3] Create MarkPaidButton component in components/admin/MarkPaidButton.tsx with confirmation dialog
-- [ ] T103 [US3] Add payment status display to booking detail view
+### Admin Booking List & Dashboard Implementation
 
-### Booking Cancellation
+- [ ] T139 [P] [US3] Implement GET /api/admin/bookings endpoint with filtering (status, date range) in app/api/admin/bookings/route.ts
+- [ ] T140 [P] [US3] Implement GET /api/admin/bookings/[id] endpoint for booking details in app/api/admin/bookings/[id]/route.ts
+- [ ] T141 [P] [US3] Implement GET /api/admin/dashboard/today endpoint for today's schedule in app/api/admin/dashboard/today/route.ts
+- [ ] T142 [P] [US3] Implement GET /api/admin/dashboard/pending-actions endpoint for unpaid balances and email failures in app/api/admin/dashboard/pending-actions/route.ts
+- [ ] T143 [US3] Create BookingList component in components/admin/BookingList.tsx with MUI DataGrid for filtering and sorting
+- [ ] T144 [US3] Create Dashboard page in app/admin/page.tsx with today's schedule and pending actions
+- [ ] T145 [US3] Create Booking Management page in app/admin/bookings/page.tsx with filterable list
 
-- [ ] T104 [P] [US3] Implement POST /api/admin/bookings/[id]/cancel endpoint in app/api/admin/bookings/[id]/cancel/route.ts
-- [ ] T105 [US3] Update booking status to CANCELLED and free time slot in lib/services/booking.ts
-- [ ] T106 [US3] Create cancellation email template in lib/email/templates/booking-cancellation.tsx
-- [ ] T107 [US3] Queue cancellation email job on booking cancellation
-- [ ] T108 [US3] Create CancelBookingButton component in components/admin/CancelBookingButton.tsx with confirmation dialog
+### Tests for Payment Status Management (TDD) 🧪
+
+> **TDD**: Write these tests FIRST
+
+- [ ] T146 [P] [US3] Contract test for POST /api/admin/bookings/[id]/mark-paid in tests/contract/admin-bookings.test.ts
+- [ ] T147 [P] [US3] Integration test for marking booking as paid and updating status in tests/integration/mark-paid.test.ts
+
+### Payment Status Management Implementation
+
+- [ ] T148 [P] [US3] Implement POST /api/admin/bookings/[id]/mark-paid endpoint in app/api/admin/bookings/[id]/mark-paid/route.ts
+- [ ] T149 [US3] Update booking status to COMPLETED and log payment completion in lib/services/booking.ts
+- [ ] T150 [US3] Create MarkPaidButton component in components/admin/MarkPaidButton.tsx with confirmation dialog
+- [ ] T151 [US3] Add payment status display to booking detail view
+
+### Tests for Booking Cancellation (TDD) 🧪
+
+> **TDD**: Write these tests FIRST
+
+- [ ] T152 [P] [US3] Contract test for POST /api/admin/bookings/[id]/cancel in tests/contract/admin-bookings.test.ts
+- [ ] T153 [P] [US3] Integration test for cancellation freeing time slot in tests/integration/cancel-booking.test.ts
+- [ ] T154 [P] [US3] Integration test for cancellation email queueing in tests/integration/cancel-email.test.ts
+
+### Booking Cancellation Implementation
+
+- [ ] T155 [P] [US3] Implement POST /api/admin/bookings/[id]/cancel endpoint in app/api/admin/bookings/[id]/cancel/route.ts
+- [ ] T156 [US3] Update booking status to CANCELLED and free time slot in lib/services/booking.ts
+- [ ] T157 [US3] Create cancellation email template in lib/email/templates/booking-cancellation.tsx
+- [ ] T158 [US3] Queue cancellation email job on booking cancellation
+- [ ] T159 [US3] Create CancelBookingButton component in components/admin/CancelBookingButton.tsx with confirmation dialog
 
 ### Search & Filtering
 
-- [ ] T109 [P] [US3] Implement debounced search by customer name/phone in BookingList component (FR-018a)
-- [ ] T110 [US3] Add status filter dropdown to BookingList component (Pending, Confirmed, Completed, Cancelled)
-- [ ] T111 [US3] Add date range filter to BookingList component
+- [ ] T160 [P] [US3] Implement debounced search by customer name/phone in BookingList component (FR-018a)
+- [ ] T161 [US3] Add status filter dropdown to BookingList component (Pending, Confirmed, Completed, Cancelled)
+- [ ] T162 [US3] Add date range filter to BookingList component
 
 **Checkpoint**: User Story 3 complete - Admin can fully manage bookings, payments, and cancellations
 
@@ -258,26 +385,36 @@
 
 **Independent Test**: Login to admin panel → Navigate to Service Configuration → Click "Add Service" → Enter "Hot Stone Massage", 75 minutes, $120, $30 down-payment → Save → Verify service appears on customer catalog. Edit "Swedish Massage" price from $80 to $90 → Verify customer sees new price. Delete "Aromatherapy Session" → Verify removed from catalog but existing bookings intact.
 
-### Service Management API
+### Tests for Service Management API (TDD) 🧪
 
-- [ ] T112 [P] [US4] Implement POST /api/admin/services endpoint to create service in app/api/admin/services/route.ts
-- [ ] T113 [P] [US4] Implement PATCH /api/admin/services/[id] endpoint to update service in app/api/admin/services/[id]/route.ts
-- [ ] T114 [P] [US4] Implement DELETE /api/admin/services/[id] endpoint with validation for future bookings (FR-025) in app/api/admin/services/[id]/route.ts
-- [ ] T115 [US4] Validate downpaymentCents <= priceCents and durationMin > 0 in service validation
+> **TDD**: Write these tests FIRST
+
+- [ ] T163 [P] [US4] Contract test for POST /api/admin/services in tests/contract/admin-services.test.ts
+- [ ] T164 [P] [US4] Contract test for PATCH /api/admin/services/[id] in tests/contract/admin-services.test.ts
+- [ ] T165 [P] [US4] Contract test for DELETE /api/admin/services/[id] in tests/contract/admin-services.test.ts
+- [ ] T166 [P] [US4] Integration test preventing service deletion with future bookings in tests/integration/service-deletion.test.ts
+- [ ] T167 [P] [US4] Unit test for service validation (downpayment <= price, duration > 0) in tests/unit/service-validation.test.ts
+
+### Service Management API Implementation
+
+- [ ] T168 [P] [US4] Implement POST /api/admin/services endpoint to create service in app/api/admin/services/route.ts
+- [ ] T169 [P] [US4] Implement PATCH /api/admin/services/[id] endpoint to update service in app/api/admin/services/[id]/route.ts
+- [ ] T170 [P] [US4] Implement DELETE /api/admin/services/[id] endpoint with validation for future bookings (FR-025) in app/api/admin/services/[id]/route.ts
+- [ ] T171 [US4] Validate downpaymentCents <= priceCents and durationMin > 0 in service validation
 
 ### Service Configuration UI
 
-- [ ] T116 [P] [US4] Create ServiceForm component in components/admin/ServiceForm.tsx with Zod validation
-- [ ] T117 [P] [US4] Create ServiceList component in components/admin/ServiceList.tsx with edit/delete actions
-- [ ] T118 [US4] Create Service Configuration page in app/admin/services/page.tsx
-- [ ] T119 [US4] Add "Add Service" button and modal dialog to Service Configuration page
-- [ ] T120 [US4] Implement inline editing for service details in ServiceList component
+- [ ] T172 [P] [US4] Create ServiceForm component in components/admin/ServiceForm.tsx with Zod validation
+- [ ] T173 [P] [US4] Create ServiceList component in components/admin/ServiceList.tsx with edit/delete actions
+- [ ] T174 [US4] Create Service Configuration page in app/admin/services/page.tsx
+- [ ] T175 [US4] Add "Add Service" button and modal dialog to Service Configuration page
+- [ ] T176 [US4] Implement inline editing for service details in ServiceList component
 
 ### Service Deletion Validation
 
-- [ ] T121 [US4] Implement validation to prevent deletion of services with existing future bookings (FR-025)
-- [ ] T122 [US4] Display error message when attempting to delete service with future bookings
-- [ ] T123 [US4] Add "Mark Inactive" option as alternative to deletion for services with bookings
+- [ ] T177 [US4] Implement validation to prevent deletion of services with existing future bookings (FR-025)
+- [ ] T178 [US4] Display error message when attempting to delete service with future bookings
+- [ ] T179 [US4] Add "Mark Inactive" option as alternative to deletion for services with bookings
 
 **Checkpoint**: User Story 4 complete - Admin can fully manage service catalog
 
@@ -289,64 +426,94 @@
 
 ### Admin Authentication & User Management
 
-- [ ] T124 [P] Create admin login page in app/admin/login/page.tsx
-- [ ] T125 [P] Implement password reset flow with email token in app/api/auth/password-reset/route.ts
-- [ ] T126 [P] Create password reset email template in lib/email/templates/password-reset.tsx
-- [ ] T127 [P] Implement GET /api/admin/admins endpoint to list admins in app/api/admin/admins/route.ts
-- [ ] T128 [P] Implement POST /api/admin/admins endpoint to add admin user in app/api/admin/admins/route.ts
-- [ ] T129 [P] Implement DELETE /api/admin/admins/[id] endpoint to remove admin in app/api/admin/admins/[id]/route.ts
-- [ ] T130 Create Manage Admins page in app/admin/admins/page.tsx
+- [ ] T180 [P] Create admin login page in app/admin/login/page.tsx
+- [ ] T181 [P] Implement password reset flow with email token in app/api/auth/password-reset/route.ts
+- [ ] T182 [P] Create password reset email template in lib/email/templates/password-reset.tsx
+- [ ] T183 [P] Implement GET /api/admin/admins endpoint to list admins in app/api/admin/admins/route.ts
+- [ ] T184 [P] Implement POST /api/admin/admins endpoint to add admin user in app/api/admin/admins/route.ts
+- [ ] T185 [P] Implement DELETE /api/admin/admins/[id] endpoint to remove admin in app/api/admin/admins/[id]/route.ts
+- [ ] T186 Create Manage Admins page in app/admin/admins/page.tsx
 
 ### Customer Data Privacy & Deletion
 
-- [ ] T131 [P] Implement POST /api/customer-data/request-deletion endpoint in app/api/customer-data/request-deletion/route.ts
-- [ ] T132 [P] Implement POST /api/customer-data/confirm-deletion endpoint with token verification in app/api/customer-data/confirm-deletion/route.ts
-- [ ] T133 [P] Create deletion request email template with verification token in lib/email/templates/deletion-request.tsx
-- [ ] T134 [P] Implement PII anonymization logic in lib/services/data-deletion.ts (FR-052)
-- [ ] T135 [P] Log all deletions in DataDeletionAuditLog with email hash and reason
-- [ ] T136 Create scheduled job for automatic PII purge (2-year threshold) in jobs/pii-purge.ts (FR-051)
+- [ ] T187 [P] Implement POST /api/customer-data/request-deletion endpoint in app/api/customer-data/request-deletion/route.ts
+- [ ] T188 [P] Implement POST /api/customer-data/confirm-deletion endpoint with token verification in app/api/customer-data/confirm-deletion/route.ts
+- [ ] T189 [P] Create deletion request email template with verification token in lib/email/templates/deletion-request.tsx
+- [ ] T190 [P] Implement PII anonymization logic in lib/services/data-deletion.ts (FR-052)
+- [ ] T191 [P] Log all deletions in DataDeletionAuditLog with email hash and reason
+- [ ] T192 Create scheduled job for automatic PII purge (2-year threshold) in jobs/pii-purge.ts (FR-051)
 
 ### Email Delivery Monitoring
 
-- [ ] T137 [P] Add email delivery status tracking to Booking entity (SUCCESS, FAILED, RETRYING)
-- [ ] T138 [P] Display email delivery status in admin booking detail view
-- [ ] T139 [P] Implement manual email resend action in admin panel
-- [ ] T140 Create refund notification email template in lib/email/templates/refund-notification.tsx
+- [ ] T193 [P] Add email delivery status tracking to Booking entity (SUCCESS, FAILED, RETRYING)
+- [ ] T194 [P] Display email delivery status in admin booking detail view
+- [ ] T195 [P] Implement manual email resend action in admin panel
+- [ ] T196 Create refund notification email template in lib/email/templates/refund-notification.tsx
 
-### Security Hardening
+### Additional Email & Payment Monitoring
 
-- [ ] T141 [P] Implement HTTPS redirect middleware (FR-042) in middleware.ts
-- [ ] T142 [P] Add Content Security Policy headers in next.config.js (FR-048)
-- [ ] T143 [P] Add HSTS headers in next.config.js
-- [ ] T144 [P] Verify all API endpoints validate inputs with Zod schemas (FR-034)
-- [ ] T145 [P] Verify no raw payment card data in logs or database (FR-038, FR-046)
-- [ ] T146 Run npm audit and fix all critical/high vulnerabilities
+- [ ] T096.5 [P] Integration test for refund notification email queueing when refund issued in tests/integration/refund-email.test.ts
+- [ ] T085.5 [P] Implement refund SLA monitoring task in lib/jobs/refund-sla-monitor.ts: Query PaymentAuditLog for REFUND_ISSUED events older than 5 minutes without completion status; log alert if SLA exceeded
+
+### Functional Programming & Clean JSX Validation (NON-NEGOTIABLE)
+
+> **Code Architecture Review**: Validate entire codebase conforms to functional programming and clean JSX standards (FR-055-FR-068)
+
+- [ ] T203.5 [P] Audit all React components for class-based patterns: grep codebase for `class Component`, `extends React.Component`, `new ClassName()` instances; document any found and refactor to functional components (FR-056)
+- [ ] T203.6 [P] Audit all service functions for pure function compliance: verify no global state mutations, no `this` binding, no side effects outside return values (FR-057)
+- [ ] T203.7 [P] Audit all data mutations for immutability: verify all data updates use spread operators, `.map()`, `.filter()`, `.reduce()` instead of `.push()`, `.splice()`, `obj.prop =` assignments (FR-058)
+- [ ] T203.8 [P] Audit all React components for inline event handlers: grep for `onClick={handleClick}` patterns (correct) vs `onClick={() => handleClick()}` (forbidden); refactor any violations (FR-061)
+- [ ] T203.9 [P] Audit all JSX for `dangerouslySetInnerHTML` usage: grep codebase for `dangerouslySetInnerHTML`; document and replace with sanitized alternatives using safe HTML libraries (FR-063)
+- [ ] T203.10 [P] Audit all component props for explicit TypeScript typing: verify no props use `any` type; all component props interfaces explicitly defined; external props validated with Zod (FR-064)
+- [ ] T203.11 [P] Audit all list rendering for proper `key` props: verify list items have stable, unique keys (not array indices); fragments have keys when applicable (FR-066)
+- [ ] T203.12 [P] Audit all custom hooks for proper extraction: identify complex logic in components >50 lines; extract into custom hooks for reusability and testability (FR-059)
+- [ ] T203.13 [P] Code review gate: All pull requests must include evidence of code style validation: ESLint report showing 0 functional programming violations, 0 unsafe JSX patterns (T017.5, T017.6)
+- [ ] T203.14 [P] Create code style guide documentation in docs/CODE_STYLE.md: Document functional programming patterns with examples, provide before/after code examples for anti-patterns, link to ESLint configuration
+
+### Security Hardening Tests (TDD) 🧪
+
+> **TDD**: Write these security tests FIRST - Critical for production readiness
+
+- [ ] T046.5 [P] Security test for CSP header validation in tests/security/csp-headers.test.ts: Verify response includes Content-Security-Policy header with expected directives; run OWASP ZAP scan to confirm inline scripts blocked
+- [ ] T197 [P] Security test for webhook signature rejection in tests/security/webhook-security.test.ts
+- [ ] T198 [P] Security test for rate limiting enforcement in tests/security/rate-limit.test.ts
+- [ ] T199 [P] Security test verifying no card data in database in tests/security/pci-compliance.test.ts
+- [ ] T200 [P] Security test verifying no secrets in error responses in tests/security/error-sanitization.test.ts
+- [ ] T201 [P] Security test for HTTPS-only cookies in tests/security/cookie-security.test.ts
+- [ ] T202 [P] Security test for SQL injection prevention in tests/security/sql-injection.test.ts
+
+### Security Hardening Implementation
+
+- [ ] T203 [P] Implement HTTPS redirect middleware (FR-042) in middleware.ts
+- [ ] T204 [P] Add Content Security Policy headers in next.config.js (FR-048)
+- [ ] T205 [P] Add HSTS headers in next.config.js
+- [ ] T206 [P] Verify all API endpoints validate inputs with Zod schemas (FR-034)
+- [ ] T207 [P] Verify no raw payment card data in logs or database (FR-038, FR-046)
+- [ ] T208 Run npm audit and fix all critical/high vulnerabilities
 
 ### Design & Accessibility
 
-- [ ] T147 [P] Define calming color palette in tailwind.config.js (blues, golds, greens per FR-030)
-- [ ] T148 [P] Implement light/dark mode toggle with theme persistence in app/layout.tsx (FR-031)
-- [ ] T149 [P] Verify all touch targets are minimum 44px tall (FR-032)
-- [ ] T150 [P] Verify WCAG 2.2 Level AA contrast ratios for all text (SC-011)
-- [ ] T151 [P] Add semantic HTML and ARIA labels for screen reader accessibility (FR-033)
-- [ ] T152 Run Lighthouse accessibility audit and achieve 100 score (SC-005)
+- [ ] T209 [P] Define calming color palette in tailwind.config.js (blues, golds, greens per FR-030)
+- [ ] T210 [P] Implement light/dark mode toggle with theme persistence in app/layout.tsx (FR-031)
+- [ ] T211 [P] Verify all touch targets are minimum 44px tall (FR-032)
 
 ### Performance Optimization
 
-- [ ] T153 [P] Add Redis caching for availability calculation results in lib/cache/availability.ts
-- [ ] T154 [P] Optimize availability query with database indexes on startTime and status
-- [ ] T155 [P] Implement pagination for booking list with limit/offset in admin API
-- [ ] T156 Run Lighthouse performance audit and achieve 90+ score (SC-005)
+- [ ] T215 [P] Add Redis caching for availability calculation results in lib/cache/availability.ts
+- [ ] T216 [P] Optimize availability query with database indexes on startTime and status
+- [ ] T217 [P] Implement pagination for booking list with limit/offset in admin API
+- [ ] T218 Run Lighthouse performance audit and achieve 90+ score (SC-005)
 
 ### Documentation & Deployment
 
-- [ ] T157 [P] Create SECURITY.md with vulnerability disclosure policy
-- [ ] T158 [P] Create CONTRIBUTING.md with development guidelines
-- [ ] T159 [P] Document all environment variables in README.md
-- [ ] T160 [P] Create deployment guide for Vercel in docs/deployment.md
-- [ ] T161 [P] Document PCI-DSS SAQ-A compliance checklist in .specify/compliance/pci-saq-a.md
-- [ ] T162 Validate quickstart.md by following setup steps from scratch
-- [ ] T163 Run end-to-end smoke tests on production deployment
+- [ ] T219 [P] Create SECURITY.md with vulnerability disclosure policy
+- [ ] T220 [P] Create CONTRIBUTING.md with development guidelines
+- [ ] T221 [P] Document all environment variables in README.md
+- [ ] T222 [P] Create deployment guide for Vercel in docs/deployment.md
+- [ ] T223 [P] Document PCI-DSS SAQ-A compliance checklist in .specify/compliance/pci-saq-a.md
+- [ ] T224 Validate quickstart.md by following setup steps from scratch
+- [ ] T225 Run end-to-end smoke tests on production deployment
+- [ ] T226 Implement logging/monitoring to verify SC-003 (email delivery < 2 minutes).
 
 ---
 
@@ -499,35 +666,38 @@ T087 [P] - GET settings
 
 ## Task Summary
 
-### Total Tasks: 163
+### Total Tasks: 225
 
 **By Phase:**
 
 - Phase 1 (Setup): 17 tasks
-- Phase 2 (Foundational): 30 tasks (BLOCKING)
-- Phase 3 (US1 - Customer Booking): 27 tasks → **MVP**
-- Phase 4 (US2 - Availability Management): 18 tasks
-- Phase 5 (US3 - Booking Management): 19 tasks
-- Phase 6 (US4 - Service Configuration): 12 tasks
-- Phase 7 (Polish): 40 tasks
+- Phase 2 (Foundational): 35 tasks (BLOCKING) - includes test infrastructure setup
+- Phase 3 (US1 - Customer Booking): 61 tasks → **MVP** (27 tests + 34 implementation)
+- Phase 4 (US2 - Availability Management): 27 tasks (9 tests + 18 implementation)
+- Phase 5 (US3 - Booking Management): 27 tasks (8 tests + 19 implementation)
+- Phase 6 (US4 - Service Configuration): 17 tasks (5 tests + 12 implementation)
+- Phase 7 (Polish): 41 tasks (6 security tests + 35 implementation/polish)
 
 **Parallel Opportunities:**
 
 - Phase 1: 15 tasks marked [P]
-- Phase 2: 22 tasks marked [P]
-- Phase 3: 16 tasks marked [P]
-- Phase 4: 11 tasks marked [P]
-- Phase 5: 9 tasks marked [P]
-- Phase 6: 8 tasks marked [P]
-- Phase 7: 31 tasks marked [P]
+- Phase 2: 27 tasks marked [P]
+- Phase 3: 42 tasks marked [P] (includes parallelizable tests)
+- Phase 4: 18 tasks marked [P]
+- Phase 5: 15 tasks marked [P]
+- Phase 6: 13 tasks marked [P]
+- Phase 7: 37 tasks marked [P]
 
-**Total Parallelizable Tasks**: 112 out of 163 (69%)
+**Total Parallelizable Tasks**: 167 out of 225 (74%)
 
 ### MVP Scope (Phase 1 + 2 + 3)
 
-**Tasks**: 74 tasks (45% of total)
+**Tasks**: 113 tasks (50% of total)
 **Features**: Full customer booking flow with payments
-**Estimated Time**: 1-2 weeks (single developer) or ~1 week (team of 2-3)
+**Test Coverage**: 27 test tasks ensuring quality and preventing regressions
+**Estimated Time**: 2-3 weeks (single developer with TDD) or ~1.5 weeks (team of 2-3)
+
+**TDD Approach**: Tests written first for all critical paths (availability, booking, payment, webhooks, email)
 
 ---
 
@@ -537,8 +707,9 @@ T087 [P] - GET settings
 - [P] tasks can run in parallel (different files, no dependencies on incomplete tasks)
 - [Story] labels (US1-US4) map to user stories in spec.md for traceability
 - Each user story is independently completable and testable
-- Tests NOT included per specification (can be added later if requested)
+- **TDD REQUIRED**: Tests marked with 🧪 MUST be written FIRST and must FAIL before implementation
+- **Keep it simple**: Write minimal test code needed to verify requirements - no over-engineering
 - Phase 2 (Foundational) MUST complete before any user story work begins
-- Commit after each task or logical group for incremental progress
+- Commit after each test passes (not before) for incremental progress
 - Stop at any checkpoint to validate story independently
-- MVP = Phase 1 + 2 + 3 only (Customer booking flow with payments)
+- MVP = Phase 1 + 2 + 3 only (Customer booking flow with payments, including all tests)

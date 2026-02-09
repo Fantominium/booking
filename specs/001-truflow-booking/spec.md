@@ -12,7 +12,7 @@
 - Q: Admin Authentication & Access Control → A: Multi-admin single role support with email/password authentication, password reset via email, and admin panel interface to add/remove admin users. All admins have identical permissions (no role differentiation in MVP).
 - Q: Email Service Requirements → A: Async queue with automatic retry logic (exponential backoff: 1 min, 5 min, 15 min). Booking confirmed immediately; email queued in background. Admin dashboard displays email delivery status (Success/Failed/Retrying).
 - Q: Data Retention & Customer Deletion → A: Immediate anonymization of PII upon verified deletion request with audit logging. System creates timestamped audit log entry (customer email, deletion timestamp, reason). Audit logs retained for 7 years. 24-hour SLA for deletion fulfillment.
-- Q: Concurrent Booking Conflict Resolution → A: Database row-level locking with real-time availability check at payment confirmation. No pessimistic slot reservation during checkout. Slot availability verified atomically during final booking INSERT. If conflict detected (slot taken), payment is already charged; system initiates automatic refund and displays error with recovery options.
+**Concurrent Booking Conflict Resolution** → A: Database row-level locking with real-time availability check at payment confirmation. No pessimistic slot reservation during checkout. Slot availability verified atomically during final booking INSERT. If conflict detected (slot taken), payment is already charged; system initiates automatic refund and displays error with recovery options. **SLA**: Payment confirmation (Stripe confirmation) MUST complete within 60 seconds of the availability check. If customer is still on checkout form after 60 seconds, system displays warning "Slot availability may have changed; please refresh your calendar to confirm selected time is still available" before final payment submission.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -37,6 +37,8 @@ A customer visits TruFlow's website, browses available massage services, selects
 5. **Given** the customer enters valid contact details, **When** they proceed to payment, **Then** they see the down-payment amount clearly displayed with a Stripe Elements payment form.
 
 6. **Given** the customer enters valid payment details and submits, **When** the payment is processed successfully, **Then** they are redirected to a success page showing appointment details and remaining balance due in-person.
+
+6b. **Given** the customer enters an invalid email (e.g., "notanemail"), **When** they attempt to proceed to payment, **Then** the form displays validation error "Please enter a valid email address" and the payment button remains disabled.
 
 7. **Given** payment succeeded, **When** the success page loads, **Then** the customer receives an automated email containing booking details and an attached .ics calendar file compatible with Google Calendar, Outlook, and Apple Calendar.
 
@@ -160,6 +162,7 @@ The business owner adds new massage services, updates pricing or down-payment am
 - **FR-040**: System MUST transmit all payment data directly from customer browser to Stripe using Stripe.js client-side integration.
 - **FR-041**: System MUST verify Stripe webhook signatures using webhook signing secret before processing any webhook events.
 - **FR-042**: System MUST serve all pages over HTTPS with TLS 1.2 or higher; HTTP requests MUST redirect to HTTPS.
+- **FR-042b**: System MUST serve Strict-Transport-Security (HSTS) header on all HTTPS responses with `max-age=31536000; includeSubDomains` to enforce HTTPS for one year and all subdomains.
 - **FR-043**: System MUST implement rate limiting on payment endpoints (max 5 payment attempts per IP per 15 minutes) to prevent brute force attacks.
 - **FR-044**: System MUST log all payment operations (payment intent creation, confirmation, failures, refunds) with timestamp, booking ID, amount, and outcome (no card details).
 - **FR-045**: System MUST sanitize all error messages shown to customers to prevent exposure of system internals, API keys, or sensitive configuration.
@@ -169,7 +172,7 @@ The business owner adds new massage services, updates pricing or down-payment am
 - **FR-049**: System MUST maintain PCI-DSS SAQ-A compliance by never handling, processing, or storing cardholder data (verified through annual self-assessment).
 - **FR-050**: System MUST encrypt database connections using SSL/TLS and store database credentials only in environment variables (never in code).
 - **FR-051**: System MUST implement automatic data retention policy: delete customer PII from completed/cancelled bookings older than 2 years (configurable), preserving only anonymized financial records.
-- **FR-052**: System MUST implement customer deletion mechanism: customer submits verified deletion request via email form. System immediately anonymizes customer PII (name, email, phone → "[DELETED]") in all associated booking records within 1 hour of verified request. System creates audit log entry with original email, deletion timestamp, and request reason. Deletion request fulfillment SLA: 24 hours. Audit logs retained for 7 years.
+- **FR-052**: System MUST implement customer deletion mechanism: customer submits verified deletion request via email form. System immediately anonymizes customer PII in all associated booking records within 1 hour of verified request. **Fields to anonymize**: `customerName → "[DELETED]"`, `customerEmail → "[DELETED]"`, `customerPhone → "[DELETED]"`. **Fields to preserve** (financial records): `id`, `serviceId`, `startTime`, `endTime`, `status`, `downpaymentCents`, `remainingBalance`, `createdAt`, `stripePaymentIntentId` (token reference only). System creates audit log entry with original email hash, deletion timestamp, and request reason. Deletion request fulfillment SLA: 24 hours. Audit logs retained for 7 years.
 - **FR-053**: System MUST implement webhook endpoint authentication requiring exact webhook URL path with unguessable token (e.g., `/api/webhooks/stripe/{SECRET_TOKEN}`).
 - **FR-054**: System MUST validate all webhook event types and amounts against expected values before updating booking status.
 
@@ -212,7 +215,27 @@ The business owner adds new massage services, updates pricing or down-payment am
 - **FR-032**: Customer-facing pages MUST be mobile-first with touch targets minimum 44px tall and a maximum content width on large screens.
 - **FR-033**: Admin panel MUST be mobile-first for on-the-go management and also provide a desktop-optimized layout for data-dense workflows while maintaining WCAG 2.2 Level AA accessibility compliance.
 - **FR-033a**: Admin panel MUST be intuitive and easy to use with clearly defined features while preserving the overall site style and calming theme.
-- **FR-033**: System MUST maintain WCAG 2.2 Level AA accessibility compliance across all interfaces.
+- **FR-033b**: System MUST maintain WCAG 2.2 Level AA accessibility compliance across all interfaces.
+
+**Functional Programming Architecture (NON-NEGOTIABLE):**
+
+- **FR-055**: System MUST be built entirely using functional programming patterns. NO class-based code is permitted. All code MUST use functions, pure transformations, and immutable data structures.
+- **FR-056**: All React components MUST be functional components using React hooks exclusively. NO class components are permitted under any circumstance.
+- **FR-057**: All service functions (AvailabilityService, BookingService, PaymentService, etc.) MUST be pure functions—identical inputs always produce identical outputs with no side effects. Services MUST be stateless and composable.
+- **FR-058**: All data transformations MUST be immutable. Data updates MUST use spread operators, array methods (.map, .filter, .reduce), and functional utilities. NO object mutation or array mutation methods (splice, push, etc.) are permitted.
+- **FR-059**: Custom React hooks MUST be used to encapsulate component logic. Complex state management MUST be extracted into hooks (e.g., useForm, useFetch, useValidation) for reusability and testability.
+- **FR-060**: Database access and external service calls MUST be wrapped in pure service functions returning Promise-based results. Prisma queries MUST be composed into higher-order functions for clarity and testability.
+
+**Safe & Clean JSX:**
+
+- **FR-061**: All inline event handlers are FORBIDDEN. Event handlers MUST be defined as named functions at component scope and passed by reference (e.g., `onClick={handleSubmit}`, not `onClick={() => handleSubmit()}`).
+- **FR-062**: JSX MUST NOT contain nested logic. Conditional rendering MUST use early returns or ternary operators at the top level. Complex JSX trees MUST be extracted into separate components.
+- **FR-063**: NO `dangerouslySetInnerHTML` is permitted. All HTML content MUST be sanitized or use React's built-in escaping. If HTML rendering is required, use a safe sanitization library (e.g., DOMPurify).
+- **FR-064**: All component props MUST be explicitly typed with TypeScript interfaces. NO `any` types on props. Props MUST be validated with Zod schemas at component entry boundaries if props come from external sources.
+- **FR-065**: NO direct DOM manipulation using `useRef` except for focus management and form reset operations. All DOM updates MUST flow through React state and JSX.
+- **FR-066**: List rendering MUST use stable `key` props. Keys MUST be unique identifiers, never array indices. Fragment children in lists MUST have `key` props.
+- **FR-067**: All component prop destructuring MUST be explicit and typed. Components MUST validate incoming props conform to expected shape using Zod schemas if sourced externally.
+- **FR-068**: No component should render JSX longer than 50 lines. Complex components MUST be decomposed into smaller, single-purpose functional components.
 
 **Technical & Security:**
 
@@ -337,7 +360,7 @@ The business owner adds new massage services, updates pricing or down-payment am
 - **OS-003**: Customer account creation with saved preferences (guest checkout only).
 - **OS-004**: Online payment of remaining balance (in-person only).
 - **OS-005**: SMS notifications (email only).
-- **OS-006**: Automatic refund processing (manual only).
+- **OS-006**: Automatic refunds (for cancellations). Cancellation refunds are manual; automatic refunds are reserved for booking conflicts per FR-007b.
 - **OS-007**: Gift certificate or voucher support.
 - **OS-008**: Membership or subscription billing.
 - **OS-009**: Integration with third-party calendar systems for admin (admin uses internal calendar only).
