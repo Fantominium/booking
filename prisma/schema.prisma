@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentAuditAction {
+  INTENT_CREATED
+  PAYMENT_CONFIRMED
+  PAYMENT_FAILED
+  REFUND_ISSUED
+  REFUND_FAILED
+}
+
+enum AuditOutcome {
+  SUCCESS
+  FAILED
+  PENDING
+}
+
+enum DataDeletionReason {
+  CUSTOMER_REQUEST
+  AUTO_PURGE_AGE
+  GDPR_RIGHT_TO_BE_FORGOTTEN
+}
+
+enum DeletionStatus {
+  SUCCESS
+  FAILED
+  PENDING
+}
+
+model Service {
+  id               String    @id @default(uuid())
+  name             String    @unique
+  description      String?
+  durationMin      Int
+  priceCents       Int
+  downpaymentCents Int
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  bookings Booking[]
+
+  @@map("services")
+}
+
+model Booking {
+  id                    String        @id @default(uuid())
+  serviceId             String        @map("service_id")
+  customerName          String        @map("customer_name")
+  customerEmail         String        @map("customer_email")
+  customerPhone         String        @map("customer_phone")
+  startTime             DateTime      @map("start_time")
+  endTime               DateTime      @map("end_time")
+  status                BookingStatus @default(PENDING)
+  stripePaymentIntentId String?       @unique @map("stripe_payment_intent_id")
+  stripeCustomerId      String?       @map("stripe_customer_id")
+  downpaymentPaidCents  Int           @default(0) @map("downpayment_paid_cents")
+  remainingBalanceCents Int           @map("remaining_balance_cents")
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+
+  service           Service           @relation(fields: [serviceId], references: [id])
+  paymentAuditLogs  PaymentAuditLog[]
+
+  @@unique([serviceId, startTime], map: "booking_service_start_unique")
+  @@index([status])
+  @@index([customerEmail])
+  @@index([createdAt])
+  @@map("bookings")
+}
+
+model BusinessHours {
+  id          String    @id @default(uuid())
+  dayOfWeek   Int       @unique @map("day_of_week")
+  openingTime DateTime? @db.Time @map("opening_time")
+  closingTime DateTime? @db.Time @map("closing_time")
+  isOpen      Boolean   @default(true) @map("is_open")
+
+  @@map("business_hours")
+}
+
+model DateOverride {
+  id              String    @id @default(uuid())
+  date            DateTime  @unique @db.Date
+  isBlocked       Boolean   @map("is_blocked")
+  customOpenTime  DateTime? @db.Time @map("custom_open_time")
+  customCloseTime DateTime? @db.Time @map("custom_close_time")
+  reason          String?
+
+  @@map("date_overrides")
+}
+
+model SystemSettings {
+  id               String   @id @default(uuid())
+  maxBookingsPerDay Int     @default(8) @map("max_bookings_per_day")
+  bufferMinutes     Int     @default(15) @map("buffer_minutes")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}
+
+model PaymentAuditLog {
+  id                    String            @id @default(uuid())
+  bookingId             String            @map("booking_id")
+  timestamp             DateTime          @default(now())
+  action                PaymentAuditAction
+  amountCents           Int               @map("amount_cents")
+  stripeEventId         String?           @map("stripe_event_id")
+  stripePaymentIntentId String?           @map("stripe_payment_intent_id")
+  ipAddress             String?           @map("ip_address")
+  userAgent             String?           @map("user_agent")
+  outcome               AuditOutcome
+  errorMessage          String?           @map("error_message")
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId])
+  @@map("payment_audit_logs")
+}
+
+model DataDeletionAuditLog {
+  id               String            @id @default(uuid())
+  timestamp        DateTime          @default(now())
+  originalEmailHash String           @map("original_email_hash")
+  deletionReason   DataDeletionReason @map("deletion_reason")
+  requestedByIp    String?           @map("requested_by_ip")
+  status           DeletionStatus
+
+  @@map("data_deletion_audit_logs")
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("admins")
+}

@@ -1,0 +1,84 @@
+import { addMinutes } from "date-fns";
+import type { Prisma, PrismaClient } from "@prisma/client";
+
+import { BookingConflictError } from "@/lib/errors";
+
+export type CreateBookingInput = {
+  serviceId: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  startTime: Date;
+  serviceDurationMin: number;
+  bufferMinutes: number;
+  priceCents: number;
+  downpaymentCents: number;
+};
+
+const lockExistingBooking = async (
+  tx: Prisma.TransactionClient,
+  params: {
+    serviceId: string;
+    startTime: Date;
+  },
+): Promise<boolean> => {
+  const rows = await tx.$queryRaw<Array<{ id: string }>>`
+    SELECT id FROM "bookings"
+    WHERE "service_id" = ${params.serviceId}
+      AND "start_time" = ${params.startTime}
+      AND "status" != 'CANCELLED'
+    FOR UPDATE
+  `;
+
+  return rows.length > 0;
+};
+
+export const createBookingWithLock = async (params: {
+  prisma: PrismaClient;
+  input: CreateBookingInput;
+}): Promise<{
+  id: string;
+  endTime: Date;
+}> => {
+  const { prisma, input } = params;
+
+  const endTime = addMinutes(input.startTime, input.serviceDurationMin + input.bufferMinutes);
+
+  const booking = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const hasConflict = await lockExistingBooking(tx, {
+      serviceId: input.serviceId,
+      startTime: input.startTime,
+    });
+
+    if (hasConflict) {
+      throw new BookingConflictError("Slot already booked");
+    }
+
+    return tx.booking.create({
+      data: {
+        serviceId: input.serviceId,
+        customerName: input.customerName,
+        customerEmail: input.customerEmail,
+        customerPhone: input.customerPhone,
+        startTime: input.startTime,
+        endTime,
+        remainingBalanceCents: Math.max(input.priceCents - input.downpaymentCents, 0),
+        downpaymentPaidCents: 0,
+      },
+    });
+  });
+
+  return { id: booking.id, endTime: booking.endTime };
+};
+
+export const confirmBookingStatus = async (params: {
+  prisma: PrismaClient;
+  bookingId: string;
+}): Promise<void> => {
+  const { prisma, bookingId } = params;
+
+  await prisma.booking.update({
+    where: { id: bookingId },
+    data: { status: "CONFIRMED" },
+  });
+};
