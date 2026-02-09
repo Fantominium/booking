@@ -1,0 +1,1294 @@
+openapi: 3.0.0
+info:
+  title: TruFlow Booking Platform API
+  description: Customer and admin API for massage therapy booking system with real-time availability and secure payment processing
+  version: 1.0.0
+  contact:
+    name: TruFlow Support
+    email: support@truflow.local
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.truflow.local/api/v1
+    description: Production API
+  - url: http://localhost:3000/api/v1
+    description: Local development
+
+tags:
+  - name: Services
+    description: Massage service catalog operations
+  - name: Availability
+    description: Real-time booking availability calculations
+  - name: Bookings
+    description: Customer booking operations
+  - name: Admin Bookings
+    description: Admin booking management
+  - name: Admin Settings
+    description: Business configuration (hours, services, settings)
+  - name: Admin Auth
+    description: Admin authentication
+  - name: Webhooks
+    description: Third-party service webhooks (Stripe)
+
+paths:
+  /services:
+    get:
+      tags:
+        - Services
+      summary: Get all active services
+      description: Returns list of all active massage services available for booking
+      operationId: getServices
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /services/{serviceId}:
+    get:
+      tags:
+        - Services
+      summary: Get service details
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '404':
+          description: Service not found
+        '500':
+          description: Server error
+
+  /admin/services:
+    post:
+      tags:
+        - Admin Settings
+      summary: Create new service
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateServiceRequest'
+      responses:
+        '201':
+          description: Service created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error
+
+  /admin/services/{serviceId}:
+    patch:
+      tags:
+        - Admin Settings
+      summary: Update service
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateServiceRequest'
+      responses:
+        '200':
+          description: Service updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '400':
+          description: Invalid input or cannot update service with future bookings
+        '401':
+          description: Unauthorized
+        '404':
+          description: Service not found
+        '500':
+          description: Server error
+
+    delete:
+      tags:
+        - Admin Settings
+      summary: Delete service
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Service deleted
+        '400':
+          description: Cannot delete service with existing future bookings
+        '401':
+          description: Unauthorized
+        '404':
+          description: Service not found
+        '500':
+          description: Server error
+
+  /availability/{serviceId}:
+    get:
+      tags:
+        - Availability
+      summary: Get available dates and times
+      description: Returns available dates for selected service and optionally available times for selected date
+      operationId: getAvailability
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: startDate
+          in: query
+          description: Start date for availability search (YYYY-MM-DD)
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: End date for availability search (YYYY-MM-DD)
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: date
+          in: query
+          description: Specific date to get time slots (YYYY-MM-DD); if provided, returns available times
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Availability returned (dates or times based on query)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/AvailabilityDatesResponse'
+                  - $ref: '#/components/schemas/AvailabilityTimesResponse'
+        '400':
+          description: Invalid parameters
+        '404':
+          description: Service not found
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bookings:
+    post:
+      tags:
+        - Bookings
+      summary: Create booking (customer)
+      description: Creates a new booking with Stripe payment intent. Payment must be completed before booking status updates to CONFIRMED.
+      operationId: createBooking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+      responses:
+        '201':
+          description: Booking created with payment intent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingWithPaymentResponse'
+        '400':
+          description: Invalid input or slot no longer available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/SlotConflictErrorResponse'
+        '409':
+          description: Slot conflict - another customer booked same slot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotConflictErrorResponse'
+        '500':
+          description: Server error
+
+  /bookings/{bookingId}/confirm:
+    post:
+      tags:
+        - Bookings
+      summary: Confirm booking after payment
+      description: Called by webhook or client after Stripe payment confirmation to mark booking as CONFIRMED
+      operationId: confirmBooking
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stripePaymentIntentId:
+                  type: string
+                  example: pi_xxx
+              required:
+                - stripePaymentIntentId
+      responses:
+        '200':
+          description: Booking confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '400':
+          description: Invalid payment intent or booking already confirmed
+        '404':
+          description: Booking not found
+        '500':
+          description: Server error
+
+  /admin/bookings:
+    get:
+      tags:
+        - Admin Bookings
+      summary: List bookings (admin)
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            type: string
+            enum: [PENDING, CONFIRMED, COMPLETED, CANCELLED]
+        - name: search
+          in: query
+          description: Search by customer name or phone (debounced 300-500ms)
+          schema:
+            type: string
+            maxLength: 255
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 10
+            maximum: 100
+            default: 25
+      responses:
+        '200':
+          description: Bookings list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Booking'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error
+
+  /admin/bookings/{bookingId}:
+    get:
+      tags:
+        - Admin Bookings
+      summary: Get booking details (admin)
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Booking details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingWithAuditLog'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Booking not found
+
+  /admin/bookings/{bookingId}/mark-paid:
+    post:
+      tags:
+        - Admin Bookings
+      summary: Mark remaining balance as paid (admin)
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+                  maxLength: 500
+                  example: Payment received in-person by cash
+      responses:
+        '200':
+          description: Booking marked as paid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '400':
+          description: Booking not in CONFIRMED state or already COMPLETED
+        '401':
+          description: Unauthorized
+        '404':
+          description: Booking not found
+
+  /admin/bookings/{bookingId}/cancel:
+    post:
+      tags:
+        - Admin Bookings
+      summary: Cancel booking (admin)
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  maxLength: 500
+                  example: Customer requested cancellation
+      responses:
+        '200':
+          description: Booking cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Booking not found
+        '500':
+          description: Server error
+
+  /admin/dashboard/today:
+    get:
+      tags:
+        - Admin Bookings
+      summary: Get today's schedule
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Today's bookings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bookings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Booking'
+                  totalCount:
+                    type: integer
+        '401':
+          description: Unauthorized
+
+  /admin/dashboard/pending-actions:
+    get:
+      tags:
+        - Admin Bookings
+      summary: Get pending actions
+      description: Returns bookings with unpaid balances, failed emails, etc.
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Pending actions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pendingBalances:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Booking'
+                  failedEmails:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        bookingId:
+                          type: string
+                          format: uuid
+                        customerEmail:
+                          type: string
+                        failureReason:
+                          type: string
+                  failedRefunds:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        bookingId:
+                          type: string
+                          format: uuid
+                        amount:
+                          type: number
+                        errorMessage:
+                          type: string
+        '401':
+          description: Unauthorized
+
+  /admin/availability:
+    get:
+      tags:
+        - Admin Settings
+      summary: Get business hours and date overrides (admin)
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Current configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  businessHours:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BusinessHours'
+                  dateOverrides:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DateOverride'
+
+  /admin/availability/hours:
+    patch:
+      tags:
+        - Admin Settings
+      summary: Update business hours (admin)
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBusinessHoursRequest'
+      responses:
+        '200':
+          description: Hours updated
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BusinessHours'
+
+  /admin/availability/date-overrides:
+    post:
+      tags:
+        - Admin Settings
+      summary: Create date override (admin)
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDateOverrideRequest'
+      responses:
+        '201':
+          description: Override created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DateOverride'
+
+    delete:
+      tags:
+        - Admin Settings
+      summary: Delete date override (admin)
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '204':
+          description: Override deleted
+
+  /admin/settings:
+    get:
+      tags:
+        - Admin Settings
+      summary: Get system settings (admin)
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Current settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemSettings'
+
+    patch:
+      tags:
+        - Admin Settings
+      summary: Update system settings (admin)
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                maxBookingsPerDay:
+                  type: integer
+                  minimum: 1
+                bufferMinutes:
+                  type: integer
+                  minimum: 0
+      responses:
+        '200':
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemSettings'
+
+  /admin/admins:
+    get:
+      tags:
+        - Admin Auth
+      summary: List admin users (admin)
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Admin list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    email:
+                      type: string
+                    createdAt:
+                      type: string
+                      format: date-time
+
+    post:
+      tags:
+        - Admin Auth
+      summary: Add new admin (admin)
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required:
+                - email
+      responses:
+        '201':
+          description: Admin created; invitation email sent
+        '400':
+          description: Email already admin
+        '401':
+          description: Unauthorized
+
+  /admin/admins/{adminId}:
+    delete:
+      tags:
+        - Admin Auth
+      summary: Remove admin user (admin)
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: adminId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Admin removed
+        '401':
+          description: Unauthorized
+        '400':
+          description: Cannot remove last admin
+
+  /auth/login:
+    post:
+      tags:
+        - Admin Auth
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Login successful; session cookie set
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: "session=xxx; Path=/; HttpOnly; Secure; SameSite=Strict"
+        '400':
+          description: Invalid credentials
+        '401':
+          description: Account not found
+
+  /auth/logout:
+    post:
+      tags:
+        - Admin Auth
+      summary: Admin logout
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Logout successful
+        '401':
+          description: Not authenticated
+
+  /auth/request-password-reset:
+    post:
+      tags:
+        - Admin Auth
+      summary: Request password reset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required:
+                - email
+      responses:
+        '200':
+          description: Reset email sent (always succeeds for security)
+
+  /auth/reset-password:
+    post:
+      tags:
+        - Admin Auth
+      summary: Reset password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: Reset token from email
+                password:
+                  type: string
+                  minLength: 8
+              required:
+                - token
+                - password
+      responses:
+        '200':
+          description: Password reset successful
+        '400':
+          description: Invalid or expired token
+
+  /webhooks/stripe/{SECRET_TOKEN}:
+    post:
+      tags:
+        - Webhooks
+      summary: Stripe webhook endpoint
+      description: Handles Stripe PaymentIntent events. Endpoint URL must include SECRET_TOKEN for authentication.
+      parameters:
+        - name: SECRET_TOKEN
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: evt_xxx
+                type:
+                  type: string
+                  enum:
+                    - payment_intent.succeeded
+                    - payment_intent.payment_failed
+                data:
+                  type: object
+      responses:
+        '200':
+          description: Webhook processed
+        '400':
+          description: Invalid signature or malformed payload
+        '409':
+          description: Event already processed (idempotency)
+
+  /customer-data/request-deletion:
+    post:
+      tags:
+        - Bookings
+      summary: Request PII deletion
+      description: Customer requests deletion of their personal data. Sends verification email.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required:
+                - email
+      responses:
+        '200':
+          description: Verification email sent
+        '400':
+          description: Invalid email
+
+  /customer-data/confirm-deletion:
+    post:
+      tags:
+        - Bookings
+      summary: Confirm PII deletion
+      description: Customer confirms deletion via token from email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: Deletion confirmation token from email
+              required:
+                - token
+      responses:
+        '200':
+          description: Deletion processed; PII anonymized
+
+components:
+  schemas:
+    Service:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Deep Tissue Massage
+        description:
+          type: string
+          example: 60-minute deep tissue massage targeting muscle tension
+        durationMin:
+          type: integer
+          example: 60
+        priceCents:
+          type: integer
+          example: 8000
+          description: Price in cents ($80.00)
+        downpaymentCents:
+          type: integer
+          example: 2000
+          description: Down-payment required in cents ($20.00)
+        isActive:
+          type: boolean
+      required:
+        - id
+        - name
+        - durationMin
+        - priceCents
+        - downpaymentCents
+
+    CreateServiceRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+        durationMin:
+          type: integer
+          minimum: 1
+        priceCents:
+          type: integer
+          minimum: 0
+        downpaymentCents:
+          type: integer
+          minimum: 0
+      required:
+        - name
+        - durationMin
+        - priceCents
+        - downpaymentCents
+
+    UpdateServiceRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+        durationMin:
+          type: integer
+          minimum: 1
+        priceCents:
+          type: integer
+          minimum: 0
+        downpaymentCents:
+          type: integer
+          minimum: 0
+
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        serviceId:
+          type: string
+          format: uuid
+        serviceName:
+          type: string
+        customerName:
+          type: string
+        customerEmail:
+          type: string
+        customerPhone:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+          description: Appointment start time (UTC)
+        endTime:
+          type: string
+          format: date-time
+          description: Appointment end time (UTC)
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, COMPLETED, CANCELLED]
+        downpaymentPaidCents:
+          type: integer
+          description: Down-payment paid (in cents)
+        remainingBalanceCents:
+          type: integer
+          description: Remaining balance due in-person
+        createdAt:
+          type: string
+          format: date-time
+
+    BookingWithPaymentResponse:
+      allOf:
+        - $ref: '#/components/schemas/Booking'
+        - type: object
+          properties:
+            stripePaymentIntentId:
+              type: string
+              example: pi_xxx
+            clientSecret:
+              type: string
+              description: Client secret for Stripe Elements payment
+
+    BookingWithAuditLog:
+      allOf:
+        - $ref: '#/components/schemas/Booking'
+        - type: object
+          properties:
+            auditLog:
+              type: array
+              items:
+                type: object
+                properties:
+                  timestamp:
+                    type: string
+                    format: date-time
+                  action:
+                    type: string
+                  amountCents:
+                    type: integer
+                  outcome:
+                    type: string
+                  errorMessage:
+                    type: string
+
+    CreateBookingRequest:
+      type: object
+      properties:
+        serviceId:
+          type: string
+          format: uuid
+        customerName:
+          type: string
+          minLength: 1
+          maxLength: 255
+        customerEmail:
+          type: string
+          format: email
+        customerPhone:
+          type: string
+          pattern: '^\+?[0-9\s\-()]+$'
+        startTime:
+          type: string
+          format: date-time
+          description: Desired appointment start time (UTC)
+      required:
+        - serviceId
+        - customerName
+        - customerEmail
+        - customerPhone
+        - startTime
+
+    AvailabilityDatesResponse:
+      type: object
+      properties:
+        serviceId:
+          type: string
+          format: uuid
+        availableDates:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              isAvailable:
+                type: boolean
+              reason:
+                type: string
+                description: Reason if unavailable (e.g., "Holiday", "Fully Booked")
+
+    AvailabilityTimesResponse:
+      type: object
+      properties:
+        serviceId:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        availableTimes:
+          type: array
+          items:
+            type: object
+            properties:
+              time:
+                type: string
+                example: "10:00 AM"
+              timeUtc:
+                type: string
+                format: time
+              isAvailable:
+                type: boolean
+
+    BusinessHours:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        dayOfWeek:
+          type: integer
+          minimum: 0
+          maximum: 6
+          description: 0=Monday, 6=Sunday
+        openingTime:
+          type: string
+          example: "09:00"
+        closingTime:
+          type: string
+          example: "17:00"
+        isOpen:
+          type: boolean
+
+    UpdateBusinessHoursRequest:
+      type: array
+      items:
+        type: object
+        properties:
+          dayOfWeek:
+            type: integer
+            minimum: 0
+            maximum: 6
+          openingTime:
+            type: string
+          closingTime:
+            type: string
+          isOpen:
+            type: boolean
+        required:
+          - dayOfWeek
+          - isOpen
+
+    DateOverride:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        isBlocked:
+          type: boolean
+        customOpenTime:
+          type: string
+          example: "10:00"
+        customCloseTime:
+          type: string
+          example: "14:00"
+        reason:
+          type: string
+          example: Christmas Holiday
+
+    CreateDateOverrideRequest:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        isBlocked:
+          type: boolean
+        customOpenTime:
+          type: string
+        customCloseTime:
+          type: string
+        reason:
+          type: string
+      required:
+        - date
+        - isBlocked
+
+    SystemSettings:
+      type: object
+      properties:
+        maxBookingsPerDay:
+          type: integer
+          minimum: 1
+        bufferMinutes:
+          type: integer
+          minimum: 0
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code for client handling (e.g., PAYMENT_DECLINED)
+        userMessage:
+          type: string
+          description: Safe message to display to customer
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Validation failed
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        fieldErrors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+              example: Invalid email format
+
+    SlotConflictErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: This time slot was just booked by another customer
+        code:
+          type: string
+          example: SLOT_UNAVAILABLE
+        refundInitiated:
+          type: boolean
+          description: Whether refund has been initiated
+        refundAmount:
+          type: integer
+          description: Amount refunded in cents
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Secure HTTP-only session cookie for admin endpoints
