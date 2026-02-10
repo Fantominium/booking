@@ -68,7 +68,7 @@ export const BusinessHoursForm = ({ initialHours }: BusinessHoursFormProps): JSX
         const data = (await response.json()) as { businessHours: BusinessHours[] };
         setHours(sortByDay(data.businessHours));
         setStatus("Business hours updated.");
-      } catch (error) {
+      } catch {
         setStatus("Unable to save business hours.");
       } finally {
         setIsSaving(false);

@@ -13,7 +13,16 @@ type CheckoutFormProps = {
   onSubmit: (data: CheckoutData) => Promise<void>;
 };
 
-const useCheckoutForm = (onSubmit: (data: CheckoutData) => Promise<void>) => {
+type UseCheckoutFormReturn = {
+  formData: CheckoutData;
+  isSubmitting: boolean;
+  handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
+};
+
+const useCheckoutForm = (
+  onSubmit: (data: CheckoutData) => Promise<void>,
+): UseCheckoutFormReturn => {
   const [formData, setFormData] = useState<CheckoutData>({
     customerName: "",
     customerEmail: "",

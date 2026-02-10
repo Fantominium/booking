@@ -1,36 +1,43 @@
-export class AppError extends Error {
-  public readonly statusCode: number;
-  public readonly code: string;
-
-  constructor(message: string, code: string, statusCode: number) {
-    super(message);
-    this.code = code;
-    this.statusCode = statusCode;
-  }
+export interface AppError {
+  message: string;
+  code: string;
+  statusCode: number;
+  stack?: string;
 }
 
-export class ValidationError extends AppError {
-  constructor(message: string) {
-    super(message, "VALIDATION_ERROR", 400);
-  }
-}
+const createAppError = (message: string, code: string, statusCode: number): AppError => {
+  const error = new Error(message);
+  return {
+    message: error.message,
+    stack: error.stack,
+    code,
+    statusCode,
+  };
+};
 
-export class BookingConflictError extends AppError {
-  constructor(message: string) {
-    super(message, "BOOKING_CONFLICT", 409);
-  }
-}
+export const createValidationError = (message: string): AppError =>
+  createAppError(message, "VALIDATION_ERROR", 400);
 
-export class UnauthorizedError extends AppError {
-  constructor(message: string) {
-    super(message, "UNAUTHORIZED", 401);
-  }
-}
+export const createBookingConflictError = (message: string): AppError =>
+  createAppError(message, "BOOKING_CONFLICT", 409);
+
+export const createUnauthorizedError = (message: string): AppError =>
+  createAppError(message, "UNAUTHORIZED", 401);
+
+export const isAppError = (error: unknown): error is AppError => {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    "statusCode" in error &&
+    "message" in error
+  );
+};
 
 export const toSafeError = (error: unknown): AppError => {
-  if (error instanceof AppError) {
+  if (isAppError(error)) {
     return error;
   }
 
-  return new AppError("Unexpected error occurred", "INTERNAL_ERROR", 500);
+  return createAppError("Unexpected error occurred", "INTERNAL_ERROR", 500);
 };

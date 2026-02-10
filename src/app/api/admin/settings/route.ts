@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { invalidateAvailabilityCache } from "@/lib/cache/availability";
 import { prisma } from "@/lib/prisma";
 
 const updateSettingsSchema = z
@@ -58,6 +59,8 @@ export const PATCH = async (request: Request): Promise<NextResponse> => {
           bufferMinutes: parsed.data.bufferMinutes ?? 15,
         },
       });
+
+  invalidateAvailabilityCache();
 
   return NextResponse.json(mapSettings(settings));
 };

@@ -81,7 +81,7 @@ export const DateOverrideForm = ({ initialOverrides }: DateOverrideFormProps): J
         setOverrides((prev) => sortOverrides([...prev, data]));
         setDraft(createEmptyDraft());
         setStatus("Date override added.");
-      } catch (error) {
+      } catch {
         setStatus("Unable to add date override.");
       } finally {
         setIsSaving(false);
@@ -110,7 +110,7 @@ export const DateOverrideForm = ({ initialOverrides }: DateOverrideFormProps): J
 
       setOverrides((prev) => prev.filter((entry) => entry.id !== id));
       setStatus("Date override removed.");
-    } catch (error) {
+    } catch {
       setStatus("Unable to delete date override.");
     }
   }, []);

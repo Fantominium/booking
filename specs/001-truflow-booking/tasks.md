@@ -304,8 +304,8 @@
 
 ### Immediate Availability Refresh
 
-- [ ] T134 [US2] Implement cache invalidation for availability changes in lib/cache/availability.ts (FR-015)
-- [ ] T135 [US2] Verify customer-facing calendar reflects changes immediately without restart
+- [x] T134 [US2] Implement cache invalidation for availability changes in lib/cache/availability.ts (FR-015)
+- [x] T135 [US2] Verify customer-facing calendar reflects changes immediately without restart
 
 **Checkpoint**: User Story 2 complete - Admin can fully control business availability and settings
 
@@ -323,55 +323,55 @@
 
 > **TDD**: Write these tests FIRST
 
-- [ ] T136 [P] [US3] Contract test for GET /api/admin/bookings with filters in tests/contract/admin-bookings.test.ts
-- [ ] T137 [P] [US3] Contract test for GET /api/admin/dashboard/today in tests/contract/admin-dashboard.test.ts
-- [ ] T138 [P] [US3] Integration test for authorization checks on admin endpoints in tests/integration/admin-auth.test.ts
+- [x] T136 [P] [US3] Contract test for GET /api/admin/bookings with filters in tests/contract/admin-bookings.test.ts
+- [x] T137 [P] [US3] Contract test for GET /api/admin/dashboard/today in tests/contract/admin-dashboard.test.ts
+- [x] T138 [P] [US3] Integration test for authorization checks on admin endpoints in tests/integration/admin-auth.test.ts
 
 ### Admin Booking List & Dashboard Implementation
 
-- [ ] T139 [P] [US3] Implement GET /api/admin/bookings endpoint with filtering (status, date range) in app/api/admin/bookings/route.ts
-- [ ] T140 [P] [US3] Implement GET /api/admin/bookings/[id] endpoint for booking details in app/api/admin/bookings/[id]/route.ts
-- [ ] T141 [P] [US3] Implement GET /api/admin/dashboard/today endpoint for today's schedule in app/api/admin/dashboard/today/route.ts
-- [ ] T142 [P] [US3] Implement GET /api/admin/dashboard/pending-actions endpoint for unpaid balances and email failures in app/api/admin/dashboard/pending-actions/route.ts
-- [ ] T143 [US3] Create BookingList component in components/admin/BookingList.tsx with MUI DataGrid for filtering and sorting
-- [ ] T144 [US3] Create Dashboard page in app/admin/page.tsx with today's schedule and pending actions
-- [ ] T145 [US3] Create Booking Management page in app/admin/bookings/page.tsx with filterable list
+- [x] T139 [P] [US3] Implement GET /api/admin/bookings endpoint with filtering (status, date range) in app/api/admin/bookings/route.ts
+- [x] T140 [P] [US3] Implement GET /api/admin/bookings/[id] endpoint for booking details in app/api/admin/bookings/[id]/route.ts
+- [x] T141 [P] [US3] Implement GET /api/admin/dashboard/today endpoint for today's schedule in app/api/admin/dashboard/today/route.ts
+- [x] T142 [P] [US3] Implement GET /api/admin/dashboard/pending-actions endpoint for unpaid balances and email failures in app/api/admin/dashboard/pending-actions/route.ts
+- [x] T143 [US3] Create BookingList component in components/admin/BookingList.tsx with MUI DataGrid for filtering and sorting
+- [x] T144 [US3] Create Dashboard page in app/admin/page.tsx with today's schedule and pending actions
+- [x] T145 [US3] Create Booking Management page in app/admin/bookings/page.tsx with filterable list
 
 ### Tests for Payment Status Management (TDD) 🧪
 
 > **TDD**: Write these tests FIRST
 
-- [ ] T146 [P] [US3] Contract test for POST /api/admin/bookings/[id]/mark-paid in tests/contract/admin-bookings.test.ts
-- [ ] T147 [P] [US3] Integration test for marking booking as paid and updating status in tests/integration/mark-paid.test.ts
+- [x] T146 [P] [US3] Contract test for POST /api/admin/bookings/[id]/mark-paid in tests/contract/admin-bookings.test.ts
+- [x] T147 [P] [US3] Integration test for marking booking as paid and updating status in tests/integration/mark-paid.test.ts
 
 ### Payment Status Management Implementation
 
-- [ ] T148 [P] [US3] Implement POST /api/admin/bookings/[id]/mark-paid endpoint in app/api/admin/bookings/[id]/mark-paid/route.ts
-- [ ] T149 [US3] Update booking status to COMPLETED and log payment completion in lib/services/booking.ts
-- [ ] T150 [US3] Create MarkPaidButton component in components/admin/MarkPaidButton.tsx with confirmation dialog
-- [ ] T151 [US3] Add payment status display to booking detail view
+- [x] T148 [P] [US3] Implement POST /api/admin/bookings/[id]/mark-paid endpoint in app/api/admin/bookings/[id]/mark-paid/route.ts
+- [x] T149 [US3] Update booking status to COMPLETED and log payment completion in lib/services/booking.ts
+- [x] T150 [US3] Create MarkPaidButton component in components/admin/MarkPaidButton.tsx with confirmation dialog
+- [x] T151 [US3] Add payment status display to booking detail view
 
 ### Tests for Booking Cancellation (TDD) 🧪
 
 > **TDD**: Write these tests FIRST
 
-- [ ] T152 [P] [US3] Contract test for POST /api/admin/bookings/[id]/cancel in tests/contract/admin-bookings.test.ts
-- [ ] T153 [P] [US3] Integration test for cancellation freeing time slot in tests/integration/cancel-booking.test.ts
-- [ ] T154 [P] [US3] Integration test for cancellation email queueing in tests/integration/cancel-email.test.ts
+- [x] T152 [P] [US3] Contract test for POST /api/admin/bookings/[id]/cancel in tests/contract/admin-bookings.test.ts
+- [x] T153 [P] [US3] Integration test for cancellation freeing time slot in tests/integration/cancel-booking.test.ts
+- [x] T154 [P] [US3] Integration test for cancellation email queueing in tests/integration/cancel-email.test.ts
 
 ### Booking Cancellation Implementation
 
-- [ ] T155 [P] [US3] Implement POST /api/admin/bookings/[id]/cancel endpoint in app/api/admin/bookings/[id]/cancel/route.ts
-- [ ] T156 [US3] Update booking status to CANCELLED and free time slot in lib/services/booking.ts
-- [ ] T157 [US3] Create cancellation email template in lib/email/templates/booking-cancellation.tsx
-- [ ] T158 [US3] Queue cancellation email job on booking cancellation
-- [ ] T159 [US3] Create CancelBookingButton component in components/admin/CancelBookingButton.tsx with confirmation dialog
+- [x] T155 [P] [US3] Implement POST /api/admin/bookings/[id]/cancel endpoint in app/api/admin/bookings/[id]/cancel/route.ts
+- [x] T156 [US3] Update booking status to CANCELLED and free time slot in lib/services/booking.ts
+- [x] T157 [US3] Create cancellation email template in lib/email/templates/booking-cancellation.tsx
+- [x] T158 [US3] Queue cancellation email job on booking cancellation
+- [x] T159 [US3] Create CancelBookingButton component in components/admin/CancelBookingButton.tsx with confirmation dialog
 
 ### Search & Filtering
 
-- [ ] T160 [P] [US3] Implement debounced search by customer name/phone in BookingList component (FR-018a)
-- [ ] T161 [US3] Add status filter dropdown to BookingList component (Pending, Confirmed, Completed, Cancelled)
-- [ ] T162 [US3] Add date range filter to BookingList component
+- [x] T160 [P] [US3] Implement debounced search by customer name/phone in BookingList component (FR-018a)
+- [x] T161 [US3] Add status filter dropdown to BookingList component (Pending, Confirmed, Completed, Cancelled)
+- [x] T162 [US3] Add date range filter to BookingList component
 
 **Checkpoint**: User Story 3 complete - Admin can fully manage bookings, payments, and cancellations
 
@@ -389,32 +389,32 @@
 
 > **TDD**: Write these tests FIRST
 
-- [ ] T163 [P] [US4] Contract test for POST /api/admin/services in tests/contract/admin-services.test.ts
-- [ ] T164 [P] [US4] Contract test for PATCH /api/admin/services/[id] in tests/contract/admin-services.test.ts
-- [ ] T165 [P] [US4] Contract test for DELETE /api/admin/services/[id] in tests/contract/admin-services.test.ts
-- [ ] T166 [P] [US4] Integration test preventing service deletion with future bookings in tests/integration/service-deletion.test.ts
-- [ ] T167 [P] [US4] Unit test for service validation (downpayment <= price, duration > 0) in tests/unit/service-validation.test.ts
+- [x] T163 [P] [US4] Contract test for POST /api/admin/services in tests/contract/admin-services.test.ts
+- [x] T164 [P] [US4] Contract test for PATCH /api/admin/services/[id] in tests/contract/admin-services.test.ts
+- [x] T165 [P] [US4] Contract test for DELETE /api/admin/services/[id] in tests/contract/admin-services.test.ts
+- [x] T166 [P] [US4] Integration test preventing service deletion with future bookings in tests/integration/service-deletion.test.ts
+- [x] T167 [P] [US4] Unit test for service validation (downpayment <= price, duration > 0) in tests/unit/service-validation.test.ts
 
 ### Service Management API Implementation
 
-- [ ] T168 [P] [US4] Implement POST /api/admin/services endpoint to create service in app/api/admin/services/route.ts
-- [ ] T169 [P] [US4] Implement PATCH /api/admin/services/[id] endpoint to update service in app/api/admin/services/[id]/route.ts
-- [ ] T170 [P] [US4] Implement DELETE /api/admin/services/[id] endpoint with validation for future bookings (FR-025) in app/api/admin/services/[id]/route.ts
-- [ ] T171 [US4] Validate downpaymentCents <= priceCents and durationMin > 0 in service validation
+- [x] T168 [P] [US4] Implement POST /api/admin/services endpoint to create service in app/api/admin/services/route.ts
+- [x] T169 [P] [US4] Implement PATCH /api/admin/services/[id] endpoint to update service in app/api/admin/services/[id]/route.ts
+- [x] T170 [P] [US4] Implement DELETE /api/admin/services/[id] endpoint with validation for future bookings (FR-025) in app/api/admin/services/[id]/route.ts
+- [x] T171 [US4] Validate downpaymentCents <= priceCents and durationMin > 0 in service validation
 
 ### Service Configuration UI
 
-- [ ] T172 [P] [US4] Create ServiceForm component in components/admin/ServiceForm.tsx with Zod validation
-- [ ] T173 [P] [US4] Create ServiceList component in components/admin/ServiceList.tsx with edit/delete actions
-- [ ] T174 [US4] Create Service Configuration page in app/admin/services/page.tsx
-- [ ] T175 [US4] Add "Add Service" button and modal dialog to Service Configuration page
-- [ ] T176 [US4] Implement inline editing for service details in ServiceList component
+- [x] T172 [P] [US4] Create ServiceForm component in components/admin/ServiceForm.tsx with Zod validation
+- [x] T173 [P] [US4] Create ServiceList component in components/admin/ServiceList.tsx with edit/delete actions
+- [x] T174 [US4] Create Service Configuration page in app/admin/services/page.tsx
+- [x] T175 [US4] Add "Add Service" button and modal dialog to Service Configuration page
+- [x] T176 [US4] Implement inline editing for service details in ServiceList component
 
 ### Service Deletion Validation
 
-- [ ] T177 [US4] Implement validation to prevent deletion of services with existing future bookings (FR-025)
-- [ ] T178 [US4] Display error message when attempting to delete service with future bookings
-- [ ] T179 [US4] Add "Mark Inactive" option as alternative to deletion for services with bookings
+- [x] T177 [US4] Implement validation to prevent deletion of services with existing future bookings (FR-025)
+- [x] T178 [US4] Display error message when attempting to delete service with future bookings
+- [x] T179 [US4] Add "Mark Inactive" option as alternative to deletion for services with bookings
 
 **Checkpoint**: User Story 4 complete - Admin can fully manage service catalog
 

@@ -55,7 +55,7 @@ export const SystemSettingsForm = ({ initialSettings }: SystemSettingsFormProps)
         }
 
         setStatus("Settings updated.");
-      } catch (error) {
+      } catch {
         setStatus("Unable to update settings.");
       } finally {
         setIsSaving(false);

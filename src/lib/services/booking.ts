@@ -1,7 +1,9 @@
 import { addMinutes } from "date-fns";
 import type { Prisma, PrismaClient } from "@prisma/client";
 
-import { BookingConflictError } from "@/lib/errors";
+import { invalidateAvailabilityCache } from "@/lib/cache/availability";
+import { createBookingConflictError } from "@/lib/errors";
+import { logPaymentAudit } from "@/lib/services/audit";
 import { queueEmailJob } from "@/lib/services/email";
 
 export type CreateBookingInput = {
@@ -52,7 +54,7 @@ export const createBookingWithLock = async (params: {
     });
 
     if (hasConflict) {
-      throw new BookingConflictError("Slot already booked");
+      throw createBookingConflictError("Slot already booked");
     }
 
     return tx.booking.create({
@@ -109,4 +111,68 @@ export const attachPaymentIntent = async (params: {
       stripePaymentIntentId: paymentIntentId,
     },
   });
+};
+
+export const markBookingAsPaid = async (params: {
+  prisma: PrismaClient;
+  bookingId: string;
+}): Promise<void> => {
+  const { prisma, bookingId } = params;
+
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: { service: true },
+  });
+
+  if (!booking) {
+    throw new Error("Booking not found");
+  }
+
+  await prisma.booking.update({
+    where: { id: bookingId },
+    data: {
+      status: "COMPLETED",
+      remainingBalanceCents: 0,
+    },
+  });
+
+  await logPaymentAudit({
+    bookingId: booking.id,
+    action: "PAYMENT_CONFIRMED",
+    amountCents: booking.remainingBalanceCents,
+    outcome: "SUCCESS",
+    stripePaymentIntentId: booking.stripePaymentIntentId ?? null,
+  });
+};
+
+export const cancelBooking = async (params: {
+  prisma: PrismaClient;
+  bookingId: string;
+}): Promise<void> => {
+  const { prisma, bookingId } = params;
+
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: { service: true },
+  });
+
+  if (!booking) {
+    throw new Error("Booking not found");
+  }
+
+  await prisma.booking.update({
+    where: { id: bookingId },
+    data: {
+      status: "CANCELLED",
+      remainingBalanceCents: 0,
+    },
+  });
+
+  await queueEmailJob({
+    bookingId: booking.id,
+    customerEmail: booking.customerEmail,
+    type: "CANCELLATION",
+  });
+
+  invalidateAvailabilityCache();
 };

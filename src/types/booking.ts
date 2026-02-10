@@ -12,3 +12,7 @@ export type Booking = {
   downpaymentPaidCents: number;
   remainingBalanceCents: number;
 };
+
+export type AdminBooking = Booking & {
+  serviceName: string;
+};

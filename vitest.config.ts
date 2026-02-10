@@ -1,11 +1,24 @@
 import { defineConfig } from "vitest/config";
-import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    {
+      name: "react-plugin",
+      config: () => ({
+        esbuild: {
+          jsx: "automatic",
+        },
+      }),
+    },
+  ],
   test: {
     environment: "jsdom",
     setupFiles: ["./tests/setup/vitest.setup.ts"],
     globals: true,
+  },
+  resolve: {
+    alias: {
+      "@": new URL("./src", import.meta.url).pathname,
+    },
   },
 });

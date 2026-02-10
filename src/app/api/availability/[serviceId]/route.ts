@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 
+import {
+  buildAvailabilityCacheKey,
+  getAvailabilityCache,
+  setAvailabilityCache,
+} from "@/lib/cache/availability";
 import { calculateAvailableSlotsForDate } from "@/lib/services/availability";
 import { prisma } from "@/lib/prisma";
 
@@ -44,6 +49,18 @@ export const GET = async (
   const businessHours = await prisma.businessHours.findMany();
   const overrides = await prisma.dateOverride.findMany();
 
+  const cacheKey = buildAvailabilityCacheKey({
+    serviceId: service.id,
+    startDate: startDateParam,
+    endDate: endDateParam,
+    date: dateParam,
+  });
+  const cached = getAvailabilityCache<Record<string, unknown>>(cacheKey);
+
+  if (cached) {
+    return NextResponse.json(cached);
+  }
+
   if (dateParam) {
     const targetDate = parseDate(dateParam);
     const dayBookings = await prisma.booking.findMany({
@@ -65,13 +82,16 @@ export const GET = async (
       settings,
     });
 
-    return NextResponse.json({
+    const payload = {
       date: dateParam,
       slots: slots.map((slot) => ({
         start: slot.start.toISOString(),
         end: slot.end.toISOString(),
       })),
-    });
+    };
+
+    setAvailabilityCache(cacheKey, payload);
+    return NextResponse.json(payload);
   }
 
   const startDate = parseDate(startDateParam);
@@ -107,5 +127,7 @@ export const GET = async (
     cursor = addDays(cursor, 1);
   }
 
-  return NextResponse.json({ dates });
+  const payload = { dates };
+  setAvailabilityCache(cacheKey, payload);
+  return NextResponse.json(payload);
 };

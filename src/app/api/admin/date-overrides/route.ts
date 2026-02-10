@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { invalidateAvailabilityCache } from "@/lib/cache/availability";
 import { prisma } from "@/lib/prisma";
 
 const timeSchema = z.string().regex(/^\d{2}:\d{2}$/);
@@ -76,6 +77,8 @@ export const POST = async (request: Request): Promise<NextResponse> => {
       reason: parsed.data.reason ?? null,
     },
   });
+
+  invalidateAvailabilityCache();
 
   return NextResponse.json(
     {

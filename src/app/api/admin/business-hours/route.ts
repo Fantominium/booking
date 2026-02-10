@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { invalidateAvailabilityCache } from "@/lib/cache/availability";
 import { prisma } from "@/lib/prisma";
 
 const timeSchema = z.string().regex(/^\d{2}:\d{2}$/);
@@ -90,6 +91,8 @@ export const PUT = async (request: Request): Promise<NextResponse> => {
       closingTime: toTimeString(entry.closingTime),
       isOpen: entry.isOpen,
     }));
+
+  invalidateAvailabilityCache();
 
   return NextResponse.json({ businessHours: payload });
 };

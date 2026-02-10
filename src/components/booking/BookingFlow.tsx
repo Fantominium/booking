@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import { useQuery } from "@tanstack/react-query";
 
 import { CheckoutForm } from "@/components/booking/CheckoutForm";
 import { DatePicker } from "@/components/booking/DatePicker";
@@ -15,49 +16,46 @@ type BookingFlowProps = {
   serviceId: string;
 };
 
-export const BookingFlow = ({ serviceId }: BookingFlowProps): JSX.Element => {
-  const [availableDates, setAvailableDates] = useState<string[]>([]);
+export const BookingFlow = ({ serviceId }: BookingFlowProps): React.JSX.Element => {
   const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
-  const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string | undefined>(undefined);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
-  const loadDates = useCallback(async () => {
-    const response = await fetch(
-      `/api/availability/${serviceId}?startDate=${today}&endDate=${today}`,
-    );
-    const data = (await response.json()) as { dates: string[] };
-    setAvailableDates(data.dates);
-  }, [serviceId, today]);
-
-  const loadSlots = useCallback(
-    async (date: string) => {
+  const { data: availableDates = [] } = useQuery({
+    queryKey: ["availability", "dates", serviceId, today],
+    queryFn: async (): Promise<string[]> => {
       const response = await fetch(
-        `/api/availability/${serviceId}?startDate=${today}&date=${date}`,
+        `/api/availability/${serviceId}?startDate=${today}&endDate=${today}`,
+      );
+      const data = (await response.json()) as { dates: string[] };
+      return data.dates;
+    },
+  });
+
+  const { data: slots = [] } = useQuery({
+    queryKey: ["availability", "slots", serviceId, selectedDate],
+    queryFn: async (): Promise<TimeSlot[]> => {
+      if (!selectedDate) {
+        return [];
+      }
+      const response = await fetch(
+        `/api/availability/${serviceId}?startDate=${today}&date=${selectedDate}`,
       );
       const data = (await response.json()) as { slots: TimeSlot[] };
-      setSlots(data.slots);
+      return data.slots;
     },
-    [serviceId, today],
-  );
+    enabled: !!selectedDate,
+  });
 
-  useEffect(() => {
-    void loadDates();
-  }, [loadDates]);
-
-  const handleDateSelect = useCallback(
-    (date: string) => {
-      setSelectedDate(date);
-      setSelectedSlot(undefined);
-      setClientSecret(null);
-      setBookingId(null);
-      void loadSlots(date);
-    },
-    [loadSlots],
-  );
+  const handleDateSelect = useCallback((date: string): void => {
+    setSelectedDate(date);
+    setSelectedSlot(undefined);
+    setClientSecret(null);
+    setBookingId(null);
+  }, []);
 
   const handleSlotSelect = useCallback((slotStart: string) => {
     setSelectedSlot(slotStart);
