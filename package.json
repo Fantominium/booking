@@ -12,6 +12,7 @@
     "test:e2e": "playwright test",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "worker:email": "tsx src/workers/email-worker.ts",
     "prepare": "lefthook install"
   },
   "dependencies": {

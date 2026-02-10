@@ -131,115 +131,115 @@
 
 > **TDD**: Write these tests FIRST, ensure they FAIL before implementation
 
-- [ ] T052.5 [P] [US1] Unit test for email validation (Zod schema) in tests/unit/email-validation.test.ts: Verify valid emails accepted, invalid formats rejected
-- [ ] T053 [P] [US1] Contract test for GET /api/services in tests/contract/services.test.ts
-- [ ] T054 [P] [US1] Contract test for GET /api/services/[serviceId] in tests/contract/services.test.ts
-- [ ] T055 [P] [US1] Component test for ServiceCard in components/booking/ServiceCard.test.tsx
+- [x] T052.5 [P] [US1] Unit test for email validation (Zod schema) in tests/unit/email-validation.test.ts: Verify valid emails accepted, invalid formats rejected
+- [x] T053 [P] [US1] Contract test for GET /api/services in tests/contract/services.test.ts
+- [x] T054 [P] [US1] Contract test for GET /api/services/[serviceId] in tests/contract/services.test.ts
+- [x] T055 [P] [US1] Component test for ServiceCard in components/booking/ServiceCard.test.tsx
 
 ### Customer Service Catalog Implementation
 
-- [ ] T056 [P] [US1] Create Service model types in types/service.ts
-- [ ] T057 [P] [US1] Implement GET /api/services endpoint in app/api/services/route.ts
-- [ ] T058 [P] [US1] Implement GET /api/services/[serviceId] endpoint in app/api/services/[serviceId]/route.ts
-- [ ] T059 [US1] Create ServiceCard component in components/booking/ServiceCard.tsx with Storybook story
-- [ ] T060 [US1] Create ServiceCatalog page in app/book/page.tsx displaying all active services
+- [x] T056 [P] [US1] Create Service model types in types/service.ts
+- [x] T057 [P] [US1] Implement GET /api/services endpoint in app/api/services/route.ts
+- [x] T058 [P] [US1] Implement GET /api/services/[serviceId] endpoint in app/api/services/[serviceId]/route.ts
+- [x] T059 [US1] Create ServiceCard component in components/booking/ServiceCard.tsx with Storybook story
+- [x] T060 [US1] Create ServiceCatalog page in app/book/page.tsx displaying all active services
 
 ### Tests for Availability Calculation (TDD) 🧪
 
 > **TDD**: Write these tests FIRST - Critical business logic requiring comprehensive test coverage
 
-- [ ] T061 [P] [US1] Unit test for availability calculation with business hours in tests/unit/availability.test.ts
-- [ ] T062 [P] [US1] Unit test for availability with date overrides in tests/unit/availability.test.ts
-- [ ] T063 [P] [US1] Unit test for availability with buffer time logic in tests/unit/availability.test.ts
-- [ ] T064 [P] [US1] Unit test for availability with daily booking cap in tests/unit/availability.test.ts
-- [ ] T065 [P] [US1] Contract test for GET /api/availability/[serviceId] in tests/contract/availability.test.ts
-- [ ] T066 [P] [US1] Component test for DatePicker in components/booking/DatePicker.test.tsx
-- [ ] T067 [P] [US1] Component test for TimeSlotPicker in components/booking/TimeSlotPicker.test.tsx
+- [x] T061 [P] [US1] Unit test for availability calculation with business hours in tests/unit/availability.test.ts
+- [x] T062 [P] [US1] Unit test for availability with date overrides in tests/unit/availability.test.ts
+- [x] T063 [P] [US1] Unit test for availability with buffer time logic in tests/unit/availability.test.ts
+- [x] T064 [P] [US1] Unit test for availability with daily booking cap in tests/unit/availability.test.ts
+- [x] T065 [P] [US1] Contract test for GET /api/availability/[serviceId] in tests/contract/availability.test.ts
+- [x] T066 [P] [US1] Component test for DatePicker in components/booking/DatePicker.test.tsx
+- [x] T067 [P] [US1] Component test for TimeSlotPicker in components/booking/TimeSlotPicker.test.tsx
 
 ### Availability Calculation & Display Implementation
 
-- [ ] T068 [P] [US1] Implement availability calculation logic in lib/services/availability.ts (business hours, date overrides, buffer time, daily cap)
-- [ ] T069 [P] [US1] Implement GET /api/availability/[serviceId] endpoint in app/api/availability/[serviceId]/route.ts
-- [ ] T070 [US1] Create DatePicker component in components/booking/DatePicker.tsx with unavailable dates grayed out
-- [ ] T071 [US1] Create TimeSlotPicker component in components/booking/TimeSlotPicker.tsx showing available times
-- [ ] T072 [US1] Create booking flow page in app/book/[serviceId]/page.tsx with date/time selection
+- [x] T068 [P] [US1] Implement availability calculation logic in lib/services/availability.ts (business hours, date overrides, buffer time, daily cap)
+- [x] T069 [P] [US1] Implement GET /api/availability/[serviceId] endpoint in app/api/availability/[serviceId]/route.ts
+- [x] T070 [US1] Create DatePicker component in components/booking/DatePicker.tsx with unavailable dates grayed out
+- [x] T071 [US1] Create TimeSlotPicker component in components/booking/TimeSlotPicker.tsx showing available times
+- [x] T072 [US1] Create booking flow page in app/book/[serviceId]/page.tsx with date/time selection
 
 ### Tests for Guest Checkout & Payment (TDD) 🧪
 
 > **TDD**: Write these tests FIRST - Critical payment flow with security implications
 
-- [ ] T073 [P] [US1] Unit test for booking validation (Zod schema) in tests/unit/booking-validation.test.ts
-- [ ] T074 [P] [US1] Integration test for atomic booking creation with row-level locking in tests/integration/booking.test.ts
-- [ ] T075 [P] [US1] Integration test for concurrent booking conflict detection in tests/integration/booking-conflict.test.ts
-- [ ] T076 [P] [US1] Integration test for automatic refund on conflict in tests/integration/payment-refund.test.ts
-- [ ] T077 [P] [US1] Contract test for POST /api/payment-intents in tests/contract/payment.test.ts
-- [ ] T078 [P] [US1] Contract test for POST /api/bookings in tests/contract/bookings.test.ts
-- [ ] T079 [P] [US1] Component test for CheckoutForm validation in components/booking/CheckoutForm.test.tsx
+- [x] T073 [P] [US1] Unit test for booking validation (Zod schema) in tests/unit/booking-validation.test.ts
+- [x] T074 [P] [US1] Integration test for atomic booking creation with row-level locking in tests/integration/booking.test.ts
+- [x] T075 [P] [US1] Integration test for concurrent booking conflict detection in tests/integration/booking-conflict.test.ts
+- [x] T076 [P] [US1] Integration test for automatic refund on conflict in tests/integration/payment-refund.test.ts
+- [x] T077 [P] [US1] Contract test for POST /api/payment-intents in tests/contract/payment.test.ts
+- [x] T078 [P] [US1] Contract test for POST /api/bookings in tests/contract/bookings.test.ts
+- [x] T079 [P] [US1] Component test for CheckoutForm validation in components/booking/CheckoutForm.test.tsx
 
 ### Guest Checkout & Payment Implementation
 
-- [ ] T080 [P] [US1] Create Booking model types in types/booking.ts
-- [ ] T081 [P] [US1] Implement Stripe Elements integration in components/payment/StripePaymentForm.tsx
-- [ ] T082 [P] [US1] Create checkout form with guest details (name, email, phone) in components/booking/CheckoutForm.tsx
-- [ ] T083 [US1] Implement POST /api/payment-intents endpoint in app/api/payment-intents/route.ts to create PaymentIntent
-- [ ] T083.pre [P] [BLOCKING] Define abstract PaymentProvider interface in lib/services/payment-provider.interface.ts with methods: createPaymentIntent(amount, currency), confirmPayment(paymentIntentId), handleWebhook(event), refund(paymentIntentId, amount). Document each method with JSDoc (purpose, @param, @returns, @throws). Stripe class (T084) implements this interface. **Must complete before T084.**
-- [ ] T084 [US1] Implement POST /api/bookings endpoint in app/api/bookings/route.ts with atomic transaction and row-level locking (FR-004)
-- [ ] T085 [US1] Implement automatic refund on booking conflict in lib/services/payment.ts (FR-007b)
-- [ ] T085.5 [P] [US1] Implement refund SLA monitoring in lib/jobs/refund-sla-monitor.ts: Query PaymentAuditLog for REFUND_ISSUED events older than 5+ minutes without REFUND_COMPLETED status. If SLA exceeded, log alert with booking ID and refund amount for admin follow-up.
+- [x] T080 [P] [US1] Create Booking model types in types/booking.ts
+- [x] T081 [P] [US1] Implement Stripe Elements integration in components/payment/StripePaymentForm.tsx
+- [x] T082 [P] [US1] Create checkout form with guest details (name, email, phone) in components/booking/CheckoutForm.tsx
+- [x] T083 [US1] Implement POST /api/payment-intents endpoint in app/api/payment-intents/route.ts to create PaymentIntent
+- [x] T083.pre [P] [BLOCKING] Define abstract PaymentProvider interface in lib/services/payment-provider.interface.ts with methods: createPaymentIntent(amount, currency), confirmPayment(paymentIntentId), handleWebhook(event), refund(paymentIntentId, amount). Document each method with JSDoc (purpose, @param, @returns, @throws). Stripe class (T084) implements this interface. **Must complete before T084.**
+- [x] T084 [US1] Implement POST /api/bookings endpoint in app/api/bookings/route.ts with atomic transaction and row-level locking (FR-004)
+- [x] T085 [US1] Implement automatic refund on booking conflict in lib/services/payment.ts (FR-007b)
+- [x] T085.5 [P] [US1] Implement refund SLA monitoring in lib/jobs/refund-sla-monitor.ts: Query PaymentAuditLog for REFUND_ISSUED events older than 5+ minutes without REFUND_COMPLETED status. If SLA exceeded, log alert with booking ID and refund amount for admin follow-up.
 
 ### Tests for Payment Confirmation & Webhooks (TDD) 🧪
 
 > **TDD**: Write these tests FIRST - Security-critical webhook handling
 
-- [ ] T086 [P] [US1] Integration test for webhook signature verification in tests/integration/webhook.test.ts
-- [ ] T087 [P] [US1] Integration test for webhook with invalid signature (must reject) in tests/integration/webhook.test.ts
-- [ ] T088 [P] [US1] Integration test for idempotent webhook processing in tests/integration/webhook.test.ts
-- [ ] T089 [P] [US1] Integration test for payment_intent.succeeded event in tests/integration/webhook.test.ts
-- [ ] T090 [P] [US1] Integration test for payment_intent.payment_failed event in tests/integration/webhook.test.ts
+- [x] T086 [P] [US1] Integration test for webhook signature verification in tests/integration/webhook.test.ts
+- [x] T087 [P] [US1] Integration test for webhook with invalid signature (must reject) in tests/integration/webhook.test.ts
+- [x] T088 [P] [US1] Integration test for idempotent webhook processing in tests/integration/webhook.test.ts
+- [x] T089 [P] [US1] Integration test for payment_intent.succeeded event in tests/integration/webhook.test.ts
+- [x] T090 [P] [US1] Integration test for payment_intent.payment_failed event in tests/integration/webhook.test.ts
 
 ### Payment Confirmation & Webhooks Implementation
 
-- [ ] T091 [P] [US1] Implement Stripe webhook handler in app/api/webhooks/stripe/[token]/route.ts with signature verification (FR-041)
-- [ ] T092 [P] [US1] Implement webhook event processing for payment_intent.succeeded in lib/services/booking.ts
-- [ ] T093 [P] [US1] Implement idempotency handling for webhook retries in lib/services/payment.ts
-- [ ] T094 [US1] Update booking status to CONFIRMED on successful payment in BookingService
+- [x] T091 [P] [US1] Implement Stripe webhook handler in app/api/webhooks/stripe/[token]/route.ts with signature verification (FR-041)
+- [x] T092 [P] [US1] Implement webhook event processing for payment_intent.succeeded in lib/services/booking.ts
+- [x] T093 [P] [US1] Implement idempotency handling for webhook retries in lib/services/payment.ts
+- [x] T094 [US1] Update booking status to CONFIRMED on successful payment in BookingService
 
 ### Tests for Email & Calendar Integration (TDD) 🧪
 
 > **TDD**: Write these tests FIRST - Verify email delivery and ICS format
 
-- [ ] T095 [P] [US1] Unit test for ICS generation with valid RFC 5545 format in tests/unit/ics.test.ts
-- [ ] T096 [P] [US1] Integration test for email job queueing in tests/integration/email-queue.test.ts
-- [ ] T096.5 [P] [US1] Integration test for refund notification email queueing when automatic refund issued in tests/integration/refund-email.test.ts
-- [ ] T097 [P] [US1] Integration test for email worker retry logic (1, 5, 15 min) in tests/integration/email-worker.test.ts
-- [ ] T098 [P] [US1] Integration test for email delivery failure and admin alert in tests/integration/email-failure.test.ts
+- [x] T095 [P] [US1] Unit test for ICS generation with valid RFC 5545 format in tests/unit/ics.test.ts
+- [x] T096 [P] [US1] Integration test for email job queueing in tests/integration/email-queue.test.ts
+- [x] T096.5 [P] [US1] Integration test for refund notification email queueing when automatic refund issued in tests/integration/refund-email.test.ts
+- [x] T097 [P] [US1] Integration test for email worker retry logic (1, 5, 15 min) in tests/integration/email-worker.test.ts
+- [x] T098 [P] [US1] Integration test for email delivery failure and admin alert in tests/integration/email-failure.test.ts
 
 ### Email & Calendar Integration Implementation
 
-- [ ] T099 [P] [US1] Create ICS calendar file generation in lib/services/ics.ts with booking details and 24-hour reminder
-- [ ] T100 [P] [US1] Create booking confirmation email template in lib/email/templates/booking-confirmation.tsx
-- [ ] T101 [P] [US1] Implement BullMQ email worker in workers/email-worker.ts with exponential backoff (1, 5, 15 min)
-- [ ] T102 [US1] Queue confirmation email job on booking confirmation in lib/services/booking.ts
-- [ ] T103 [US1] Create success page in app/book/success/page.tsx displaying booking details and ICS download
+- [x] T099 [P] [US1] Create ICS calendar file generation in lib/services/ics.ts with booking details and 24-hour reminder
+- [x] T100 [P] [US1] Create booking confirmation email template in lib/email/templates/booking-confirmation.tsx
+- [x] T101 [P] [US1] Implement BullMQ email worker in workers/email-worker.ts with exponential backoff (1, 5, 15 min)
+- [x] T102 [US1] Queue confirmation email job on booking confirmation in lib/services/booking.ts
+- [x] T103 [US1] Create success page in app/book/success/page.tsx displaying booking details and ICS download
 
 ### Tests for Payment Audit Logging (TDD) 🧪
 
 > **TDD**: Write these tests FIRST - Verify audit trail completeness
 
-- [ ] T104 [P] [US1] Integration test for audit log creation on all payment events in tests/integration/audit.test.ts
-- [ ] T105 [P] [US1] Integration test verifying no sensitive data in audit logs in tests/integration/audit-security.test.ts
+- [x] T104 [P] [US1] Integration test for audit log creation on all payment events in tests/integration/audit.test.ts
+- [x] T105 [P] [US1] Integration test verifying no sensitive data in audit logs in tests/integration/audit-security.test.ts
 
 ### Payment Audit Logging Implementation
 
-- [ ] T106 [P] [US1] Implement payment audit logging in lib/services/audit.ts for all payment operations (FR-044)
-- [ ] T107 [US1] Log INTENT_CREATED, PAYMENT_CONFIRMED, PAYMENT_FAILED, REFUND_ISSUED events in PaymentAuditLog
+- [x] T106 [P] [US1] Implement payment audit logging in lib/services/audit.ts for all payment operations (FR-044)
+- [x] T107 [US1] Log INTENT_CREATED, PAYMENT_CONFIRMED, PAYMENT_FAILED, REFUND_ISSUED events in PaymentAuditLog
 
 ### End-to-End Test for User Story 1 (TDD) 🧪
 
-- [ ] T108 [US1] E2E test for complete booking flow (service selection → payment → confirmation) in tests/e2e/booking-flow.spec.ts
-- [ ] T212 [US1] [P] Verify WCAG 2.2 Level AA contrast ratios for all text (SC-011)
-- [ ] T213 [US1] [P] Add semantic HTML and ARIA labels for screen reader accessibility (FR-033b)
-- [ ] T214 [US1] Run Lighthouse accessibility audit and achieve 100 score (SC-005)
+- [x] T108 [US1] E2E test for complete booking flow (service selection → payment → confirmation) in tests/e2e/booking-flow.spec.ts
+- [x] T212 [US1] [P] Verify WCAG 2.2 Level AA contrast ratios for all text (SC-011)
+- [x] T213 [US1] [P] Add semantic HTML and ARIA labels for screen reader accessibility (FR-033b)
+- [x] T214 [US1] Run Lighthouse accessibility audit and achieve 100 score (SC-005)
 
 **Checkpoint**: User Story 1 complete - Full customer booking flow functional with payment processing and email notifications
 
@@ -257,50 +257,50 @@
 
 > **TDD**: Write these tests FIRST - Verify availability updates correctly
 
-- [ ] T109 [P] [US2] Contract test for GET /api/admin/business-hours in tests/contract/admin-availability.test.ts
-- [ ] T110 [P] [US2] Contract test for PUT /api/admin/business-hours in tests/contract/admin-availability.test.ts
-- [ ] T111 [P] [US2] Integration test for immediate availability refresh after hours change in tests/integration/availability-refresh.test.ts
+- [x] T109 [P] [US2] Contract test for GET /api/admin/business-hours in tests/contract/admin-availability.test.ts
+- [x] T110 [P] [US2] Contract test for PUT /api/admin/business-hours in tests/contract/admin-availability.test.ts
+- [x] T111 [P] [US2] Integration test for immediate availability refresh after hours change in tests/integration/availability-refresh.test.ts
 
 ### Business Hours Configuration Implementation
 
-- [ ] T112 [P] [US2] Create BusinessHours model types in types/availability.ts
-- [ ] T113 [P] [US2] Implement GET /api/admin/business-hours endpoint in app/api/admin/business-hours/route.ts
-- [ ] T114 [P] [US2] Implement PUT /api/admin/business-hours endpoint to update operating hours
-- [ ] T115 [US2] Create BusinessHoursForm component in components/admin/BusinessHoursForm.tsx for day-by-day configuration
-- [ ] T116 [US2] Create Availability Management page in app/admin/availability/page.tsx
+- [x] T112 [P] [US2] Create BusinessHours model types in types/availability.ts
+- [x] T113 [P] [US2] Implement GET /api/admin/business-hours endpoint in app/api/admin/business-hours/route.ts
+- [x] T114 [P] [US2] Implement PUT /api/admin/business-hours endpoint to update operating hours
+- [x] T115 [US2] Create BusinessHoursForm component in components/admin/BusinessHoursForm.tsx for day-by-day configuration
+- [x] T116 [US2] Create Availability Management page in app/admin/availability/page.tsx
 
 ### Tests for Date Overrides Configuration (TDD) 🧪
 
 > **TDD**: Write these tests FIRST
 
-- [ ] T117 [P] [US2] Contract test for POST /api/admin/date-overrides in tests/contract/admin-availability.test.ts
-- [ ] T118 [P] [US2] Contract test for DELETE /api/admin/date-overrides/[id] in tests/contract/admin-availability.test.ts
-- [ ] T119 [P] [US2] Integration test for date override taking precedence over business hours in tests/integration/date-override.test.ts
+- [x] T117 [P] [US2] Contract test for POST /api/admin/date-overrides in tests/contract/admin-availability.test.ts
+- [x] T118 [P] [US2] Contract test for DELETE /api/admin/date-overrides/[id] in tests/contract/admin-availability.test.ts
+- [x] T119 [P] [US2] Integration test for date override taking precedence over business hours in tests/integration/date-override.test.ts
 
 ### Date Overrides Configuration Implementation
 
-- [ ] T120 [P] [US2] Create DateOverride model types in types/availability.ts
-- [ ] T121 [P] [US2] Implement GET /api/admin/date-overrides endpoint in app/api/admin/date-overrides/route.ts
-- [ ] T122 [P] [US2] Implement POST /api/admin/date-overrides endpoint to create date override
-- [ ] T123 [P] [US2] Implement DELETE /api/admin/date-overrides/[id] endpoint to remove override
-- [ ] T124 [US2] Create DateOverrideForm component in components/admin/DateOverrideForm.tsx with reason field
-- [ ] T125 [US2] Add date override management section to Availability Management page
+- [x] T120 [P] [US2] Create DateOverride model types in types/availability.ts
+- [x] T121 [P] [US2] Implement GET /api/admin/date-overrides endpoint in app/api/admin/date-overrides/route.ts
+- [x] T122 [P] [US2] Implement POST /api/admin/date-overrides endpoint to create date override
+- [x] T123 [P] [US2] Implement DELETE /api/admin/date-overrides/[id] endpoint to remove override
+- [x] T124 [US2] Create DateOverrideForm component in components/admin/DateOverrideForm.tsx with reason field
+- [x] T125 [US2] Add date override management section to Availability Management page
 
 ### Tests for System Settings Configuration (TDD) 🧪
 
 > **TDD**: Write these tests FIRST
 
-- [ ] T126 [P] [US2] Contract test for PATCH /api/admin/settings in tests/contract/admin-settings.test.ts
-- [ ] T127 [P] [US2] Integration test for max bookings per day enforcement in tests/integration/booking-cap.test.ts
-- [ ] T128 [P] [US2] Integration test for buffer time calculation in tests/integration/buffer-time.test.ts
+- [x] T126 [P] [US2] Contract test for PATCH /api/admin/settings in tests/contract/admin-settings.test.ts
+- [x] T127 [P] [US2] Integration test for max bookings per day enforcement in tests/integration/booking-cap.test.ts
+- [x] T128 [P] [US2] Integration test for buffer time calculation in tests/integration/buffer-time.test.ts
 
 ### System Settings Configuration Implementation
 
-- [ ] T129 [P] [US2] Create SystemSettings model types in types/settings.ts
-- [ ] T130 [P] [US2] Implement GET /api/admin/settings endpoint in app/api/admin/settings/route.ts
-- [ ] T131 [P] [US2] Implement PATCH /api/admin/settings endpoint to update max bookings per day and buffer time
-- [ ] T132 [US2] Create SystemSettingsForm component in components/admin/SystemSettingsForm.tsx
-- [ ] T133 [US2] Add system settings section to Availability Management page
+- [x] T129 [P] [US2] Create SystemSettings model types in types/settings.ts
+- [x] T130 [P] [US2] Implement GET /api/admin/settings endpoint in app/api/admin/settings/route.ts
+- [x] T131 [P] [US2] Implement PATCH /api/admin/settings endpoint to update max bookings per day and buffer time
+- [x] T132 [US2] Create SystemSettingsForm component in components/admin/SystemSettingsForm.tsx
+- [x] T133 [US2] Add system settings section to Availability Management page
 
 ### Immediate Availability Refresh
 

@@ -2,6 +2,7 @@ import { addMinutes } from "date-fns";
 import type { Prisma, PrismaClient } from "@prisma/client";
 
 import { BookingConflictError } from "@/lib/errors";
+import { queueEmailJob } from "@/lib/services/email";
 
 export type CreateBookingInput = {
   serviceId: string;
@@ -77,8 +78,35 @@ export const confirmBookingStatus = async (params: {
 }): Promise<void> => {
   const { prisma, bookingId } = params;
 
-  await prisma.booking.update({
+  const booking = await prisma.booking.update({
     where: { id: bookingId },
     data: { status: "CONFIRMED" },
+    include: { service: true },
+  });
+
+  await prisma.booking.update({
+    where: { id: booking.id },
+    data: { downpaymentPaidCents: booking.service.downpaymentCents },
+  });
+
+  await queueEmailJob({
+    bookingId: booking.id,
+    customerEmail: booking.customerEmail,
+    type: "CONFIRMATION",
+  });
+};
+
+export const attachPaymentIntent = async (params: {
+  prisma: PrismaClient;
+  bookingId: string;
+  paymentIntentId: string;
+}): Promise<void> => {
+  const { prisma, bookingId, paymentIntentId } = params;
+
+  await prisma.booking.update({
+    where: { id: bookingId },
+    data: {
+      stripePaymentIntentId: paymentIntentId,
+    },
   });
 };
