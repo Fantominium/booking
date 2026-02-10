@@ -21,12 +21,13 @@ export const DatePicker = ({ dates, selectedDate, onSelect }: DatePickerProps): 
   );
 
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-2 gap-2" data-testid="calendar">
       {dates.map((date) => (
         <button
           key={date}
           type="button"
           data-date={date}
+          data-testid="available-date"
           aria-label={`Select date ${date}`}
           onClick={handleSelect}
           className={`rounded-md border px-3 py-2 text-sm ${

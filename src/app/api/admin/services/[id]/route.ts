@@ -4,7 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
 type RouteParams = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 const updateServiceSchema = z.object({
@@ -21,6 +21,7 @@ const validatePricing = (params: { priceCents: number; downpaymentCents: number 
 };
 
 export const PATCH = async (request: Request, { params }: RouteParams): Promise<NextResponse> => {
+  const { id } = await params;
   const body = await request.json();
   const parsed = updateServiceSchema.safeParse(body);
 
@@ -29,7 +30,7 @@ export const PATCH = async (request: Request, { params }: RouteParams): Promise<
   }
 
   const existing = await prisma.service.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   if (!existing) {
@@ -44,7 +45,7 @@ export const PATCH = async (request: Request, { params }: RouteParams): Promise<
   }
 
   const service = await prisma.service.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       name: parsed.data.name ?? existing.name,
       description:
@@ -60,9 +61,11 @@ export const PATCH = async (request: Request, { params }: RouteParams): Promise<
 };
 
 export const DELETE = async (_request: Request, { params }: RouteParams): Promise<NextResponse> => {
+  const { id } = await params;
+
   const upcomingBooking = await prisma.booking.findFirst({
     where: {
-      serviceId: params.id,
+      serviceId: id,
       startTime: { gt: new Date() },
       status: { not: "CANCELLED" },
     },
@@ -73,7 +76,7 @@ export const DELETE = async (_request: Request, { params }: RouteParams): Promis
   }
 
   await prisma.service.delete({
-    where: { id: params.id },
+    where: { id },
   });
 
   return new NextResponse(null, { status: 204 });

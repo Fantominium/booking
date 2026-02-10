@@ -21,8 +21,9 @@ const addDays = (date: Date, days: number): Date => {
 
 export const GET = async (
   request: Request,
-  context: { params: { serviceId: string } },
+  context: { params: Promise<{ serviceId: string }> },
 ): Promise<NextResponse> => {
+  const { serviceId } = await context.params;
   const { searchParams } = new URL(request.url);
   const startDateParam = searchParams.get("startDate");
   const endDateParam = searchParams.get("endDate");
@@ -33,7 +34,7 @@ export const GET = async (
   }
 
   const service = await prisma.service.findUnique({
-    where: { id: context.params.serviceId },
+    where: { id: serviceId },
   });
 
   if (!service) {

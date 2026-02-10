@@ -5,10 +5,12 @@ import { createIcsEvent } from "@/lib/services/ics";
 
 export const GET = async (
   _request: Request,
-  context: { params: { bookingId: string } },
+  context: { params: Promise<{ bookingId: string }> },
 ): Promise<NextResponse> => {
+  const { bookingId } = await context.params;
+
   const booking = await prisma.booking.findUnique({
-    where: { id: context.params.bookingId },
+    where: { id: bookingId },
     include: { service: true },
   });
 

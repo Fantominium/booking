@@ -6,10 +6,12 @@ import { prisma } from "@/lib/prisma";
 const ServiceBookingPage = async ({
   params,
 }: {
-  params: { serviceId: string };
+  params: Promise<{ serviceId: string }>;
 }): Promise<JSX.Element> => {
+  const { serviceId } = await params;
+
   const service = await prisma.service.findUnique({
-    where: { id: params.serviceId },
+    where: { id: serviceId },
   });
 
   if (!service) {

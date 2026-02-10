@@ -4,12 +4,14 @@ import { cancelBooking } from "@/lib/services/booking";
 import { prisma } from "@/lib/prisma";
 
 type RouteParams = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export const POST = async (_request: Request, { params }: RouteParams): Promise<NextResponse> => {
+  const { id } = await params;
+
   const booking = await prisma.booking.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { service: true },
   });
 

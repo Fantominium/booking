@@ -16,6 +16,9 @@
     "prepare": "lefthook install"
   },
   "dependencies": {
+    "@emotion/cache": "^11.14.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@mui/base": "5.0.0-beta.70",
     "@mui/x-data-grid": "^7.29.0",
     "@prisma/client": "^5.22.0",
@@ -27,7 +30,7 @@
     "date-fns": "^4.1.0",
     "ics": "^3.8.1",
     "ioredis": "^5.9.2",
-    "next": "14.2.20",
+    "next": "16.1.6",
     "next-auth": "^4.24.13",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -37,14 +40,14 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^3.2.7",
+    "@chromatic-com/storybook": "^5.0.1",
     "@playwright/test": "^1.58.2",
     "@storybook/addon-essentials": "8.6.14",
-    "@storybook/addon-onboarding": "8.6.14",
+    "@storybook/addon-onboarding": "10.2.8",
     "@storybook/blocks": "8.6.14",
     "@storybook/experimental-addon-test": "^8.6.14",
-    "@storybook/nextjs": "8.6.14",
-    "@storybook/react": "8.6.14",
+    "@storybook/nextjs": "10.2.8",
+    "@storybook/react": "10.2.8",
     "@storybook/test": "8.6.14",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
@@ -66,11 +69,11 @@
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "prisma": "5.22.0",
-    "storybook": "8.6.14",
+    "storybook": "10.2.8",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
-    "vitest": "3.0.0"
+    "vitest": "4.0.18"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

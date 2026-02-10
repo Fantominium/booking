@@ -1,4 +1,5 @@
 const nextConfig = {
+  srcDir: "src",
   async headers() {
     return [
       {

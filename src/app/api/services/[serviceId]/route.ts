@@ -4,10 +4,12 @@ import { prisma } from "@/lib/prisma";
 
 export const GET = async (
   _request: Request,
-  context: { params: { serviceId: string } },
+  context: { params: Promise<{ serviceId: string }> },
 ): Promise<NextResponse> => {
+  const { serviceId } = await context.params;
+
   const service = await prisma.service.findUnique({
-    where: { id: context.params.serviceId },
+    where: { id: serviceId },
   });
 
   if (!service) {

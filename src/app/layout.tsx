@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
 import { Providers } from "@/components/Providers";
+import { SkipToMainLink } from "@/components/accessibility";
 import "./globals.css";
 
 const inter = Inter({
@@ -23,7 +24,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
-        <Providers>{children}</Providers>
+        <SkipToMainLink />
+        <Providers>
+          <main id="main-content" tabIndex={-1}>
+            {children}
+          </main>
+        </Providers>
       </body>
     </html>
   );

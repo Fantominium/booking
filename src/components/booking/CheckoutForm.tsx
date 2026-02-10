@@ -55,7 +55,7 @@ export const CheckoutForm = ({ onSubmit }: CheckoutFormProps): JSX.Element => {
   const { formData, isSubmitting, handleChange, handleSubmit } = useCheckoutForm(onSubmit);
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+    <form className="flex flex-col gap-4" data-testid="customer-form" onSubmit={handleSubmit}>
       <label className="flex flex-col gap-2 text-sm text-slate-700">
         <span>Full name</span>
         <input

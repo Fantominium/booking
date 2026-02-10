@@ -4,14 +4,14 @@ import { invalidateAvailabilityCache } from "@/lib/cache/availability";
 import { prisma } from "@/lib/prisma";
 
 type RouteParams = {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 };
 
 export const DELETE = async (_request: Request, { params }: RouteParams): Promise<NextResponse> => {
+  const { id } = await params;
+
   await prisma.dateOverride.delete({
-    where: { id: params.id },
+    where: { id },
   });
 
   invalidateAvailabilityCache();

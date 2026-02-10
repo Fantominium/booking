@@ -52,12 +52,12 @@ export const ServiceList = ({ refreshKey }: ServiceListProps): React.JSX.Element
     setDeleteError(null);
   }, []);
 
-  const handleEditCancel = useCallback(() => {
+  const handleEditCancel = useCallback((): void => {
     setEditingServiceId(null);
   }, []);
 
   const handleInlineSubmit = useCallback(
-    async (values: ServiceFormValues) => {
+    async (values: ServiceFormValues): Promise<void> => {
       if (!editingServiceId) {
         return;
       }
@@ -69,70 +69,76 @@ export const ServiceList = ({ refreshKey }: ServiceListProps): React.JSX.Element
       });
 
       if (!response.ok) {
-        setStatusMessage("Unable to update service.");
+        // Handle error - could show a toast or alert instead
+        console.error("Unable to update service.");
         return;
       }
 
-      const data = (await response.json()) as { service: Service };
-      setServices((prev) =>
-        prev.map((service) => (service.id === data.service.id ? data.service : service)),
-      );
+      // Invalidate and refetch the services data
+      await queryClient.invalidateQueries({ queryKey: ["admin", "services"] });
       setEditingServiceId(null);
     },
-    [editingServiceId],
+    [editingServiceId, queryClient],
   );
 
-  const handleDeleteClick = useCallback(async (event: React.MouseEvent<HTMLButtonElement>) => {
-    const id = event.currentTarget.dataset.id;
-    if (!id) {
-      return;
-    }
+  const handleDeleteClick = useCallback(
+    async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+      const id = event.currentTarget.dataset.id;
+      if (!id) {
+        return;
+      }
 
-    const confirmed = globalThis.confirm("Delete this service?");
-    if (!confirmed) {
-      return;
-    }
+      const confirmed = globalThis.confirm("Delete this service?");
+      if (!confirmed) {
+        return;
+      }
 
-    const response = await fetch(`/api/admin/services/${id}`, { method: "DELETE" });
-    if (response.status === 409) {
-      setDeleteError({
-        id,
-        message: "Service has future bookings. Mark it inactive instead.",
+      const response = await fetch(`/api/admin/services/${id}`, { method: "DELETE" });
+      if (response.status === 409) {
+        setDeleteError({
+          id,
+          message: "Service has future bookings. Mark it inactive instead.",
+        });
+        return;
+      }
+
+      if (!response.ok) {
+        // Handle error - could show a toast or alert instead
+        console.error("Unable to delete service.");
+        return;
+      }
+
+      // Invalidate and refetch the services data
+      await queryClient.invalidateQueries({ queryKey: ["admin", "services"] });
+    },
+    [queryClient],
+  );
+
+  const handleMarkInactive = useCallback(
+    async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+      const id = event.currentTarget.dataset.id;
+      if (!id) {
+        return;
+      }
+
+      const response = await fetch(`/api/admin/services/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: false }),
       });
-      return;
-    }
 
-    if (!response.ok) {
-      setStatusMessage("Unable to delete service.");
-      return;
-    }
+      if (!response.ok) {
+        // Handle error - could show a toast or alert instead
+        console.error("Unable to mark service inactive.");
+        return;
+      }
 
-    setServices((prev) => prev.filter((service) => service.id !== id));
-  }, []);
-
-  const handleMarkInactive = useCallback(async (event: React.MouseEvent<HTMLButtonElement>) => {
-    const id = event.currentTarget.dataset.id;
-    if (!id) {
-      return;
-    }
-
-    const response = await fetch(`/api/admin/services/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isActive: false }),
-    });
-
-    if (!response.ok) {
-      setStatusMessage("Unable to mark service inactive.");
-      return;
-    }
-
-    const data = (await response.json()) as { service: Service };
-    setServices((prev) =>
-      prev.map((service) => (service.id === data.service.id ? data.service : service)),
-    );
-    setDeleteError(null);
-  }, []);
+      // Invalidate and refetch the services data
+      await queryClient.invalidateQueries({ queryKey: ["admin", "services"] });
+      setDeleteError(null);
+    },
+    [queryClient],
+  );
 
   return (
     <section className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6">

@@ -3,12 +3,14 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 type RouteParams = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export const GET = async (_request: Request, { params }: RouteParams): Promise<NextResponse> => {
+  const { id } = await params;
+
   const booking = await prisma.booking.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { service: true },
   });
 

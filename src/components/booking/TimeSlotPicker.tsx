@@ -36,6 +36,7 @@ export const TimeSlotPicker = ({
           key={slot.start}
           type="button"
           data-start={slot.start}
+          data-testid="time-slot"
           aria-label={`Select time ${new Date(slot.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
           onClick={handleSelect}
           className={`rounded-md border px-3 py-2 text-sm ${

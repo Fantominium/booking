@@ -10,9 +10,11 @@ import { stripe } from "@/lib/stripe/config";
 
 export const POST = async (
   request: Request,
-  context: { params: { token: string } },
+  context: { params: Promise<{ token: string }> },
 ): Promise<NextResponse> => {
-  if (context.params.token !== env.WEBHOOK_URL_TOKEN) {
+  const { token } = await context.params;
+
+  if (token !== env.WEBHOOK_URL_TOKEN) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 

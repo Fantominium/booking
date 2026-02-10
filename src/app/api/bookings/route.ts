@@ -4,7 +4,7 @@ import { createBookingRequestSchema } from "@/lib/schemas/api";
 import { createBookingWithLock, attachPaymentIntent } from "@/lib/services/booking";
 import { createPaymentIntent } from "@/lib/services/payment";
 import { prisma } from "@/lib/prisma";
-import { BookingConflictError } from "@/lib/errors";
+import { isAppError } from "@/lib/errors";
 
 export const POST = async (request: Request): Promise<NextResponse> => {
   const body = await request.json();
@@ -63,10 +63,11 @@ export const POST = async (request: Request): Promise<NextResponse> => {
       clientSecret: intent.clientSecret,
     });
   } catch (error) {
-    if (error instanceof BookingConflictError) {
-      return NextResponse.json({ error: error.message }, { status: 409 });
+    if (isAppError(error) && error.code === "BOOKING_CONFLICT") {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
     }
 
+    console.error("Booking creation error:", error);
     return NextResponse.json({ error: "Unable to create booking" }, { status: 500 });
   }
 };
