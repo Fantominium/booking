@@ -29,6 +29,7 @@ export const bookingSchema = z.object({
   startTime: z.union([dateTimeSchema, z.date()]),
   endTime: z.union([dateTimeSchema, z.date()]),
   status: z.enum(["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"]),
+  emailDeliveryStatus: z.enum(["SUCCESS", "FAILED", "RETRYING"]),
   stripePaymentIntentId: z.string().nullable().optional(),
   stripeCustomerId: z.string().nullable().optional(),
   downpaymentPaidCents: z.number().int().nonnegative(),

@@ -33,3 +33,11 @@ export const availabilityQuerySchema = z.object({
     .regex(/\d{4}-\d{2}-\d{2}/)
     .optional(),
 });
+
+export const customerDataDeletionRequestSchema = z.object({
+  email: emailSchema,
+});
+
+export const customerDataDeletionConfirmSchema = z.object({
+  token: z.string().min(20),
+});

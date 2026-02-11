@@ -19,6 +19,7 @@ type Booking = {
   startTime: Date;
   endTime: Date;
   status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
+  emailDeliveryStatus: "SUCCESS" | "FAILED" | "RETRYING";
   stripePaymentIntentId: string | null;
   stripeCustomerId: string | null;
   downpaymentPaidCents: number;
@@ -73,6 +74,7 @@ export const buildBooking = (overrides: Partial<Booking> = {}): Booking => ({
   startTime: new Date(),
   endTime: new Date(),
   status: "PENDING",
+  emailDeliveryStatus: "RETRYING",
   stripePaymentIntentId: null,
   stripeCustomerId: null,
   downpaymentPaidCents: 0,

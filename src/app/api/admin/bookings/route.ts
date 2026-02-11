@@ -45,6 +45,7 @@ type BookingSummary = {
   startTime: string;
   endTime: string;
   status: string;
+  emailDeliveryStatus: string;
   downpaymentPaidCents: number;
   remainingBalanceCents: number;
   createdAt: string;
@@ -78,6 +79,7 @@ const mapBooking = (
   startTime: booking.startTime.toISOString(),
   endTime: booking.endTime.toISOString(),
   status: booking.status,
+  emailDeliveryStatus: booking.emailDeliveryStatus,
   downpaymentPaidCents: booking.downpaymentPaidCents,
   remainingBalanceCents: booking.remainingBalanceCents,
   createdAt: booking.createdAt.toISOString(),
@@ -101,10 +103,7 @@ export const GET = async (
   });
 
   if (!queryResult.success) {
-    return NextResponse.json<ErrorResponse>(
-      { error: "Invalid query parameters" },
-      { status: 400 },
-    );
+    return NextResponse.json<ErrorResponse>({ error: "Invalid query parameters" }, { status: 400 });
   }
 
   const { status, startDate, endDate, search, page, limit, sort, order } = queryResult.data;
@@ -204,9 +203,6 @@ export const GET = async (
     return NextResponse.json(response);
   } catch (error) {
     console.error("Error fetching bookings:", error);
-    return NextResponse.json<ErrorResponse>(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json<ErrorResponse>({ error: "Internal server error" }, { status: 500 });
   }
 };

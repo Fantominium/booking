@@ -1,13 +1,8 @@
-import { format, parseISO, startOfDay, addMinutes } from "date-fns";
+import { format, parseISO, startOfDay, addMinutes, differenceInMinutes } from "date-fns";
 import type { Booking, BusinessHours } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
-import {
-  getOrSetCached,
-  cacheKeys,
-  CACHE_TTL,
-  invalidateCache,
-} from "@/lib/cache/redis";
+import { getOrSetCached, cacheKeys, CACHE_TTL, invalidateCache } from "@/lib/cache/redis";
 
 export interface TimeSlot {
   time: string; // HH:MM format
@@ -254,8 +249,6 @@ function generateTimeSlots(
   durationMin: number,
   existingBookings: Booking[],
 ): TimeSlot[] {
-  const slots: TimeSlot[] = [];
-
   // Parse time strings (format: "HH:MM")
   const [startHour, startMinute] = startTime.split(":").map(Number);
   const [endHour, endMinute] = endTime.split(":").map(Number);
@@ -267,32 +260,30 @@ function generateTimeSlots(
   const end = new Date();
   end.setHours(endHour, endMinute, 0, 0);
 
-  // Generate slots
-  let currentSlot = new Date(start);
+  const intervalMinutes = 30;
+  const totalMinutes = differenceInMinutes(end, start);
+  const steps = Math.max(Math.ceil(totalMinutes / intervalMinutes), 0);
 
-  while (currentSlot < end) {
+  const slotStarts = Array.from({ length: steps }, (_, index) =>
+    addMinutes(start, index * intervalMinutes),
+  );
+
+  return slotStarts.map((currentSlot) => {
     const slotEndTime = addMinutes(currentSlot, durationMin);
 
-    // Check if this slot conflicts with existing bookings
     const hasConflict = existingBookings.some((booking) => {
       const bookingStart = booking.startTime;
       const bookingEnd = addMinutes(bookingStart, durationMin);
 
-      // Check for overlap
       return currentSlot < bookingEnd && slotEndTime > bookingStart;
     });
 
-    slots.push({
+    return {
       time: format(currentSlot, "HH:mm"),
       available: !hasConflict,
       reason: hasConflict ? "Already booked" : undefined,
-    });
-
-    // Move to next slot (typically 15-30 minute intervals)
-    currentSlot = addMinutes(currentSlot, 30); // Configurable interval
-  }
-
-  return slots;
+    };
+  });
 }
 
 /**

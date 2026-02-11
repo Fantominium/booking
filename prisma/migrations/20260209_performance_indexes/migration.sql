@@ -4,47 +4,47 @@
 -- Booking queries optimization
 -- Index for finding bookings by service and date range (availability calculations)
 CREATE INDEX IF NOT EXISTS "idx_booking_service_starttime_status" 
-ON "Booking" ("serviceId", "startTime", "status");
+ON "bookings" ("service_id", "start_time", "status");
 
 -- Index for finding bookings by status and remaining balance (admin dashboard)
 CREATE INDEX IF NOT EXISTS "idx_booking_status_balance" 
-ON "Booking" ("status", "remainingBalanceCents");
+ON "bookings" ("status", "remaining_balance_cents");
 
 -- Index for finding bookings by customer email (customer lookups)
 CREATE INDEX IF NOT EXISTS "idx_booking_customer_email" 
-ON "Booking" ("customerEmail");
+ON "bookings" ("customer_email");
 
 -- Index for finding bookings within date ranges (reporting)
 CREATE INDEX IF NOT EXISTS "idx_booking_starttime" 
-ON "Booking" ("startTime");
+ON "bookings" ("start_time");
 
 -- Service queries optimization  
 -- Index for active services (public booking flow)
 CREATE INDEX IF NOT EXISTS "idx_service_active" 
-ON "Service" ("isActive", "name");
+ON "services" ("isActive", "name");
 
 -- BusinessHours queries optimization
 -- Index for finding hours by day of week
 CREATE INDEX IF NOT EXISTS "idx_business_hours_dow" 
-ON "BusinessHours" ("dayOfWeek", "isOpen");
+ON "business_hours" ("day_of_week", "is_open");
 
 -- DateOverride queries optimization
 -- Index for finding date overrides (availability calculations)
 CREATE INDEX IF NOT EXISTS "idx_date_override_date" 
-ON "DateOverride" ("date");
+ON "date_overrides" ("date");
 
 -- PaymentAuditLog queries optimization
 -- Index for finding audit logs by booking (refund SLA monitoring)
 CREATE INDEX IF NOT EXISTS "idx_payment_audit_booking_action" 
-ON "PaymentAuditLog" ("bookingId", "action", "createdAt");
+ON "payment_audit_logs" ("booking_id", "action", "timestamp");
 
 -- Index for finding audit logs by Stripe event ID (webhook idempotency)
 CREATE INDEX IF NOT EXISTS "idx_payment_audit_stripe_event" 
-ON "PaymentAuditLog" ("stripeEventId");
+ON "payment_audit_logs" ("stripe_event_id");
 
 -- Index for finding audit logs by outcome and timestamp (monitoring)
 CREATE INDEX IF NOT EXISTS "idx_payment_audit_outcome_created" 
-ON "PaymentAuditLog" ("outcome", "createdAt");
+ON "payment_audit_logs" ("outcome", "timestamp");
 
 -- DataDeletionAuditLog queries optimization (if this table exists)
 -- Index for finding deletions by email hash (compliance reporting)
@@ -54,30 +54,28 @@ ON "PaymentAuditLog" ("outcome", "createdAt");
 -- Admin table optimization
 -- Index for admin login by email
 CREATE INDEX IF NOT EXISTS "idx_admin_email" 
-ON "Admin" ("email");
+ON "admins" ("email");
 
 -- Composite indexes for complex queries
 -- Index for finding upcoming bookings for a service
-CREATE INDEX IF NOT EXISTS "idx_booking_service_upcoming" 
-ON "Booking" ("serviceId", "startTime", "status") 
-WHERE "startTime" > NOW();
+-- Removed non-immutable predicate to satisfy PostgreSQL index requirements.
 
 -- Index for finding recent bookings (admin dashboard)
 CREATE INDEX IF NOT EXISTS "idx_booking_recent" 
-ON "Booking" ("createdAt" DESC, "status");
+ON "bookings" ("created_at" DESC, "status");
 
 -- Partial indexes for better performance on filtered queries
 -- Index only for confirmed/pending bookings (availability calculations)
 CREATE INDEX IF NOT EXISTS "idx_booking_active_service_time" 
-ON "Booking" ("serviceId", "startTime") 
+ON "bookings" ("service_id", "start_time") 
 WHERE "status" IN ('CONFIRMED', 'PENDING');
 
 -- Index only for bookings with remaining balance (admin dashboard)
 CREATE INDEX IF NOT EXISTS "idx_booking_unpaid" 
-ON "Booking" ("remainingBalanceCents", "customerName", "startTime") 
-WHERE "remainingBalanceCents" > 0;
+ON "bookings" ("remaining_balance_cents", "customer_name", "start_time") 
+WHERE "remaining_balance_cents" > 0;
 
 -- Index only for active services (public queries)
 CREATE INDEX IF NOT EXISTS "idx_service_public" 
-ON "Service" ("name", "priceCents", "durationMin") 
+ON "services" ("name", "priceCents", "durationMin") 
 WHERE "isActive" = true;

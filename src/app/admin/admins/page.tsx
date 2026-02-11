@@ -41,6 +41,14 @@ const ManageAdminsPage = (): JSX.Element => {
     setShowAddForm(!showAddForm);
   }, [showAddForm]);
 
+  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
+    setEmail(e.target.value);
+  }, []);
+
+  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
+    setPassword(e.target.value);
+  }, []);
+
   const fetchAdmins = useCallback(async (): Promise<void> => {
     try {
       const response = await fetch("/api/admin/admins");

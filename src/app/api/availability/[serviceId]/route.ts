@@ -98,7 +98,7 @@ export const GET = async (
   const startDate = parseDate(startDateParam);
   const endDate = endDateParam ? parseDate(endDateParam) : startDate;
 
-  const dates: string[] = [];
+  let dates: string[] = [];
   let cursor = startDate;
 
   while (cursor <= endDate) {
@@ -122,7 +122,7 @@ export const GET = async (
     });
 
     if (slots.length > 0) {
-      dates.push(cursor.toISOString().slice(0, 10));
+      dates = [...dates, cursor.toISOString().slice(0, 10)];
     }
 
     cursor = addDays(cursor, 1);

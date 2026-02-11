@@ -1,4 +1,4 @@
-import { addMinutes, isBefore } from "date-fns";
+import { addMinutes, differenceInMinutes, isBefore } from "date-fns";
 
 export type AvailabilitySlot = {
   start: Date;
@@ -95,25 +95,23 @@ export const calculateAvailableSlotsForDate = (params: {
   const dayStart = buildDateWithTime(date, openingTime);
   const dayEnd = buildDateWithTime(date, closingTime);
 
-  const slots: AvailabilitySlot[] = [];
-  let cursor = dayStart;
+  const intervalMinutes = 15;
+  const totalMinutes = differenceInMinutes(dayEnd, dayStart);
+  const steps = Math.max(Math.floor(totalMinutes / intervalMinutes) + 1, 0);
 
-  while (isBefore(addMinutes(cursor, slotDuration), addMinutes(dayEnd, 1))) {
-    const slot: AvailabilitySlot = {
-      start: cursor,
-      end: addMinutes(cursor, slotDuration),
-    };
+  const slotStarts = Array.from({ length: steps }, (_, index) =>
+    addMinutes(dayStart, index * intervalMinutes),
+  ).filter((start) => isBefore(addMinutes(start, slotDuration), addMinutes(dayEnd, 1)));
 
-    const conflicts = bookings.some((booking) =>
-      isOverlapping(slot, { start: booking.startTime, end: booking.endTime }),
+  return slotStarts
+    .map((start) => ({
+      start,
+      end: addMinutes(start, slotDuration),
+    }))
+    .filter(
+      (slot) =>
+        !bookings.some((booking) =>
+          isOverlapping(slot, { start: booking.startTime, end: booking.endTime }),
+        ),
     );
-
-    if (!conflicts) {
-      slots.push(slot);
-    }
-
-    cursor = addMinutes(cursor, 15);
-  }
-
-  return slots;
 };

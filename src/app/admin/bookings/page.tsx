@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 
 import { BookingList } from "@/components/admin/BookingList";
+import { EmailResendButton } from "@/components/admin/EmailResendButton";
 import type { AdminBooking } from "@/types/booking";
 
 const formatMoney = (amountCents: number): string => {
@@ -19,6 +20,10 @@ const BookingManagementPage = (): JSX.Element => {
     setSelectedBooking(booking);
   }, []);
 
+  const handleResendComplete = useCallback(() => {
+    return;
+  }, []);
+
   const paymentStatus = useMemo(() => {
     if (!selectedBooking) {
       return "";
@@ -29,6 +34,22 @@ const BookingManagementPage = (): JSX.Element => {
     }
 
     return `Balance due: ${formatMoney(selectedBooking.remainingBalanceCents)}`;
+  }, [selectedBooking]);
+
+  const emailStatusLabel = useMemo(() => {
+    if (!selectedBooking) {
+      return "";
+    }
+
+    if (selectedBooking.emailDeliveryStatus === "SUCCESS") {
+      return "Delivered";
+    }
+
+    if (selectedBooking.emailDeliveryStatus === "FAILED") {
+      return "Failed";
+    }
+
+    return "Retrying";
   }, [selectedBooking]);
 
   return (
@@ -63,6 +84,12 @@ const BookingManagementPage = (): JSX.Element => {
             </div>
             <div>
               <span className="font-semibold text-slate-900">Payment status:</span> {paymentStatus}
+            </div>
+            <div>
+              <span className="font-semibold text-slate-900">Email status:</span> {emailStatusLabel}
+            </div>
+            <div className="pt-2">
+              <EmailResendButton bookingId={selectedBooking.id} onComplete={handleResendComplete} />
             </div>
           </div>
         ) : (

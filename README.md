@@ -45,6 +45,22 @@ pnpm test:e2e
   - `vitest.config.mts` - Vitest configuration
   - `playwright.config.ts` - Playwright configuration
 
+  ## Environment Variables
+
+  Create `.env.local` with the following keys:
+
+  ```
+  DATABASE_URL=
+  STRIPE_SECRET_KEY=
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+  STRIPE_WEBHOOK_SECRET=
+  RESEND_API_KEY=
+  NEXTAUTH_SECRET=
+  WEBHOOK_URL_TOKEN=
+  REDIS_URL=
+  NEXT_PUBLIC_API_URL=
+  ```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

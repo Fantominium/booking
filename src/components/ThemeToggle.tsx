@@ -62,7 +62,7 @@ export function ThemeToggle(): React.ReactElement {
     <button
       onClick={handleToggle}
       data-testid="theme-toggle"
-      className="hover:bg-surface hover:text-foreground focus:ring-primary rounded-lg p-2 text-neutral-600 transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none"
+      className="hover:bg-surface hover:text-foreground focus:ring-primary min-h-11 min-w-11 rounded-lg p-2 text-neutral-600 transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none"
       aria-label={getLabel()}
       title={getLabel()}
     >

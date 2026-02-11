@@ -1,4 +1,6 @@
 import { hasPaymentAuditEvent, logPaymentAudit } from "@/lib/services/audit";
+import { prisma } from "@/lib/prisma";
+import { queueEmailJob } from "@/lib/services/email";
 import { createStripePaymentProvider } from "@/lib/services/stripe-payment-provider";
 
 export type PaymentIntentResult = {
@@ -43,6 +45,18 @@ export const refundPaymentIntent = async (params: {
       outcome: "SUCCESS",
       stripePaymentIntentId: params.paymentIntentId,
     });
+
+    const booking = await prisma.booking.findUnique({
+      where: { id: params.bookingId },
+    });
+
+    if (booking) {
+      await queueEmailJob({
+        bookingId: booking.id,
+        customerEmail: booking.customerEmail,
+        type: "REFUND_NOTIFICATION",
+      });
+    }
 
     return refundId;
   } catch (error) {

@@ -82,7 +82,7 @@ export const PUT = async (request: Request): Promise<NextResponse> => {
     ),
   );
 
-  const payload = updated
+  const payload = [...updated]
     .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
     .map((entry) => ({
       id: entry.id,

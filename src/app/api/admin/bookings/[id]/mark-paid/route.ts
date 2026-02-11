@@ -32,6 +32,7 @@ export const POST = async (_request: Request, { params }: RouteParams): Promise<
       startTime: booking.startTime.toISOString(),
       endTime: booking.endTime.toISOString(),
       status: "COMPLETED",
+      emailDeliveryStatus: booking.emailDeliveryStatus,
       downpaymentPaidCents: booking.downpaymentPaidCents,
       remainingBalanceCents: 0,
     },

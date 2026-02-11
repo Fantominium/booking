@@ -1,0 +1,48 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - button "Switch to dark mode" [ref=e4]:
+    - img [ref=e5]
+  - main [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e10]:
+        - link "T TruFlow" [ref=e12] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e14]: T
+          - heading "TruFlow" [level=1] [ref=e15]
+        - navigation [ref=e16]:
+          - link "Book Appointment" [ref=e17] [cursor=pointer]:
+            - /url: /book
+          - link "Admin" [ref=e18] [cursor=pointer]:
+            - /url: /admin
+        - button "Switch to dark mode" [ref=e20]:
+          - img [ref=e21]
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - heading "TruFlow Booking" [level=1] [ref=e25]
+          - paragraph [ref=e26]: Book your next massage in minutes with our calming, intuitive booking system.
+        - generic [ref=e27]:
+          - link "Start Booking" [ref=e28] [cursor=pointer]:
+            - /url: /book
+          - link "Admin Dashboard" [ref=e29] [cursor=pointer]:
+            - /url: /admin
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - generic [ref=e33]: 📅
+            - heading "Easy Scheduling" [level=3] [ref=e34]
+            - paragraph [ref=e35]: Pick your service and available time slot in just a few clicks.
+          - generic [ref=e36]:
+            - generic [ref=e38]: 💳
+            - heading "Secure Payments" [level=3] [ref=e39]
+            - paragraph [ref=e40]: Safe and secure payment processing powered by Stripe.
+          - generic [ref=e41]:
+            - generic [ref=e43]: ✨
+            - heading "Instant Confirmation" [level=3] [ref=e44]
+            - paragraph [ref=e45]: Get immediate booking confirmation and calendar invites.
+  - button "Open Next.js Dev Tools" [ref=e51] [cursor=pointer]:
+    - img [ref=e52]
+  - alert [ref=e55]
+```

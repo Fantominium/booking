@@ -87,7 +87,7 @@ const eslintConfig = [
         },
         {
           selector:
-            "NewExpression[callee.type='Identifier'][callee.name!='Date'][callee.name!='URL'][callee.name!='Error'][callee.name!='Map'][callee.name!='Set'][callee.name!='PrismaClient'][callee.name!='Stripe'][callee.name!='Resend'][callee.name!='Queue'][callee.name!='Worker'][callee.name!='Redis'][callee.name!='NextResponse'][callee.name!='Response'][callee.name!='Headers'][callee.name!='URLSearchParams'][callee.name!='QueryClient']",
+            "NewExpression[callee.type='Identifier'][callee.name!='Date'][callee.name!='URL'][callee.name!='Error'][callee.name!='Map'][callee.name!='Set'][callee.name!='PrismaClient'][callee.name!='Stripe'][callee.name!='Resend'][callee.name!='Queue'][callee.name!='Worker'][callee.name!='Redis'][callee.name!='NextResponse'][callee.name!='Response'][callee.name!='Request'][callee.name!='Headers'][callee.name!='URLSearchParams'][callee.name!='QueryClient']",
           message:
             "Avoid `new` for custom classes. Use functional factories or approved framework constructors.",
         },

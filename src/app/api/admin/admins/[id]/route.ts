@@ -1,13 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
-type RouteContext = {
-  params: {
-    id: string;
-  };
-};
 
 const checkAuthentication = async (): Promise<boolean> => {
   const session = await getServerSession(authOptions);
@@ -38,7 +32,10 @@ const deleteAdmin = async (id: string): Promise<{ success: boolean; error?: stri
   return { success: true };
 };
 
-export const DELETE = async (request: Request, context: RouteContext): Promise<NextResponse> => {
+export const DELETE = async (
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+): Promise<NextResponse> => {
   try {
     const isAuthenticated = await checkAuthentication();
 
@@ -46,7 +43,7 @@ export const DELETE = async (request: Request, context: RouteContext): Promise<N
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = context.params;
+    const { id } = await context.params;
 
     const result = await deleteAdmin(id);
 

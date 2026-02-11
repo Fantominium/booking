@@ -29,6 +29,7 @@ export const GET = async (_request: Request, { params }: RouteParams): Promise<N
       startTime: booking.startTime.toISOString(),
       endTime: booking.endTime.toISOString(),
       status: booking.status,
+      emailDeliveryStatus: booking.emailDeliveryStatus,
       downpaymentPaidCents: booking.downpaymentPaidCents,
       remainingBalanceCents: booking.remainingBalanceCents,
     },

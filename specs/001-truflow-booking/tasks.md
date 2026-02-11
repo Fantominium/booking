@@ -441,84 +441,84 @@
 
 ### Customer Data Privacy & Deletion
 
-- [ ] T187 [P] Implement POST /api/customer-data/request-deletion endpoint in app/api/customer-data/request-deletion/route.ts
-- [ ] T188 [P] Implement POST /api/customer-data/confirm-deletion endpoint with token verification in app/api/customer-data/confirm-deletion/route.ts
-- [ ] T189 [P] Create deletion request email template with verification token in lib/email/templates/deletion-request.tsx
-- [ ] T190 [P] Implement PII anonymization logic in lib/services/data-deletion.ts (FR-052)
-- [ ] T191 [P] Log all deletions in DataDeletionAuditLog with email hash and reason
-- [ ] T192 Create scheduled job for automatic PII purge (2-year threshold) in jobs/pii-purge.ts (FR-051)
+- [x] T187 [P] Implement POST /api/customer-data/request-deletion endpoint in app/api/customer-data/request-deletion/route.ts
+- [x] T188 [P] Implement POST /api/customer-data/confirm-deletion endpoint with token verification in app/api/customer-data/confirm-deletion/route.ts
+- [x] T189 [P] Create deletion request email template with verification token in lib/email/templates/deletion-request.tsx
+- [x] T190 [P] Implement PII anonymization logic in lib/services/data-deletion.ts (FR-052)
+- [x] T191 [P] Log all deletions in DataDeletionAuditLog with email hash and reason
+- [x] T192 Create scheduled job for automatic PII purge (2-year threshold) in jobs/pii-purge.ts (FR-051)
 
 ### Email Delivery Monitoring
 
-- [ ] T193 [P] Add email delivery status tracking to Booking entity (SUCCESS, FAILED, RETRYING)
-- [ ] T194 [P] Display email delivery status in admin booking detail view
-- [ ] T195 [P] Implement manual email resend action in admin panel
-- [ ] T196 Create refund notification email template in lib/email/templates/refund-notification.tsx
+- [x] T193 [P] Add email delivery status tracking to Booking entity (SUCCESS, FAILED, RETRYING)
+- [x] T194 [P] Display email delivery status in admin booking detail view
+- [x] T195 [P] Implement manual email resend action in admin panel
+- [x] T196 Create refund notification email template in lib/email/templates/refund-notification.tsx
 
 ### Additional Email & Payment Monitoring
 
-- [ ] T096.5 [P] Integration test for refund notification email queueing when refund issued in tests/integration/refund-email.test.ts
-- [ ] T085.5 [P] Implement refund SLA monitoring task in lib/jobs/refund-sla-monitor.ts: Query PaymentAuditLog for REFUND_ISSUED events older than 5 minutes without completion status; log alert if SLA exceeded
+- [x] T096.5 [P] Integration test for refund notification email queueing when refund issued in tests/integration/refund-email.test.ts
+- [x] T085.5 [P] Implement refund SLA monitoring task in lib/jobs/refund-sla-monitor.ts: Query PaymentAuditLog for REFUND_ISSUED events older than 5 minutes without completion status; log alert if SLA exceeded
 
 ### Functional Programming & Clean JSX Validation (NON-NEGOTIABLE)
 
 > **Code Architecture Review**: Validate entire codebase conforms to functional programming and clean JSX standards (FR-055-FR-068)
 
-- [ ] T203.5 [P] Audit all React components for class-based patterns: grep codebase for `class Component`, `extends React.Component`, `new ClassName()` instances; document any found and refactor to functional components (FR-056)
-- [ ] T203.6 [P] Audit all service functions for pure function compliance: verify no global state mutations, no `this` binding, no side effects outside return values (FR-057)
-- [ ] T203.7 [P] Audit all data mutations for immutability: verify all data updates use spread operators, `.map()`, `.filter()`, `.reduce()` instead of `.push()`, `.splice()`, `obj.prop =` assignments (FR-058)
-- [ ] T203.8 [P] Audit all React components for inline event handlers: grep for `onClick={handleClick}` patterns (correct) vs `onClick={() => handleClick()}` (forbidden); refactor any violations (FR-061)
-- [ ] T203.9 [P] Audit all JSX for `dangerouslySetInnerHTML` usage: grep codebase for `dangerouslySetInnerHTML`; document and replace with sanitized alternatives using safe HTML libraries (FR-063)
-- [ ] T203.10 [P] Audit all component props for explicit TypeScript typing: verify no props use `any` type; all component props interfaces explicitly defined; external props validated with Zod (FR-064)
-- [ ] T203.11 [P] Audit all list rendering for proper `key` props: verify list items have stable, unique keys (not array indices); fragments have keys when applicable (FR-066)
-- [ ] T203.12 [P] Audit all custom hooks for proper extraction: identify complex logic in components >50 lines; extract into custom hooks for reusability and testability (FR-059)
-- [ ] T203.13 [P] Code review gate: All pull requests must include evidence of code style validation: ESLint report showing 0 functional programming violations, 0 unsafe JSX patterns (T017.5, T017.6)
-- [ ] T203.14 [P] Create code style guide documentation in docs/CODE_STYLE.md: Document functional programming patterns with examples, provide before/after code examples for anti-patterns, link to ESLint configuration
+- [x] T203.5 [P] Audit all React components for class-based patterns: grep codebase for `class Component`, `extends React.Component`, `new ClassName()` instances; document any found and refactor to functional components (FR-056)
+- [x] T203.6 [P] Audit all service functions for pure function compliance: verify no global state mutations, no `this` binding, no side effects outside return values (FR-057)
+- [x] T203.7 [P] Audit all data mutations for immutability: verify all data updates use spread operators, `.map()`, `.filter()`, `.reduce()` instead of `.push()`, `.splice()`, `obj.prop =` assignments (FR-058)
+- [x] T203.8 [P] Audit all React components for inline event handlers: grep for `onClick={handleClick}` patterns (correct) vs `onClick={() => handleClick()}` (forbidden); refactor any violations (FR-061)
+- [x] T203.9 [P] Audit all JSX for `dangerouslySetInnerHTML` usage: grep codebase for `dangerouslySetInnerHTML`; document and replace with sanitized alternatives using safe HTML libraries (FR-063)
+- [x] T203.10 [P] Audit all component props for explicit TypeScript typing: verify no props use `any` type; all component props interfaces explicitly defined; external props validated with Zod (FR-064)
+- [x] T203.11 [P] Audit all list rendering for proper `key` props: verify list items have stable, unique keys (not array indices); fragments have keys when applicable (FR-066)
+- [x] T203.12 [P] Audit all custom hooks for proper extraction: identify complex logic in components >50 lines; extract into custom hooks for reusability and testability (FR-059)
+- [x] T203.13 [P] Code review gate: All pull requests must include evidence of code style validation: ESLint report showing 0 functional programming violations, 0 unsafe JSX patterns (T017.5, T017.6)
+- [x] T203.14 [P] Create code style guide documentation in docs/CODE_STYLE.md: Document functional programming patterns with examples, provide before/after code examples for anti-patterns, link to ESLint configuration
 
 ### Security Hardening Tests (TDD) 🧪
 
 > **TDD**: Write these security tests FIRST - Critical for production readiness
 
-- [ ] T046.5 [P] Security test for CSP header validation in tests/security/csp-headers.test.ts: Verify response includes Content-Security-Policy header with expected directives; run OWASP ZAP scan to confirm inline scripts blocked
-- [ ] T197 [P] Security test for webhook signature rejection in tests/security/webhook-security.test.ts
-- [ ] T198 [P] Security test for rate limiting enforcement in tests/security/rate-limit.test.ts
-- [ ] T199 [P] Security test verifying no card data in database in tests/security/pci-compliance.test.ts
-- [ ] T200 [P] Security test verifying no secrets in error responses in tests/security/error-sanitization.test.ts
-- [ ] T201 [P] Security test for HTTPS-only cookies in tests/security/cookie-security.test.ts
-- [ ] T202 [P] Security test for SQL injection prevention in tests/security/sql-injection.test.ts
+- [x] T046.5 [P] Security test for CSP header validation in tests/security/csp-headers.test.ts: Verify response includes Content-Security-Policy header with expected directives; run OWASP ZAP scan to confirm inline scripts blocked
+- [x] T197 [P] Security test for webhook signature rejection in tests/security/webhook-security.test.ts
+- [x] T198 [P] Security test for rate limiting enforcement in tests/security/rate-limit.test.ts
+- [x] T199 [P] Security test verifying no card data in database in tests/security/pci-compliance.test.ts
+- [x] T200 [P] Security test verifying no secrets in error responses in tests/security/error-sanitization.test.ts
+- [x] T201 [P] Security test for HTTPS-only cookies in tests/security/cookie-security.test.ts
+- [x] T202 [P] Security test for SQL injection prevention in tests/security/sql-injection.test.ts
 
 ### Security Hardening Implementation
 
-- [ ] T203 [P] Implement HTTPS redirect middleware (FR-042) in middleware.ts
-- [ ] T204 [P] Add Content Security Policy headers in next.config.js (FR-048)
-- [ ] T205 [P] Add HSTS headers in next.config.js
-- [ ] T206 [P] Verify all API endpoints validate inputs with Zod schemas (FR-034)
-- [ ] T207 [P] Verify no raw payment card data in logs or database (FR-038, FR-046)
-- [ ] T208 Run npm audit and fix all critical/high vulnerabilities
+- [x] T203 [P] Implement HTTPS redirect middleware (FR-042) in middleware.ts
+- [x] T204 [P] Add Content Security Policy headers in next.config.js (FR-048)
+- [x] T205 [P] Add HSTS headers in next.config.js
+- [x] T206 [P] Verify all API endpoints validate inputs with Zod schemas (FR-034)
+- [x] T207 [P] Verify no raw payment card data in logs or database (FR-038, FR-046)
+- [x] T208 Run npm audit and fix all critical/high vulnerabilities
 
 ### Design & Accessibility
 
-- [ ] T209 [P] Define calming color palette in tailwind.config.js (blues, golds, greens per FR-030)
-- [ ] T210 [P] Implement light/dark mode toggle with theme persistence in app/layout.tsx (FR-031)
-- [ ] T211 [P] Verify all touch targets are minimum 44px tall (FR-032)
+- [x] T209 [P] Define calming color palette in tailwind.config.js (blues, golds, greens per FR-030)
+- [x] T210 [P] Implement light/dark mode toggle with theme persistence in app/layout.tsx (FR-031)
+- [x] T211 [P] Verify all touch targets are minimum 44px tall (FR-032)
 
 ### Performance Optimization
 
-- [ ] T215 [P] Add Redis caching for availability calculation results in lib/cache/availability.ts
-- [ ] T216 [P] Optimize availability query with database indexes on startTime and status
-- [ ] T217 [P] Implement pagination for booking list with limit/offset in admin API
-- [ ] T218 Run Lighthouse performance audit and achieve 90+ score (SC-005)
+- [x] T215 [P] Add Redis caching for availability calculation results in lib/cache/availability.ts
+- [x] T216 [P] Optimize availability query with database indexes on startTime and status
+- [x] T217 [P] Implement pagination for booking list with limit/offset in admin API
+- [x] T218 Run Lighthouse performance audit and achieve 90+ score (SC-005)
 
 ### Documentation & Deployment
 
-- [ ] T219 [P] Create SECURITY.md with vulnerability disclosure policy
-- [ ] T220 [P] Create CONTRIBUTING.md with development guidelines
-- [ ] T221 [P] Document all environment variables in README.md
-- [ ] T222 [P] Create deployment guide for Vercel in docs/deployment.md
-- [ ] T223 [P] Document PCI-DSS SAQ-A compliance checklist in .specify/compliance/pci-saq-a.md
+- [x] T219 [P] Create SECURITY.md with vulnerability disclosure policy
+- [x] T220 [P] Create CONTRIBUTING.md with development guidelines
+- [x] T221 [P] Document all environment variables in README.md
+- [x] T222 [P] Create deployment guide for Vercel in docs/deployment.md
+- [x] T223 [P] Document PCI-DSS SAQ-A compliance checklist in .specify/compliance/pci-saq-a.md
 - [ ] T224 Validate quickstart.md by following setup steps from scratch
 - [ ] T225 Run end-to-end smoke tests on production deployment
-- [ ] T226 Implement logging/monitoring to verify SC-003 (email delivery < 2 minutes).
+- [x] T226 Implement logging/monitoring to verify SC-003 (email delivery < 2 minutes).
 
 ---
 

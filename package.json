@@ -71,6 +71,7 @@
     "happy-dom": "^20.6.1",
     "jsdom": "^28.0.0",
     "lefthook": "^2.1.0",
+    "lighthouse": "^13.0.2",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "prisma": "5.22.0",
@@ -82,5 +83,10 @@
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
+  },
+  "pnpm": {
+    "overrides": {
+      "glob": "10.5.0"
+    }
   }
 }

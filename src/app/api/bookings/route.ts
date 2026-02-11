@@ -7,7 +7,13 @@ import { prisma } from "@/lib/prisma";
 import { isAppError } from "@/lib/errors";
 
 export const POST = async (request: Request): Promise<NextResponse> => {
-  const body = await request.json();
+  let body: unknown;
+
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
   const parsed = createBookingRequestSchema.safeParse(body);
 
   if (!parsed.success) {
