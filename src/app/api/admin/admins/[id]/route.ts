@@ -34,7 +34,7 @@ const deleteAdmin = async (id: string): Promise<{ success: boolean; error?: stri
 
 export const DELETE = async (
   _request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> => {
   try {
     const isAuthenticated = await checkAuthentication();
