@@ -16,7 +16,7 @@ export const createIcsEvent = (event: IcsEventInput): string => {
       start: event.start,
       duration: { minutes: event.durationMinutes },
       location: event.location,
-      alarms: [{ trigger: { hours: 24, before: true } }],
+      alarms: [{ action: "display", trigger: { hours: 24, before: true } }],
     },
   ]);
 

@@ -20,6 +20,31 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Testing
+
+This project uses Vitest for unit and integration tests, and Playwright for end-to-end tests.
+
+### Running Tests
+
+```bash
+# Run all unit and integration tests
+pnpm test
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Run end-to-end tests
+pnpm test:e2e
+```
+
+### Test Configuration
+
+- **Unit & Integration Tests**: Vitest with Happy DOM (for better ESM support)
+- **E2E Tests**: Playwright
+- **Config Files**:
+  - `vitest.config.mts` - Vitest configuration
+  - `playwright.config.ts` - Playwright configuration
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

@@ -431,13 +431,13 @@
 
 ### Admin Authentication & User Management
 
-- [ ] T180 [P] Create admin login page in app/admin/login/page.tsx
-- [ ] T181 [P] Implement password reset flow with email token in app/api/auth/password-reset/route.ts
-- [ ] T182 [P] Create password reset email template in lib/email/templates/password-reset.tsx
-- [ ] T183 [P] Implement GET /api/admin/admins endpoint to list admins in app/api/admin/admins/route.ts
-- [ ] T184 [P] Implement POST /api/admin/admins endpoint to add admin user in app/api/admin/admins/route.ts
-- [ ] T185 [P] Implement DELETE /api/admin/admins/[id] endpoint to remove admin in app/api/admin/admins/[id]/route.ts
-- [ ] T186 Create Manage Admins page in app/admin/admins/page.tsx
+- [x] T180 [P] Create admin login page in app/admin/login/page.tsx
+- [x] T181 [P] Implement password reset flow with email token in app/api/auth/password-reset/route.ts
+- [x] T182 [P] Create password reset email template in lib/email/templates/password-reset.tsx
+- [x] T183 [P] Implement GET /api/admin/admins endpoint to list admins in app/api/admin/admins/route.ts
+- [x] T184 [P] Implement POST /api/admin/admins endpoint to add admin user in app/api/admin/admins/route.ts
+- [x] T185 [P] Implement DELETE /api/admin/admins/[id] endpoint to remove admin in app/api/admin/admins/[id]/route.ts
+- [x] T186 Create Manage Admins page in app/admin/admins/page.tsx
 
 ### Customer Data Privacy & Deletion
 

@@ -5,7 +5,7 @@ const Home = (): JSX.Element => {
   return (
     <div className="bg-background min-h-screen">
       <Header />
-      <main className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-4xl flex-col items-center justify-center gap-8 px-6 text-center">
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-4xl flex-col items-center justify-center gap-8 px-6 text-center">
         <div className="space-y-4">
           <h1 className="text-foreground text-5xl font-bold">TruFlow Booking</h1>
           <p className="max-w-2xl text-xl text-neutral-600">
@@ -59,7 +59,7 @@ const Home = (): JSX.Element => {
             </p>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };
