@@ -1,16 +1,14 @@
-<!-- 
-SYNC IMPACT REPORT (Constitution v1.4.0)
+<!--
+SYNC IMPACT REPORT (Constitution v1.5.0)
 ==========================================
-Integration: Added modular payments, documentation standards, deployment, and booking cap.
-- Version: 1.3.0 → 1.4.0 (MINOR: Added deployment + payments modularity + admin booking cap)
-- Status: Expanded operational and extensibility requirements
+Integration: Added Definition of Done as a core, enforceable gate.
+- Version: 1.4.0 → 1.5.0 (MINOR: Added Definition of Done requirements)
+- Status: Expanded delivery completion requirements
 - Ratified: 2026-02-01
-- Last Amended: 2026-02-02
-- New Sections: Deployment & Hosting
-- Tech Stack Additions: Modular payment provider interface
-- Required Policies: Method documentation (purpose, params, return types)
-- Domain Rules: Max bookings per day configurable by admin
-- Templates aligned: ✅ plan-template.md, ✅ spec-template.md, ✅ tasks-template.md
+- Last Amended: 2026-02-12
+- New Sections: Definition of Done (NON-NEGOTIABLE)
+- Modified Principles: Added XI. Definition of Done (NON-NEGOTIABLE)
+- Templates aligned: ✅ .specify/templates/plan-template.md, ✅ .specify/templates/spec-template.md, ✅ .specify/templates/tasks-template.md
 - No breaking changes (additive only)
 ==========================================
 -->
@@ -77,12 +75,26 @@ All interfaces work flawlessly across devices and viewport sizes (mobile-first).
 
 Every external dependency is a liability. Add dependencies only when building the solution in-house is significantly more costly. Audit dependencies quarterly for security, maintenance status, and necessity. Prefer smaller, focused libraries over monolithic frameworks (beyond core stack). Remove unused dependencies immediately. Document why each dependency exists.
 
+### XI. Definition of Done (NON-NEGOTIABLE)
+
+Work is only considered complete when it satisfies all Definition of Done gates: Storybook stories exist for every user-facing component that requires UI documentation or variants; all HTTP endpoints are represented in `spec/openapi.yaml`; unit, integration, and E2E tests are implemented with required coverage and all tests pass; linting reports zero errors; and all necessary documentation is updated. Any exception must be explicitly documented and approved.
+
 ## Development Workflow
 
 - **Planning Phase**: Feature specification is created, reviewed, and approved with acceptance scenarios defined. Accessibility requirements are explicit.
 - **Implementation Phase**: Tasks are generated from specification; developers implement following TDD; peer code review ensures constitution compliance and accessibility standards.
 - **Testing Phase**: Unit, integration, and E2E tests validate acceptance scenarios and accessibility conformance; all tests pass before merge. Test coverage reports reviewed.
 - **Documentation**: Feature documentation (quickstart, API contracts, data models) is maintained alongside code. JSDoc and comments capture intent.
+
+## Definition of Done (NON-NEGOTIABLE)
+
+All deliverables MUST satisfy the following before merge or release:
+
+- **Storybook coverage**: All applicable UI components have complete Storybook stories (states, variants, and edge cases).
+- **OpenAPI coverage**: Every API route is documented in `spec/openapi.yaml` with accurate schemas.
+- **Tests**: Unit, integration, and E2E tests are implemented with required coverage, and all tests pass.
+- **Linting**: All lint rules pass with zero errors.
+- **Documentation**: Required documentation is updated (README, docs/, specs, and API contracts as applicable).
 
 ## Technology Standards
 
@@ -223,6 +235,7 @@ Every external dependency is a liability. Add dependencies only when building th
 
 - Follow standard HTTP verbs (GET, POST, PATCH, DELETE).
 - All endpoints defined in `spec/openapi.yaml` before implementation (OpenAPI-First).
+- OpenAPI coverage is mandatory; undocumented endpoints are prohibited.
 - API responses follow consistent JSON structure with proper error codes.
 
 **Idempotency**:
@@ -372,4 +385,4 @@ This constitution supersedes all other development practices. All pull requests 
 
 **Compliance Review**: Random feature audits verify constitution compliance quarterly. Non-compliance findings are escalated and resolved before next release.
 
-**Version**: 1.4.0 | **Ratified**: 2026-02-01 | **Last Amended**: 2026-02-02
+**Version**: 1.5.0 | **Ratified**: 2026-02-01 | **Last Amended**: 2026-02-12
