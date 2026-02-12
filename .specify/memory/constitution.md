@@ -110,11 +110,40 @@ Every external dependency is a liability. Add dependencies only when building th
 - Use discriminated unions for state and events.
 - Prefer immutable data and pure functions.
 - Keep functions focused (< 20 lines); extract helpers early.
-- Functions do one thing well; classes have single responsibility.
+- Functions do one thing well; single responsibility principle applied.
 - Run repository lint and format scripts before commit.
 - No dead code, commented-out code, or console.log statements in production.
 - If a component is hard to mock in Storybook, it's too coupled—refactor.
 - Public methods, services, hooks, and utilities MUST be documented with purpose, params, and return types.
+
+**Functional Programming (NON-NEGOTIABLE)**:
+
+- **NO class-based code**: All code MUST use functional programming patterns exclusively.
+- **Prohibited patterns**: No `class` keyword, no `new` operator (except for frameworks/libraries requiring it), no `this` context.
+- **React Components**: Functional components ONLY (no class components). Use hooks for state, side effects, and context.
+- **Pure Functions**: All service functions MUST be pure (same input → same output, no side effects).
+- **Immutability**: All data structures are immutable; use `const`, spread operators, and array methods (`.map()`, `.filter()`, `.reduce()`).
+- **Closures & Currying**: Use closures for factory functions; apply currying for composable utilities.
+- **Function Composition**: Build larger behaviors from small, composable pure functions.
+- **No Stateful Objects**: Data flows unidirectionally; state held in React hooks or centralized stores (React Query, Context).
+- **Data Transformation**: Use pure transformations (Zod parsing, data mapping utilities) rather than mutable updates.
+- **Error Handling**: Use Result types or discriminated unions for error handling; avoid try/catch where possible (or use in isolation).
+- **Async/Await in Closures**: Wrap async operations in functions returning Promises; ensure deterministic behavior.
+- **Database Access**: Prisma client used as injected dependency; queries wrapped in pure service functions returning typed data.
+
+**Safe & Clean JSX**:
+
+- **No inline event handlers**: Extract event handlers to named functions at component scope for testability.
+- **No JSX in conditions**: Use early returns or ternary operators for conditional rendering; avoid nested JSX.
+- **No anonymous functions in props**: Pass named function references; no arrow functions inline in `onClick={...}`.
+- **Type-safe props**: All component props explicitly typed with TypeScript interfaces; use `React.FC<Props>` or function signature.
+- **No `dangerouslySetInnerHTML`**: Sanitize content if needed; prefer React's built-in escaping or safe HTML alternatives.
+- **Fragment keys**: Use `key` prop on fragments when rendering lists.
+- **No direct DOM manipulation**: Use React state for all DOM updates; no `useRef` for element queries except for focus management.
+- **Props validation at entry**: Validate external props with Zod or TypeScript at component boundary.
+- **Component composition over inheritance**: Build UI from small, reusable functional components.
+- **Custom hooks for logic**: Extract component logic into custom hooks (useFetch, useForm, useValidation).
+- **Context sparingly**: Use Context for truly global state (theme, auth session); avoid prop drilling but prevent excessive context nesting.
 
 **Type System**:
 
