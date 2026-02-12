@@ -37,6 +37,7 @@ Required gates (Definition of Done alignment):
 - OpenAPI coverage planned for every API endpoint.
 - Unit, integration, and E2E tests planned with coverage expectations.
 - Linting must pass with zero errors.
+- Accessibility audits planned with target Lighthouse Accessibility score ≥ 95 and manual WCAG 2.2 AA checks.
 - Documentation updates identified (README, docs/, specs, API contracts).
 
 ## Project Structure

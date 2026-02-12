@@ -1,13 +1,13 @@
 <!--
-SYNC IMPACT REPORT (Constitution v1.5.0)
+SYNC IMPACT REPORT (Constitution v1.6.0)
 ==========================================
-Integration: Added Definition of Done as a core, enforceable gate.
-- Version: 1.4.0 → 1.5.0 (MINOR: Added Definition of Done requirements)
-- Status: Expanded delivery completion requirements
+Integration: Added accessibility audit score requirement to Definition of Done.
+- Version: 1.5.0 → 1.6.0 (MINOR: Expanded Definition of Done requirements)
+- Status: Expanded accessibility completion requirements
 - Ratified: 2026-02-01
 - Last Amended: 2026-02-12
-- New Sections: Definition of Done (NON-NEGOTIABLE)
-- Modified Principles: Added XI. Definition of Done (NON-NEGOTIABLE)
+- New Sections: None (updated existing Definition of Done)
+- Modified Principles: XI. Definition of Done (NON-NEGOTIABLE)
 - Templates aligned: ✅ .specify/templates/plan-template.md, ✅ .specify/templates/spec-template.md, ✅ .specify/templates/tasks-template.md
 - No breaking changes (additive only)
 ==========================================
@@ -77,7 +77,7 @@ Every external dependency is a liability. Add dependencies only when building th
 
 ### XI. Definition of Done (NON-NEGOTIABLE)
 
-Work is only considered complete when it satisfies all Definition of Done gates: Storybook stories exist for every user-facing component that requires UI documentation or variants; all HTTP endpoints are represented in `spec/openapi.yaml`; unit, integration, and E2E tests are implemented with required coverage and all tests pass; linting reports zero errors; and all necessary documentation is updated. Any exception must be explicitly documented and approved.
+Work is only considered complete when it satisfies all Definition of Done gates: Storybook stories exist for every user-facing component that requires UI documentation or variants; all HTTP endpoints are represented in `spec/openapi.yaml`; unit, integration, and E2E tests are implemented with required coverage and all tests pass; linting reports zero errors; accessibility audits achieve excellent scores; and all necessary documentation is updated. Any exception must be explicitly documented and approved.
 
 ## Development Workflow
 
@@ -94,6 +94,7 @@ All deliverables MUST satisfy the following before merge or release:
 - **OpenAPI coverage**: Every API route is documented in `spec/openapi.yaml` with accurate schemas.
 - **Tests**: Unit, integration, and E2E tests are implemented with required coverage, and all tests pass.
 - **Linting**: All lint rules pass with zero errors.
+- **Accessibility audits**: Lighthouse Accessibility score ≥ 95 and manual WCAG 2.2 AA checks are verified.
 - **Documentation**: Required documentation is updated (README, docs/, specs, and API contracts as applicable).
 
 ## Technology Standards
@@ -385,4 +386,4 @@ This constitution supersedes all other development practices. All pull requests 
 
 **Compliance Review**: Random feature audits verify constitution compliance quarterly. Non-compliance findings are escalated and resolved before next release.
 
-**Version**: 1.5.0 | **Ratified**: 2026-02-01 | **Last Amended**: 2026-02-12
+**Version**: 1.6.0 | **Ratified**: 2026-02-01 | **Last Amended**: 2026-02-12

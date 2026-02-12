@@ -160,6 +160,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Lint with zero errors
 - [ ] TXXX Ensure all tests pass (unit, integration, E2E)
+- [ ] TXXX Run accessibility audit (Lighthouse Accessibility ≥ 95 + manual WCAG 2.2 AA checks)
 - [ ] TXXX Code cleanup and refactoring
 - [ ] TXXX Performance optimization across all stories
 - [ ] TXXX [P] Additional unit tests (as needed for coverage) in tests/unit/

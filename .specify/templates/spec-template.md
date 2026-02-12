@@ -122,4 +122,5 @@ All items below MUST be satisfied for completion:
 - OpenAPI coverage includes every API endpoint in `spec/openapi.yaml`.
 - Unit, integration, and E2E tests are implemented with required coverage and pass.
 - Linting reports zero errors.
+- Accessibility audits achieve Lighthouse Accessibility score ≥ 95 and manual WCAG 2.2 AA checks.
 - Documentation is updated (README, docs/, specs, API contracts as applicable).
