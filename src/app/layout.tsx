@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
 import { Providers } from "@/components/Providers";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { SkipToMainLink } from "@/components/accessibility";
+import { Header } from "@/components/Header";
 import "./globals.css";
 
 const inter = Inter({
@@ -27,9 +27,7 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased`}>
         <SkipToMainLink />
         <Providers>
-          <div className="fixed right-6 bottom-6 z-50">
-            <ThemeToggle />
-          </div>
+          <Header />
           <main id="main-content" tabIndex={-1}>
             {children}
           </main>

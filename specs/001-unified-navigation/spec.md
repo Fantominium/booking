@@ -83,6 +83,9 @@ As a mobile user, I want a clear and responsive navigation menu that uses standa
 - **Unauthorized Access**: If a user bookmarks an internal admin page (e.g., `/admin/services`) and their session is expired, the system MUST redirect to the login screen without displaying any cached data.
 - **Orientation Switch**: When a mobile user rotates from portrait to landscape (transitioning from mobile to tablet-like view), the navigation bar MUST adapt its layout without losing the current breadcrumb state.
 - **Empty Breadcrumbs**: If the user is on a page that is neither the home page nor part of the booking flow (e.g., a "Terms of Service" page), the breadcrumb area MUST remain empty or show a basic "Home" link.
+- **Error States**: On 404 or 500 error pages, the navigation bar MUST remain functional, displaying the logo and guest links (Home) to allow users to recover.
+- **Form Submission**: During active form submission in the booking flow, the navigation bar MUST remain interactive, though breadcrumb navigation may be temporarily disabled via an overlay or disabled state to prevent data loss.
+- **Admin Session Expiry**: If an admin session expires mid-interaction, any attempt to navigate or trigger an action MUST redirect to the `/admin/login` page with a `callbackUrl` parameter.
 
 ## Requirements _(mandatory)_
 
@@ -99,6 +102,10 @@ As a mobile user, I want a clear and responsive navigation menu that uses standa
 - **FR-009**: **Homepage Cleanup**: All instances of "Book Appointment", "Admin", and "Admin Dashboard" buttons MUST be removed from the home page body and standard navigation links.
 - **FR-010**: **Logo Navigation**: The website logo (TruFlow graphic + "TruFlow" text) in the navigation bar MUST function as a link to the root directory (`/`).
 - **FR-011**: **Animated Mobile Icon**: The hamburger icon MUST use a CSS/Tailwind morphing animation to transition to a close icon (`X`) when active.
+- **FR-012**: **Admin Logout**: The admin navigation dropdown MUST include a "Log Out" action that terminates the session and redirects to the home page.
+- **FR-013**: **Booking Step Labels**: The breadcrumb component MUST use the following labels for the booking flow: "Service Selection" -> "Schedule" -> "Details" -> "Payment" -> "Confirmation".
+- **FR-014**: **Mobile Menu Content**: For guest users, the mobile hamburger menu MUST contain a "Home" link and a "Services" link (anchor to home page services section). For admins, it MUST contain the items from the admin dropdown (Dashboard, Services, Bookings, Availability) plus "Log Out".
+- **FR-015**: **Global Accessibility Compliance**: All text and interactive elements in the navigation bar MUST maintain a minimum contrast ratio of 4.5:1 against the background in both themes.
 
 ### Key Entities _(include if feature involves data)_
 

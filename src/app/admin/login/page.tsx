@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Header } from "@/components/Header";
 
 export default function AdminLogin(): React.ReactElement {
   const [email, setEmail] = useState("");
@@ -22,41 +21,43 @@ export default function AdminLogin(): React.ReactElement {
     setError(""); // Clear error when user types
   }, []);
 
-  const handleSubmit = React.useCallback(async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
+  const handleSubmit = React.useCallback(
+    async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+      e.preventDefault();
+      setIsLoading(true);
+      setError("");
 
-    try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
+      try {
+        const result = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
 
-      if (result?.error) {
-        setError("Invalid email or password");
-      } else {
-        // Check session to ensure authentication worked
-        const session = await getSession();
-        if (session) {
-          router.push("/admin");
-          router.refresh();
+        if (result?.error) {
+          setError("Invalid email or password");
         } else {
-          setError("Authentication failed");
+          // Check session to ensure authentication worked
+          const session = await getSession();
+          if (session) {
+            router.push("/admin");
+            router.refresh();
+          } else {
+            setError("Authentication failed");
+          }
         }
+      } catch (err) {
+        console.error("Login error:", err);
+        setError("An unexpected error occurred");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error("Login error:", err);
-      setError("An unexpected error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [email, password, router]);
+    },
+    [email, password, router],
+  );
 
   return (
     <div className="bg-background min-h-screen">
-      <Header />
       <main className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md flex-col items-center justify-center px-6">
         <div className="w-full space-y-8">
           <div className="text-center">

@@ -20,6 +20,9 @@ const config: Config = {
         "surface-elevated": "var(--surface-elevated)",
         border: "var(--border)",
         "border-light": "var(--border-light)",
+        // High-contrast theme toggle colors
+        "theme-light": "var(--theme-light)",
+        "theme-dark": "var(--theme-dark)",
         blue: {
           50: "var(--blue-50)",
           100: "var(--blue-100)",

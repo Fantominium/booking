@@ -31,7 +31,23 @@
 
 - Attempt to navigate to `/admin`.
 - Verify redirect to `/admin/login` (Unauthorized state).
-- Log in with credentials; verify the horizontal links are replaced by the Admin Dropdown button.
+- Log in with **test admin credentials**:
+- **Email**: `admin@truflow.local`
+- **Password**: `TestPassword123!`
+  - _(Note: These credentials should be seeded via `prisma/seed.ts` for testing purposes)_
+- Verify the horizontal links are replaced by the Admin Dropdown button.
+- Test dropdown navigation: Dashboard, Services, Bookings, Availability.
+
+**Creating Test Admin** (if not seeded):
+
+```bash
+# Run Prisma seed script
+npx prisma db seed
+
+# Or manually create admin via Prisma Studio
+npx prisma studio
+# Navigate to Admin table and create entry with hashed password
+```
 
 ### 3. Theme Contrast
 

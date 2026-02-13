@@ -73,6 +73,10 @@
   --surface-elevated: #ffffff;
   --border: var(--neutral-200);
   --border-light: var(--neutral-100);
+
+  /* High-contrast theme toggle colors (4.5:1 ratio minimum) */
+  --theme-light: var(--gold-500); /* Sun icon in light mode */
+  --theme-dark: var(--blue-200); /* Moon icon in dark mode */
 }
 
 @theme inline {
@@ -167,6 +171,10 @@
     --surface-elevated: var(--neutral-700);
     --border: var(--neutral-700);
     --border-light: var(--neutral-600);
+
+    /* High-contrast theme toggle colors for dark mode */
+    --theme-light: var(--gold-400);
+    --theme-dark: var(--blue-300);
   }
 }
 
@@ -191,6 +199,10 @@
   --surface-elevated: var(--neutral-700);
   --border: var(--neutral-700);
   --border-light: var(--neutral-600);
+
+  /* High-contrast theme toggle colors for dark mode */
+  --theme-light: var(--gold-400);
+  --theme-dark: var(--blue-300);
 }
 
 [data-theme="light"] {
@@ -213,6 +225,10 @@
   --surface-elevated: #ffffff;
   --border: var(--neutral-200);
   --border-light: var(--neutral-100);
+
+  /* High-contrast theme toggle colors for light mode */
+  --theme-light: var(--gold-500);
+  --theme-dark: var(--blue-200);
 }
 
 button,

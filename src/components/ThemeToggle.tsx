@@ -19,9 +19,10 @@ export function ThemeToggle(): React.ReactElement {
 
   const getIcon = (): React.ReactElement => {
     if (resolvedTheme === "dark") {
+      // Sun icon for dark mode - using high-contrast gold color (Research R-003)
       return (
         <svg
-          className="h-5 w-5"
+          className="text-theme-light h-5 w-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -36,9 +37,10 @@ export function ThemeToggle(): React.ReactElement {
         </svg>
       );
     }
+    // Moon icon for light mode - using high-contrast blue color (Research R-003)
     return (
       <svg
-        className="h-5 w-5"
+        className="text-theme-dark h-5 w-5"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"

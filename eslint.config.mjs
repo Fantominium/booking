@@ -30,6 +30,7 @@ const eslintConfig = [
       "public/**",
       "next-env.d.ts",
       ".storybook/**",
+      "src/stories/**",
       "*.config.mjs",
       "next.config.mjs",
       "*.config.ts",

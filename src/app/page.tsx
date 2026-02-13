@@ -1,10 +1,8 @@
 import Link from "next/link";
-import { Header } from "@/components/Header";
 
 const Home = (): JSX.Element => {
   return (
     <div className="bg-background min-h-screen">
-      <Header />
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-4xl flex-col items-center justify-center gap-8 px-6 text-center">
         <div className="space-y-4">
           <h1 className="text-foreground text-5xl font-bold">TruFlow Booking</h1>
@@ -19,12 +17,6 @@ const Home = (): JSX.Element => {
             className="bg-primary hover:bg-primary-dark focus:ring-primary flex min-h-[44px] items-center justify-center rounded-lg px-8 py-4 text-lg font-semibold text-white shadow-lg transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none"
           >
             Start Booking
-          </Link>
-          <Link
-            href="/admin"
-            className="bg-surface border-border text-foreground focus:ring-primary flex min-h-[44px] items-center justify-center rounded-lg border-2 px-8 py-4 text-lg font-semibold transition-colors hover:bg-neutral-100 focus:ring-2 focus:ring-offset-2 focus:outline-none"
-          >
-            Admin Dashboard
           </Link>
         </div>
 

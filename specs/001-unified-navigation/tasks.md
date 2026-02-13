@@ -16,17 +16,17 @@
 
 **Purpose**: Initial configuration and cleanup.
 
-- [ ] T001 [P] Add TruFlow logo asset to `public/logo.png` (from user attachment)
-- [ ] T002 [P] Configure Storybook globals for theme and viewport testing in `.storybook/preview.ts`
-- [ ] T003 [P] Add Lucide React dependency to `package.json` for standardized navigation icons
+- [x] T001 [P] Add TruFlow logo asset to `public/logo.png` (from user attachment)
+- [x] T002 [P] Configure Storybook globals for theme and viewport testing in `.storybook/preview.ts`
+- [x] T003 [P] Add Lucide React dependency to `package.json` for standardized navigation icons
 
 ## Phase 2: Foundational
 
 **Purpose**: Shared utilities and core layout structure changes.
 
-- [ ] T004 Define `useBreadcrumbs` hook signature and logic in `src/lib/nav/useBreadcrumbs.ts`
-- [ ] T005 [P] Implement `NavigationContext` providers if needed or verify path-based derivation logic in `src/components/navigation/Header.tsx`
-- [ ] T006 [P] Update `tailwind.config.ts` with accessibility-compliant high-contrast color tokens for Dark Mode
+- [x] T004 Define `useBreadcrumbs` hook signature and logic in `src/lib/nav/useBreadcrumbs.ts`
+- [x] T005 [P] Implement `NavigationContext` providers if needed or verify path-based derivation logic in `src/components/navigation/Header.tsx`
+- [x] T006 [P] Update `tailwind.config.ts` with accessibility-compliant high-contrast color tokens for Dark Mode
 
 ---
 
@@ -38,16 +38,16 @@
 
 ### Tests for User Story 1 (REQUIRED)
 
-- [ ] T007 [P] [US1] Create unit tests for path-to-breadcrumb mapping in `tests/unit/nav/useBreadcrumbs.test.ts`
-- [ ] T008 [P] [US1] Create integration test for Header state transitions (Guest -> Booking) in `tests/integration/components/Header.test.tsx`
-- [ ] T009 [US1] Create E2E test for home page cleanup and booking flow navigation in `tests/e2e/navigation/customer-flow.spec.ts`
+- [x] T007 [P] [US1] Create unit tests for path-to-breadcrumb mapping in `tests/unit/nav/useBreadcrumbs.test.ts`
+- [x] T008 [P] [US1] Create integration test for Header state transitions (Guest -> Booking) in `tests/integration/components/Header.test.tsx`
+- [x] T009 [US1] Create E2E test for home page cleanup and booking flow navigation in `tests/e2e/navigation/customer-flow.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] Create `Breadcrumbs` component in `src/components/booking/Breadcrumbs.tsx`
-- [ ] T011 [US1] Refactor `src/components/Header.tsx` to remove "Book Appointment" and "Admin" buttons and conditionally render `Breadcrumbs`
-- [ ] T012 [US1] Implement Logo-to-Home link logic in `src/components/Header.tsx` with TruFlow graphic and text
-- [ ] T013 [US1] Create Storybook stories for Customer Header states in `src/stories/navigation/Header.stories.tsx`
+- [x] T010 [P] [US1] Create `Breadcrumbs` component in `src/components/booking/Breadcrumbs.tsx`
+- [x] T011 [US1] Refactor `src/components/Header.tsx` to remove "Book Appointment" and "Admin" buttons and conditionally render `Breadcrumbs`
+- [x] T012 [US1] Implement Logo-to-Home link logic in `src/components/Header.tsx` with TruFlow graphic and text
+- [x] T013 [US1] Create Storybook stories for Customer Header states in `src/stories/navigation/Header.stories.tsx`
 
 ---
 
@@ -59,14 +59,14 @@
 
 ### Tests for User Story 3 (REQUIRED)
 
-- [ ] T014 [P] [US3] Create accessibility unit test for `ThemeToggle` contrast in `tests/unit/components/ThemeToggle.test.tsx`
-- [ ] T015 [US3] Create E2E test for global toggle uniqueness and functionality in `tests/e2e/navigation/theme-toggle.spec.ts`
+- [x] T014 [P] [US3] Create accessibility unit test for `ThemeToggle` contrast in `tests/unit/components/ThemeToggle.test.tsx`
+- [x] T015 [US3] Create E2E test for global toggle uniqueness and functionality in `tests/e2e/navigation/theme-toggle.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T016 [P] [US3] Enhance `ThemeToggle` component in `src/components/ThemeToggle.tsx` with high-contrast SVG/CSS per Research R-003
-- [ ] T017 [US3] Remove all other instances of theme toggles from pages (e.g., `src/app/page.tsx` or layout bodies)
-- [ ] T018 [US3] Ensure `ThemeToggle` is correctly positioned in the refactored `Header.tsx`
+- [x] T016 [P] [US3] Enhance `ThemeToggle` component in `src/components/ThemeToggle.tsx` with high-contrast SVG/CSS per Research R-003
+- [x] T017 [US3] Remove all other instances of theme toggles from pages (e.g., `src/app/page.tsx` or layout bodies)
+- [x] T018 [US3] Ensure `ThemeToggle` is correctly positioned in the refactored `Header.tsx`
 
 ---
 
@@ -78,15 +78,15 @@
 
 ### Tests for User Story 4 (REQUIRED)
 
-- [ ] T019 [P] [US4] Create visual regression tests for hamburger animation in `tests/e2e/navigation/hamburger-animation.spec.ts`
-- [ ] T020 [US4] Create mobile-specific layout integration tests in `tests/integration/components/Header.mobile.test.tsx`
+- [x] T019 [P] [US4] Create visual regression tests for hamburger animation in `tests/e2e/navigation/hamburger-animation.spec.ts`
+- [x] T020 [US4] Create mobile-specific layout integration tests in `tests/integration/components/Header.mobile.test.tsx`
 
 ### Implementation for User Story 4
 
-- [ ] T021 [P] [US4] Create animated `HamburgerIcon` component in `src/components/navigation/HamburgerIcon.tsx` using Tailwind 4 morphing
-- [ ] T022 [US4] Implement mobile-responsive `Header` layout in `src/components/Header.tsx` (Logo right, Hamburger left)
-- [ ] T023 [US4] Implement truncation logic in `Breadcrumbs.tsx` for 320px viewports (Home > ... > Current)
-- [ ] T024 [US4] Create Storybook stories for Mobile Header states in `src/stories/navigation/Header.mobile.stories.tsx`
+- [x] T021 [P] [US4] Create animated `HamburgerIcon` component in `src/components/navigation/HamburgerIcon.tsx` using Tailwind 4 morphing
+- [x] T022 [US4] Implement mobile-responsive `Header` layout in `src/components/Header.tsx` (Logo right, Hamburger left)
+- [x] T023 [US4] Implement truncation logic in `Breadcrumbs.tsx` for 320px viewports (Home > ... > Current)
+- [x] T024 [US4] Create Storybook stories for Mobile Header states in `src/stories/navigation/Header.mobile.stories.tsx`
 
 ---
 
@@ -98,16 +98,16 @@
 
 ### Tests for User Story 2 (REQUIRED)
 
-- [ ] T025 [P] [US2] Create security integration test for `/admin` subpath redirection in `tests/integration/auth/admin-gate.test.ts`
-- [ ] T026 [P] [US2] Create unit tests for admin dropdown state mapping in `tests/unit/nav/AdminDropdown.test.tsx`
-- [ ] T027 [US2] Create E2E test for Admin navigation flow and dropdown updates in `tests/e2e/navigation/admin-flow.spec.ts`
+- [x] T025 [P] [US2] Create security integration test for `/admin` subpath redirection in `tests/integration/auth/admin-gate.test.ts`
+- [x] T026 [P] [US2] Create unit tests for admin dropdown state mapping in `tests/unit/nav/AdminDropdown.test.tsx`
+- [x] T027 [US2] Create E2E test for Admin navigation flow and dropdown updates in `tests/e2e/navigation/admin-flow.spec.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T028 [P] [US2] Create `AdminDropdown` component in `src/components/navigation/AdminDropdown.tsx` (button + arrow)
-- [ ] T029 [US2] Update `Header.tsx` to render `AdminDropdown` ONLY for authenticated admin sessions
-- [ ] T030 [US2] Implement "Identity Protection" by ensuring NO admin links are rendered in guest sessions in `src/components/Header.tsx`
-- [ ] T031 [US2] Create Storybook stories for Admin Header states in `src/stories/navigation/Header.admin.stories.tsx`
+- [x] T028 [P] [US2] Create `AdminDropdown` component in `src/components/navigation/AdminDropdown.tsx` (button + arrow)
+- [x] T029 [US2] Update `Header.tsx` to render `AdminDropdown` ONLY for authenticated admin sessions
+- [x] T030 [US2] Implement "Identity Protection" by ensuring NO admin links are rendered in guest sessions in `src/components/Header.tsx`
+- [x] T031 [US2] Create Storybook stories for Admin Header states in `src/stories/navigation/Header.admin.stories.tsx`
 
 ---
 
@@ -115,13 +115,13 @@
 
 **Purpose**: Final audit and documentation.
 
-- [ ] T032 [P] Conduct full Lighthouse Accessibility audit targeting ≥ 95 score
-- [ ] T033 [P] Perform manual WCAG 2.2 AA check for keyboard navigation in navigation elements
-- [ ] T034 Update `docs/PHASE_8_NAVIGATION.md` with implementation summary
-- [ ] T035 Verify zero linting errors across all modified files
-- [ ] T036 Document admin credentials (for testing) in `specs/001-unified-navigation/quickstart.md`
-- [ ] T037 [US1] Verify layout stability (SC-002) via unit/E2E tests (nav bar height consistency +/- 5px)
-- [ ] T038 [US3] Perform manual usability check for theme toggle discoverability (SC-004)
+- [x] T032 [P] Conduct full Lighthouse Accessibility audit targeting ≥ 95 score
+- [x] T033 [P] Perform manual WCAG 2.2 AA check for keyboard navigation in navigation elements
+- [x] T034 Update `docs/PHASE_8_NAVIGATION.md` with implementation summary
+- [x] T035 Verify zero linting errors across all modified files
+- [x] T036 Document admin credentials (for testing) in `specs/001-unified-navigation/quickstart.md`
+- [x] T037 [US1] Verify layout stability (SC-002) via unit/E2E tests (nav bar height consistency +/- 5px)
+- [x] T038 [US3] Perform manual usability check for theme toggle discoverability (SC-004)
 
 ## Dependency Graph
 
