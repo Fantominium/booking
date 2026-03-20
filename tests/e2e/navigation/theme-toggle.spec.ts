@@ -1,20 +1,25 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Locator, type Page } from "@playwright/test";
+
+const visibleThemeToggles = (page: Page): Locator =>
+  page.locator('[data-testid="theme-toggle-desktop"]:visible, [data-testid="theme-toggle-mobile"]:visible');
+
+const activeThemeToggle = (page: Page): Locator => visibleThemeToggles(page).first();
 
 test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
   test("only one theme toggle exists on any page", async ({ page }) => {
     // Test home page
     await page.goto("/");
-    let toggleCount = await page.getByTestId("theme-toggle").count();
+    let toggleCount = await visibleThemeToggles(page).count();
     expect(toggleCount).toBe(1);
 
     // Test booking page
     await page.goto("/book");
-    toggleCount = await page.getByTestId("theme-toggle").count();
+    toggleCount = await visibleThemeToggles(page).count();
     expect(toggleCount).toBe(1);
 
     // Test admin page (if accessible)
     await page.goto("/admin");
-    toggleCount = await page.getByTestId("theme-toggle").count();
+    toggleCount = await visibleThemeToggles(page).count();
     expect(toggleCount).toBeLessThanOrEqual(1); // 0 or 1 (depends on auth)
   });
 
@@ -23,7 +28,9 @@ test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
 
     // Toggle should be inside the header element
     const header = page.locator("header");
-    const toggle = header.getByTestId("theme-toggle");
+    const toggle = header.locator(
+      '[data-testid="theme-toggle-desktop"]:visible, [data-testid="theme-toggle-mobile"]:visible',
+    );
 
     await expect(toggle).toBeVisible();
   });
@@ -34,13 +41,13 @@ test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
     // Get initial theme (check data-theme attribute on html/body)
     const initialTheme = await page.evaluate(() => {
       return (
-        document.documentElement.getAttribute("data-theme") ||
-        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        document.documentElement.dataset.theme ||
+        (globalThis.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
       );
     });
 
     // Click theme toggle
-    await page.getByTestId("theme-toggle").click();
+    await activeThemeToggle(page).click();
 
     // Wait for theme change
     await page.waitForTimeout(200); // Allow transition
@@ -48,8 +55,8 @@ test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
     // Get new theme
     const newTheme = await page.evaluate(() => {
       return (
-        document.documentElement.getAttribute("data-theme") ||
-        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        document.documentElement.dataset.theme ||
+        (globalThis.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
       );
     });
 
@@ -64,11 +71,11 @@ test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
     await page.goto("/");
 
     // Ensure initial theme is dark
-    await expect(page.getByTestId("theme-toggle")).toBeVisible();
+    await expect(activeThemeToggle(page)).toBeVisible();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 
     // Click theme toggle
-    await page.getByTestId("theme-toggle").click();
+    await activeThemeToggle(page).click();
 
     // Wait for theme change
     await page.waitForTimeout(200);
@@ -81,7 +88,7 @@ test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
     await page.goto("/");
 
     // Switch to dark mode
-    await page.getByTestId("theme-toggle").click();
+    await activeThemeToggle(page).click();
     await page.waitForTimeout(200);
 
     // Navigate to booking page
@@ -90,7 +97,7 @@ test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
 
     // Theme should still be dark
     const theme = await page.evaluate(() => {
-      return document.documentElement.getAttribute("data-theme");
+      return document.documentElement.dataset.theme;
     });
 
     expect(theme).toBe("dark");
@@ -99,7 +106,7 @@ test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
   test("theme toggle is keyboard accessible", async ({ page }) => {
     await page.goto("/");
 
-    const toggle = page.getByTestId("theme-toggle");
+    const toggle = activeThemeToggle(page);
     await expect(toggle).toBeVisible();
 
     await toggle.focus();
@@ -111,7 +118,7 @@ test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
 
     // Theme should have changed
     const theme = await page.evaluate(() => {
-      return document.documentElement.getAttribute("data-theme");
+      return document.documentElement.dataset.theme;
     });
     expect(theme).toBeTruthy();
   });
@@ -119,7 +126,7 @@ test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
   test("theme toggle has proper focus indicator", async ({ page }) => {
     await page.goto("/");
 
-    const toggle = page.getByTestId("theme-toggle");
+    const toggle = activeThemeToggle(page);
     await expect(toggle).toBeVisible();
 
     // Focus the toggle
@@ -127,7 +134,7 @@ test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
 
     // Check for focus ring (via computed styles or class)
     const hasFocusRing = await toggle.evaluate((el) => {
-      const styles = window.getComputedStyle(el);
+      const styles = globalThis.getComputedStyle(el);
       const classes = el.className;
       return (
         classes.includes("focus:ring") ||
@@ -142,7 +149,7 @@ test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
   test("theme toggle icon changes based on current theme", async ({ page }) => {
     await page.goto("/");
 
-    const toggle = page.getByTestId("theme-toggle");
+    const toggle = activeThemeToggle(page);
 
     // In light mode, should show moon icon (switch to dark)
     let label = await toggle.getAttribute("aria-label");
@@ -164,7 +171,7 @@ test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
     const hamburger = page.getByRole("button", { name: /menu/i });
     await hamburger.click();
 
-    const toggle = page.getByTestId("theme-toggle");
+    const toggle = activeThemeToggle(page);
     await expect(toggle).toBeVisible();
     const box = await toggle.boundingBox();
     expect(box).not.toBeNull();
@@ -193,7 +200,7 @@ test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
     for (const pagePath of pages) {
       await page.goto(pagePath);
 
-      const toggle = page.getByTestId("theme-toggle");
+      const toggle = activeThemeToggle(page);
       await expect(toggle).toBeVisible();
 
       // Should be clickable
@@ -202,7 +209,7 @@ test.describe("Theme Toggle - Global Uniqueness & Functionality", () => {
 
       // Theme should change
       const theme = await page.evaluate(() => {
-        return document.documentElement.getAttribute("data-theme");
+        return document.documentElement.dataset.theme;
       });
       expect(theme).toBeTruthy();
     }
