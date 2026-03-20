@@ -14,7 +14,7 @@ const Home = (): JSX.Element => {
         <div className="flex flex-col gap-4 sm:flex-row">
           <Link
             href="/book"
-            className="bg-primary hover:bg-primary-dark focus:ring-primary flex min-h-[44px] items-center justify-center rounded-lg px-8 py-4 text-lg font-semibold text-white shadow-lg transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none"
+            className="bg-primary hover:bg-primary-dark focus:ring-primary flex min-h-11 items-center justify-center rounded-lg px-8 py-4 text-lg font-semibold text-white shadow-lg transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none"
           >
             Start Booking
           </Link>

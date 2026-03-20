@@ -14,7 +14,10 @@ const requiredSchema = z.object({
 
 const optionalSchema = requiredSchema.partial();
 
-const schema = process.env.NODE_ENV === "test" ? optionalSchema : requiredSchema;
+const shouldSkipValidation =
+  process.env.NODE_ENV === "test" || process.env.SKIP_ENV_VALIDATION === "1";
+
+const schema = shouldSkipValidation ? optionalSchema : requiredSchema;
 
 export const env = schema.parse({
   DATABASE_URL: process.env.DATABASE_URL,

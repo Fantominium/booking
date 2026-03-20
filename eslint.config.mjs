@@ -25,6 +25,7 @@ const eslintConfig = [
       "coverage/**",
       "html/**",
       "playwright-report/**",
+      "storybook-static/**",
       "test-results/**",
       "**/*.min.js",
       "public/**",

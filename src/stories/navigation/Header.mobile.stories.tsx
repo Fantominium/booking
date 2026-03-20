@@ -8,7 +8,7 @@
  * - MobileHomeMenuOpen: Mobile menu expanded
  * - MobileBookingServices: Booking flow with breadcrumbs in menu
  * - MobileBookingPayment: Payment step with progress in menu
- * - MobileAdmin: Admin session with admin dropdown in menu
+ * - MobileAdmin: Admin session with admin menu items in hamburger menu
  * - TabletHome: Tablet viewport (768px) - transition to desktop layout
  */
 
@@ -200,7 +200,7 @@ export const MobileBookingConfirmation: Story = {
 /**
  * Mobile Admin - Dashboard
  * Session: Authenticated admin
- * Menu Content: Home, Admin section (with AdminDropdown), Theme toggle
+ * Menu Content: Home, Admin section (Dashboard/Services/Bookings/Availability/Sign out), Theme toggle
  */
 export const MobileAdmin: Story = {
   decorators: [

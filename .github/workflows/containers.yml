@@ -1,0 +1,39 @@
+name: Container Verification
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  verify-containers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start container topology
+        run: docker compose --env-file .env.compose.example up -d --build
+
+      - name: Wait for health endpoint
+        run: |
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            if curl --fail --silent http://localhost:3000/api/health > /tmp/health.json; then
+              cat /tmp/health.json
+              exit 0
+            fi
+            sleep 5
+          done
+          docker compose logs web
+          docker compose logs worker
+          exit 1
+
+      - name: Verify compose status
+        run: docker compose --env-file .env.compose.example ps
+
+      - name: Tear down topology
+        if: always()
+        run: docker compose --env-file .env.compose.example down -v

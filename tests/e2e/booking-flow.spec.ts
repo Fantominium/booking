@@ -25,7 +25,7 @@ test.describe("Customer Booking Flow", () => {
     await expect(page.getByText("Select a date")).toBeVisible();
 
     // 4. Check that calendar is rendered
-    await page.waitForSelector("[data-testid='calendar']", { timeout: 10000 });
+    await page.waitForSelector("[data-testid='calendar']", { state: "attached", timeout: 10000 });
     const calendar = page.locator("[data-testid='calendar']");
     await expect(calendar).toBeAttached();
     if (!(await calendar.isVisible())) {

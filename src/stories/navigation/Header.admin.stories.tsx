@@ -1,15 +1,16 @@
 /**
  * Storybook Stories: Admin Header States
  *
- * Visual documentation for Header component in authenticated admin sessions.
+ * Visual documentation for Header component in authenticated admin sessions
+ * where admin navigation/actions are exposed via the dynamic hamburger menu.
  *
  * Stories:
- * - AdminDashboard: /admin root with "Dashboard" button
- * - AdminServices: /admin/services with "Services" button
- * - AdminBookings: /admin/bookings with "Bookings" button
- * - AdminAvailability: /admin/availability with "Availability" button
- * - AdminDropdownExpanded: Dropdown menu open showing all sections
- * - MobileAdminDashboard: Mobile view with admin dropdown
+ * - AdminDashboard: /admin root
+ * - AdminServices: /admin/services
+ * - AdminBookings: /admin/bookings
+ * - AdminAvailability: /admin/availability
+ * - AdminMenuExpanded: Hamburger menu open showing admin sections + sign out
+ * - MobileAdminDashboard: Mobile view with admin hamburger menu
  */
 
 import type { Meta, StoryObj } from "@storybook/react";
@@ -58,7 +59,6 @@ type Story = StoryObj<typeof Header>;
 /**
  * Admin Dashboard - Default State
  * Path: /admin
- * Button: "Dashboard"
  */
 export const AdminDashboard: Story = {
   parameters: {
@@ -76,7 +76,6 @@ export const AdminDashboard: Story = {
 /**
  * Admin Services
  * Path: /admin/services
- * Button: "Services"
  */
 export const AdminServices: Story = {
   parameters: {
@@ -94,7 +93,6 @@ export const AdminServices: Story = {
 /**
  * Admin Bookings
  * Path: /admin/bookings
- * Button: "Bookings"
  */
 export const AdminBookings: Story = {
   parameters: {
@@ -112,7 +110,6 @@ export const AdminBookings: Story = {
 /**
  * Admin Availability
  * Path: /admin/availability
- * Button: "Availability"
  */
 export const AdminAvailability: Story = {
   parameters: {
@@ -128,15 +125,15 @@ export const AdminAvailability: Story = {
 };
 
 /**
- * Admin Dropdown Expanded
+ * Admin Menu Expanded
  * Path: /admin
- * State: Dropdown menu open
+ * State: Hamburger menu open
  *
  * Note: Storybook cannot directly control component state.
  * This story documents the expanded state visually.
- * To interact: Click the "Dashboard" button in Storybook canvas.
+ * To interact: Click the hamburger button in Storybook canvas.
  */
-export const AdminDropdownExpanded: Story = {
+export const AdminMenuExpanded: Story = {
   parameters: {
     nextjs: {
       navigation: {
@@ -148,8 +145,8 @@ export const AdminDropdownExpanded: Story = {
     mockPathname("/admin");
   },
   play: async ({ canvasElement }) => {
-    // Auto-click dropdown button to show expanded state
-    const button = canvasElement.querySelector('button[aria-haspopup="menu"]');
+    // Auto-click hamburger button to show expanded state
+    const button = canvasElement.querySelector('[data-testid="hamburger-button"]');
     if (button) {
       (button as HTMLButtonElement).click();
     }
@@ -159,7 +156,7 @@ export const AdminDropdownExpanded: Story = {
 /**
  * Mobile Admin Dashboard
  * Viewport: 320px (mobile)
- * Layout: Logo top-left, Admin dropdown centered below header
+ * Layout: Logo right, hamburger left
  */
 export const MobileAdminDashboard: Story = {
   parameters: {
