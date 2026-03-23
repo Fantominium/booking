@@ -54,11 +54,7 @@ const BookPage = async ({ searchParams }: BookPageProps): Promise<JSX.Element> =
                 {OFFERING_LABELS[offeringType as keyof typeof OFFERING_LABELS]}s
               </h2>
               <p className="max-w-2xl text-sm leading-6 text-slate-700">
-                {
-                  OFFERING_DESCRIPTIONS[
-                    offeringType as keyof typeof OFFERING_DESCRIPTIONS
-                  ]
-                }
+                {OFFERING_DESCRIPTIONS[offeringType as keyof typeof OFFERING_DESCRIPTIONS]}
               </p>
             </header>
 

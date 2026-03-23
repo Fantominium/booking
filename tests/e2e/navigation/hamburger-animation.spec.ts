@@ -9,7 +9,10 @@ test.describe("Mobile Navigation Dialog", () => {
     await page.goto("/");
 
     const trigger = page.getByRole("button", { name: /open menu/i });
-    const brand = page.locator("header").getByRole("link", { name: /truflow/i }).first();
+    const brand = page
+      .locator("header")
+      .getByRole("link", { name: /truflow/i })
+      .first();
 
     const triggerBox = await trigger.boundingBox();
     const brandBox = await brand.boundingBox();

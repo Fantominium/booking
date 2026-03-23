@@ -1,7 +1,9 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 
 const visibleThemeToggles = (page: Page): Locator =>
-  page.locator('[data-testid="theme-toggle-desktop"]:visible, [data-testid="theme-toggle-mobile"]:visible');
+  page.locator(
+    '[data-testid="theme-toggle-desktop"]:visible, [data-testid="theme-toggle-mobile"]:visible',
+  );
 
 const activeThemeToggle = (page: Page): Locator => visibleThemeToggles(page).first();
 

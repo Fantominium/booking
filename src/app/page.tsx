@@ -19,8 +19,8 @@ const Home = (): JSX.Element => {
               Reserve the right TruFlow experience without broken journeys.
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-slate-700">
-              Start with a guided session, a hosted event, or a rental booking. Every route leads
-              to availability, customer details, and a final payment choice.
+              Start with a guided session, a hosted event, or a rental booking. Every route leads to
+              availability, customer details, and a final payment choice.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link
@@ -35,17 +35,32 @@ const Home = (): JSX.Element => {
           <div className="rounded-4xl border border-slate-200 bg-white/90 p-6 shadow-xl backdrop-blur">
             <h2 className="text-xl font-semibold text-slate-950">Quick paths</h2>
             <div className="mt-4 grid gap-3">
-              <Link href="/book?type=SESSION" className="rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:bg-slate-50">
+              <Link
+                href="/book?type=SESSION"
+                className="rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:bg-slate-50"
+              >
                 <span className="block text-sm font-semibold text-slate-950">Book a session</span>
-                <span className="mt-1 block text-sm leading-6 text-slate-700">One-to-one appointments with secure deposit or bank transfer.</span>
+                <span className="mt-1 block text-sm leading-6 text-slate-700">
+                  One-to-one appointments with secure deposit or bank transfer.
+                </span>
               </Link>
-              <Link href="/book?type=EVENT" className="rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:bg-slate-50">
+              <Link
+                href="/book?type=EVENT"
+                className="rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:bg-slate-50"
+              >
                 <span className="block text-sm font-semibold text-slate-950">Reserve an event</span>
-                <span className="mt-1 block text-sm leading-6 text-slate-700">Hosted group experiences with clear availability and payment steps.</span>
+                <span className="mt-1 block text-sm leading-6 text-slate-700">
+                  Hosted group experiences with clear availability and payment steps.
+                </span>
               </Link>
-              <Link href="/book?type=RENTAL" className="rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:bg-slate-50">
+              <Link
+                href="/book?type=RENTAL"
+                className="rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:bg-slate-50"
+              >
                 <span className="block text-sm font-semibold text-slate-950">Reserve a rental</span>
-                <span className="mt-1 block text-sm leading-6 text-slate-700">Private space reservations with booking confirmation and transfer references.</span>
+                <span className="mt-1 block text-sm leading-6 text-slate-700">
+                  Private space reservations with booking confirmation and transfer references.
+                </span>
               </Link>
             </div>
           </div>
@@ -62,12 +77,12 @@ const Home = (): JSX.Element => {
             </p>
           </div>
 
-          <div className="rounded-2xl bg-gold-50 p-6 text-center">
+          <div className="bg-gold-50 rounded-2xl p-6 text-center">
             <div className="bg-gold-200 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg">
               <span className="text-2xl">💳</span>
             </div>
-            <h3 className="mb-2 font-semibold text-gold-900">Clear payment choices</h3>
-            <p className="text-sm leading-6 text-gold-900">
+            <h3 className="text-gold-900 mb-2 font-semibold">Clear payment choices</h3>
+            <p className="text-gold-900 text-sm leading-6">
               Card deposits and bank transfer reservations are explained before you commit.
             </p>
           </div>

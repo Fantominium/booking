@@ -1,7 +1,9 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 
 const visibleThemeToggles = (page: Page): Locator =>
-  page.locator('[data-testid="theme-toggle-desktop"]:visible, [data-testid="theme-toggle-mobile"]:visible');
+  page.locator(
+    '[data-testid="theme-toggle-desktop"]:visible, [data-testid="theme-toggle-mobile"]:visible',
+  );
 
 test.describe("Customer Journey - Navigation Flow", () => {
   test("home page exposes quick booking paths and hides admin links", async ({ page }) => {

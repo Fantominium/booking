@@ -63,7 +63,10 @@ const buildCacheKey = (params: {
   return `bookings:admin:${JSON.stringify(params)}`;
 };
 
-const buildDateFilter = (startDate?: string, endDate?: string): Prisma.DateTimeFilter | undefined => {
+const buildDateFilter = (
+  startDate?: string,
+  endDate?: string,
+): Prisma.DateTimeFilter | undefined => {
   if (!startDate) {
     return undefined;
   }
@@ -97,9 +100,7 @@ const buildWhereClause = (params: {
   search?: string;
 }): Prisma.BookingWhereInput => {
   const validStatus =
-    params.status && allowedStatuses.has(params.status)
-      ? (params.status as BookingStatus)
-      : null;
+    params.status && allowedStatuses.has(params.status) ? (params.status as BookingStatus) : null;
   const dateFilter = buildDateFilter(params.startDate, params.endDate);
   const searchFilters = buildSearchFilters(params.search);
 
