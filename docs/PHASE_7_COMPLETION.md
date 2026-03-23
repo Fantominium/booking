@@ -266,7 +266,7 @@ CREATE INDEX booking_service_availability_idx ON booking(serviceId, startTime, s
 | Control                  | Status | Evidence                         |
 | ------------------------ | ------ | -------------------------------- |
 | CSP headers              | ✅     | Test: csp-headers.test.ts        |
-| HTTPS redirect           | ✅     | Implementation: middleware.ts    |
+| HTTPS redirect           | ✅     | Implementation: proxy.ts         |
 | HSTS headers             | ✅     | Implementation: next.config.mjs  |
 | Webhook verification     | ✅     | Test: webhook-security.test.ts   |
 | Rate limiting            | ✅     | Test: rate-limit.test.ts         |

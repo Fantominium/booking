@@ -82,7 +82,9 @@ export const calculateAvailableSlotsForDate = (params: {
     return [];
   }
 
-  const dayConfig = businessHours.find((entry) => entry.dayOfWeek === getDayOfWeek(date));
+  const dayConfig = businessHours.find(
+    (entry: (typeof businessHours)[number]) => entry.dayOfWeek === getDayOfWeek(date),
+  );
 
   const openingTime = override?.customOpenTime ?? dayConfig?.openingTime ?? null;
   const closingTime = override?.customCloseTime ?? dayConfig?.closingTime ?? null;
@@ -104,13 +106,13 @@ export const calculateAvailableSlotsForDate = (params: {
   ).filter((start) => isBefore(addMinutes(start, slotDuration), addMinutes(dayEnd, 1)));
 
   return slotStarts
-    .map((start) => ({
+    .map((start: (typeof slotStarts)[number]) => ({
       start,
       end: addMinutes(start, slotDuration),
     }))
     .filter(
       (slot) =>
-        !bookings.some((booking) =>
+        !bookings.some((booking: (typeof bookings)[number]) =>
           isOverlapping(slot, { start: booking.startTime, end: booking.endTime }),
         ),
     );

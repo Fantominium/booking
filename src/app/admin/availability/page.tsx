@@ -1,8 +1,11 @@
 import { BusinessHoursForm } from "@/components/admin/BusinessHoursForm";
 import { DateOverrideForm } from "@/components/admin/DateOverrideForm";
 import { SystemSettingsForm } from "@/components/admin/SystemSettingsForm";
+import { requireAdminPageSession } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
 import type { BusinessHours, DateOverride } from "@/types/availability";
+
+export const dynamic = "force-dynamic";
 
 const formatTime = (value: Date | null): string | null => {
   if (!value) {
@@ -45,6 +48,8 @@ const mapDateOverride = (entry: {
 });
 
 const AvailabilityPage = async (): Promise<JSX.Element> => {
+  await requireAdminPageSession("/admin/availability");
+
   const businessHours = await prisma.businessHours.findMany({
     orderBy: { dayOfWeek: "asc" },
   });
@@ -76,6 +81,7 @@ const AvailabilityPage = async (): Promise<JSX.Element> => {
           id: settings.id,
           maxBookingsPerDay: settings.maxBookingsPerDay,
           bufferMinutes: settings.bufferMinutes,
+          bankTransferInstructions: settings.bankTransferInstructions,
           updatedAt: settings.updatedAt.toISOString(),
         }}
       />

@@ -7,6 +7,7 @@ const emailSchema = z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/i);
 const dateTimeSchema = z
   .string()
   .refine((value) => !Number.isNaN(Date.parse(value)), "Invalid datetime");
+const paymentMethodSchema = z.enum(["CARD", "BANK_TRANSFER"]);
 
 export const createBookingRequestSchema = z.object({
   serviceId: uuidSchema,
@@ -14,6 +15,7 @@ export const createBookingRequestSchema = z.object({
   customerName: z.string().min(1).max(255),
   customerEmail: emailSchema,
   customerPhone: z.string().min(5).max(20),
+  paymentMethod: paymentMethodSchema.default("CARD"),
 });
 
 export const createPaymentIntentRequestSchema = z.object({

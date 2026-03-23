@@ -164,6 +164,18 @@ export const BookingList = ({ onSelectBooking }: BookingListProps): JSX.Element 
       },
       { field: "status", headerName: "Status", flex: 0.7, minWidth: 120 },
       {
+        field: "paymentState",
+        headerName: "Payment",
+        flex: 0.9,
+        minWidth: 180,
+      },
+      {
+        field: "paymentMethod",
+        headerName: "Method",
+        flex: 0.8,
+        minWidth: 140,
+      },
+      {
         field: "remainingBalanceCents",
         headerName: "Balance",
         flex: 0.7,

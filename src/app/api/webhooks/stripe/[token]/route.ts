@@ -8,6 +8,8 @@ import { confirmBookingStatus } from "@/lib/services/booking";
 import { isWebhookEventProcessed } from "@/lib/services/payment";
 import { stripe } from "@/lib/stripe/config";
 
+export const dynamic = "force-dynamic";
+
 export const POST = async (
   request: Request,
   context: { params: Promise<{ token: string }> },

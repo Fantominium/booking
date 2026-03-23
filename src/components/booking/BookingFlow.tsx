@@ -16,19 +16,32 @@ type BookingFlowProps = {
   serviceId: string;
 };
 
+type BookingResponse = {
+  id: string;
+  clientSecret: string | null;
+  paymentMethod: "CARD" | "BANK_TRANSFER";
+  paymentState: "UNPAID" | "PENDING_BANK_TRANSFER" | "DEPOSIT_PAID" | "PAID_IN_FULL";
+};
+
 export const BookingFlow = ({ serviceId }: BookingFlowProps): React.JSX.Element => {
   const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
   const [selectedSlot, setSelectedSlot] = useState<string | undefined>(undefined);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const endDate = useMemo(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 30);
+    return date.toISOString().slice(0, 10);
+  }, []);
 
   const { data: availableDates = [] } = useQuery({
-    queryKey: ["availability", "dates", serviceId, today],
+    queryKey: ["availability", "dates", serviceId, today, endDate],
     queryFn: async (): Promise<string[]> => {
       const response = await fetch(
-        `/api/availability/${serviceId}?startDate=${today}&endDate=${today}`,
+        `/api/availability/${serviceId}?startDate=${today}&endDate=${endDate}`,
       );
       const data = (await response.json()) as { dates: string[] };
       return data.dates;
@@ -62,10 +75,17 @@ export const BookingFlow = ({ serviceId }: BookingFlowProps): React.JSX.Element 
   }, []);
 
   const handleCheckoutSubmit = useCallback(
-    async (data: { customerName: string; customerEmail: string; customerPhone: string }) => {
+    async (data: {
+      customerName: string;
+      customerEmail: string;
+      customerPhone: string;
+      paymentMethod: "CARD" | "BANK_TRANSFER";
+    }) => {
       if (!selectedSlot) {
         return;
       }
+
+      setStatusMessage(null);
 
       const response = await fetch("/api/bookings", {
         method: "POST",
@@ -76,16 +96,23 @@ export const BookingFlow = ({ serviceId }: BookingFlowProps): React.JSX.Element 
           customerName: data.customerName,
           customerEmail: data.customerEmail,
           customerPhone: data.customerPhone,
+          paymentMethod: data.paymentMethod,
         }),
       });
 
-      const booking = (await response.json()) as {
-        id: string;
-        clientSecret: string | null;
-      };
+      if (!response.ok) {
+        setStatusMessage("We could not create your booking. Please review your details and try again.");
+        return;
+      }
+
+      const booking = (await response.json()) as BookingResponse;
 
       setClientSecret(booking.clientSecret ?? null);
       setBookingId(booking.id);
+
+      if (booking.paymentMethod === "BANK_TRANSFER") {
+        globalThis.location.href = `/book/success?bookingId=${booking.id}`;
+      }
     },
     [selectedSlot, serviceId],
   );
@@ -98,8 +125,13 @@ export const BookingFlow = ({ serviceId }: BookingFlowProps): React.JSX.Element 
 
   return (
     <div className="flex flex-col gap-6">
+      {statusMessage ? (
+        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {statusMessage}
+        </p>
+      ) : null}
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold text-slate-900">Select a date</h2>
+        <h2 className="text-lg font-semibold text-slate-950">Select a date</h2>
         <DatePicker
           dates={availableDates}
           selectedDate={selectedDate}
@@ -109,21 +141,21 @@ export const BookingFlow = ({ serviceId }: BookingFlowProps): React.JSX.Element 
 
       {selectedDate ? (
         <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold text-slate-900">Select a time</h2>
+          <h2 className="text-lg font-semibold text-slate-950">Select a time</h2>
           <TimeSlotPicker slots={slots} selectedStart={selectedSlot} onSelect={handleSlotSelect} />
         </section>
       ) : null}
 
       {selectedSlot ? (
-        <section className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold text-slate-900">Your details</h2>
+        <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-950">Your details and payment choice</h2>
           <CheckoutForm onSubmit={handleCheckoutSubmit} />
         </section>
       ) : null}
 
       {clientSecret ? (
-        <section className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold text-slate-900">Payment</h2>
+        <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-950">Card payment</h2>
           <Elements stripe={stripePromise} options={{ clientSecret }}>
             <StripePaymentForm
               clientSecret={clientSecret}

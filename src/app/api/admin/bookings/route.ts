@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import type { Prisma } from "@prisma/client";
-
+import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
 import { getCached, setCached, CACHE_TTL } from "@/lib/cache/redis";
 import { type BookingStatus } from "@/types/booking";
+import type { Prisma } from "@prisma/client";
+
+export const dynamic = "force-dynamic";
 
 const parseDate = (value: string): Date => {
   const [year, month, day] = value.split("-").map(Number);
@@ -19,6 +21,94 @@ const addDays = (date: Date, days: number): Date => {
 };
 
 const allowedStatuses = new Set(["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"]);
+const parseNumberParam = (value: string, fallback: number, min: number, max: number): number => {
+  const parsed = Number.parseInt(value, 10);
+
+  if (Number.isNaN(parsed)) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.max(min, parsed));
+};
+
+const getOrderBy = (
+  sort: "startTime" | "customerName" | "status" | "createdAt",
+  order: "asc" | "desc",
+): Prisma.BookingOrderByWithRelationInput => {
+  if (sort === "customerName") {
+    return { customerName: order };
+  }
+
+  if (sort === "status") {
+    return { status: order };
+  }
+
+  if (sort === "createdAt") {
+    return { createdAt: order };
+  }
+
+  return { startTime: order };
+};
+
+const buildCacheKey = (params: {
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  search?: string;
+  page: number;
+  limit: number;
+  sort: string;
+  order: string;
+}): string => {
+  return `bookings:admin:${JSON.stringify(params)}`;
+};
+
+const buildDateFilter = (startDate?: string, endDate?: string): Prisma.DateTimeFilter | undefined => {
+  if (!startDate) {
+    return undefined;
+  }
+
+  const parsedStartDate = parseDate(startDate);
+  const parsedEndDate = endDate ? parseDate(endDate) : null;
+
+  return {
+    gte: parsedStartDate,
+    lt: parsedEndDate ? addDays(parsedEndDate, 1) : addDays(parsedStartDate, 1),
+  };
+};
+
+const buildSearchFilters = (search?: string): Prisma.BookingWhereInput["OR"] | undefined => {
+  if (!search) {
+    return undefined;
+  }
+
+  return [
+    { customerName: { contains: search, mode: "insensitive" as const } },
+    { customerPhone: { contains: search } },
+    { customerEmail: { contains: search, mode: "insensitive" as const } },
+    { service: { name: { contains: search, mode: "insensitive" as const } } },
+  ];
+};
+
+const buildWhereClause = (params: {
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  search?: string;
+}): Prisma.BookingWhereInput => {
+  const validStatus =
+    params.status && allowedStatuses.has(params.status)
+      ? (params.status as BookingStatus)
+      : null;
+  const dateFilter = buildDateFilter(params.startDate, params.endDate);
+  const searchFilters = buildSearchFilters(params.search);
+
+  return {
+    ...(validStatus ? { status: validStatus } : {}),
+    ...(dateFilter ? { startTime: dateFilter } : {}),
+    ...(searchFilters ? { OR: searchFilters } : {}),
+  };
+};
 
 // Query parameters validation schema
 const querySchema = z.object({
@@ -26,8 +116,8 @@ const querySchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   search: z.string().optional(),
-  page: z.string().transform((val) => Math.max(1, parseInt(val) || 1)),
-  limit: z.string().transform((val) => Math.min(100, Math.max(10, parseInt(val) || 20))),
+  page: z.string().transform((value) => parseNumberParam(value, 1, 1, Number.MAX_SAFE_INTEGER)),
+  limit: z.string().transform((value) => parseNumberParam(value, 20, 10, 100)),
   sort: z
     .enum(["startTime", "customerName", "status", "createdAt"])
     .optional()
@@ -45,6 +135,8 @@ type BookingSummary = {
   startTime: string;
   endTime: string;
   status: string;
+  paymentMethod: string;
+  paymentState: string;
   emailDeliveryStatus: string;
   downpaymentPaidCents: number;
   remainingBalanceCents: number;
@@ -67,9 +159,27 @@ type ErrorResponse = {
   error: string;
 };
 
-const mapBooking = (
-  booking: Prisma.BookingGetPayload<{ include: { service: true } }>,
-): BookingSummary => ({
+type BookingWithService = {
+  id: string;
+  serviceId: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  startTime: Date;
+  endTime: Date;
+  status: string;
+  paymentMethod: string;
+  paymentState: string;
+  emailDeliveryStatus: string;
+  downpaymentPaidCents: number;
+  remainingBalanceCents: number;
+  createdAt: Date;
+  service: {
+    name: string;
+  };
+};
+
+const mapBooking = (booking: BookingWithService): BookingSummary => ({
   id: booking.id,
   serviceId: booking.serviceId,
   serviceName: booking.service.name,
@@ -79,6 +189,8 @@ const mapBooking = (
   startTime: booking.startTime.toISOString(),
   endTime: booking.endTime.toISOString(),
   status: booking.status,
+  paymentMethod: booking.paymentMethod,
+  paymentState: booking.paymentState,
   emailDeliveryStatus: booking.emailDeliveryStatus,
   downpaymentPaidCents: booking.downpaymentPaidCents,
   remainingBalanceCents: booking.remainingBalanceCents,
@@ -88,6 +200,10 @@ const mapBooking = (
 export const GET = async (
   request: Request,
 ): Promise<NextResponse<PaginatedResponse | ErrorResponse>> => {
+  if (!(await getAdminSession())) {
+    return createAdminUnauthorizedResponse() as NextResponse<PaginatedResponse | ErrorResponse>;
+  }
+
   const { searchParams } = new URL(request.url);
 
   // Validate and parse query parameters
@@ -108,8 +224,7 @@ export const GET = async (
 
   const { status, startDate, endDate, search, page, limit, sort, order } = queryResult.data;
 
-  // Build cache key for this request
-  const cacheKey = `bookings:admin:${JSON.stringify({
+  const cacheKey = buildCacheKey({
     status,
     startDate,
     endDate,
@@ -118,7 +233,7 @@ export const GET = async (
     limit,
     sort,
     order,
-  })}`;
+  });
 
   // Try to get from cache first
   const cached = await getCached<PaginatedResponse>(cacheKey);
@@ -126,46 +241,8 @@ export const GET = async (
     return NextResponse.json(cached);
   }
 
-  // Validate status parameter
-  const validStatus: BookingStatus | null =
-    status && allowedStatuses.has(status) ? (status as BookingStatus) : null;
-  const parsedStartDate = startDate ? parseDate(startDate) : null;
-  const parsedEndDate = endDate ? parseDate(endDate) : null;
-
-  // Build date filter
-  const dateFilter = parsedStartDate
-    ? {
-        gte: parsedStartDate,
-        lt: parsedEndDate ? addDays(parsedEndDate, 1) : addDays(parsedStartDate, 1),
-      }
-    : undefined;
-
-  // Build search filters
-  const searchFilters = search
-    ? [
-        { customerName: { contains: search, mode: "insensitive" as const } },
-        { customerPhone: { contains: search } },
-        { customerEmail: { contains: search, mode: "insensitive" as const } },
-        { service: { name: { contains: search, mode: "insensitive" as const } } },
-      ]
-    : null;
-
-  // Build where clause
-  const where: Prisma.BookingWhereInput = {
-    ...(validStatus ? { status: validStatus } : {}),
-    ...(dateFilter ? { startTime: dateFilter } : {}),
-    ...(searchFilters ? { OR: searchFilters } : {}),
-  };
-
-  // Build order by clause
-  const orderBy: Prisma.BookingOrderByWithRelationInput =
-    sort === "customerName"
-      ? { customerName: order }
-      : sort === "status"
-        ? { status: order }
-        : sort === "createdAt"
-          ? { createdAt: order }
-          : { startTime: order };
+  const where = buildWhereClause({ status, startDate, endDate, search });
+  const orderBy = getOrderBy(sort, order);
 
   // Calculate pagination
   const skip = (page - 1) * limit;

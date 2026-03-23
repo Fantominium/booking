@@ -14,6 +14,7 @@ type ServiceListProps = {
 const mapServiceToForm = (service: Service): ServiceFormValues => ({
   name: service.name,
   description: service.description ?? "",
+  offeringType: service.offeringType,
   durationMin: service.durationMin,
   priceCents: service.priceCents,
   downpaymentCents: service.downpaymentCents,
@@ -38,7 +39,7 @@ export const ServiceList = ({ refreshKey }: ServiceListProps): React.JSX.Element
   });
 
   useEffect(() => {
-    void queryClient.invalidateQueries({ queryKey: ["admin", "services"] });
+    queryClient.invalidateQueries({ queryKey: ["admin", "services"] });
   }, [refreshKey, queryClient]);
 
   const statusMessage = error ? (error as Error).message : null;
@@ -153,10 +154,7 @@ export const ServiceList = ({ refreshKey }: ServiceListProps): React.JSX.Element
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <div className="text-sm font-semibold text-slate-900">{service.name}</div>
-                <div className="text-xs text-slate-600">
-                  {service.durationMin} min · ${service.priceCents / 100} · Downpayment $
-                  {service.downpaymentCents / 100}
-                </div>
+                <div className="text-xs text-slate-600">{`${service.offeringType} · ${service.durationMin} min · $${service.priceCents / 100} · Downpayment $${service.downpaymentCents / 100}`}</div>
                 <div className="text-xs text-slate-500">
                   {service.isActive ? "Active" : "Inactive"}
                 </div>

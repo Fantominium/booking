@@ -54,7 +54,7 @@ Successfully implemented a unified, context-aware navigation bar that adapts to 
   - Keyboard accessible (Arrow Down, Tab, Escape)
 - Updated `Header.tsx` to render `AdminDropdown` ONLY for authenticated sessions using `useSession()` from next-auth
 - Implemented identity protection: NO admin links rendered for guest sessions
-- Admin routes protected via `middleware.ts` (redirect to `/admin/login`)
+- Admin routes protected via `proxy.ts` (redirect to `/admin/login`)
 
 **Tests**:
 

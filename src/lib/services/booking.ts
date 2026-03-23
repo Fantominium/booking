@@ -12,6 +12,7 @@ export type CreateBookingInput = {
   customerEmail: string;
   customerPhone: string;
   startTime: Date;
+  paymentMethod: "CARD" | "BANK_TRANSFER";
   serviceDurationMin: number;
   bufferMinutes: number;
   priceCents: number;
@@ -42,10 +43,15 @@ export const createBookingWithLock = async (params: {
 }): Promise<{
   id: string;
   endTime: Date;
+  bankTransferReference: string | null;
 }> => {
   const { prisma, input } = params;
 
   const endTime = addMinutes(input.startTime, input.serviceDurationMin + input.bufferMinutes);
+  const bankTransferReference =
+    input.paymentMethod === "BANK_TRANSFER"
+      ? `TF-${input.startTime.getUTCFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`
+      : null;
 
   const booking = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const hasConflict = await lockExistingBooking(tx, {
@@ -65,13 +71,17 @@ export const createBookingWithLock = async (params: {
         customerPhone: input.customerPhone,
         startTime: input.startTime,
         endTime,
+        paymentMethod: input.paymentMethod,
+        paymentState:
+          input.paymentMethod === "BANK_TRANSFER" ? "PENDING_BANK_TRANSFER" : "UNPAID",
+        bankTransferReference,
         remainingBalanceCents: Math.max(input.priceCents - input.downpaymentCents, 0),
         downpaymentPaidCents: 0,
       },
     });
   });
 
-  return { id: booking.id, endTime: booking.endTime };
+  return { id: booking.id, endTime: booking.endTime, bankTransferReference };
 };
 
 export const confirmBookingStatus = async (params: {
@@ -88,7 +98,10 @@ export const confirmBookingStatus = async (params: {
 
   await prisma.booking.update({
     where: { id: booking.id },
-    data: { downpaymentPaidCents: booking.service.downpaymentCents },
+    data: {
+      downpaymentPaidCents: booking.service.downpaymentCents,
+      paymentState: "DEPOSIT_PAID",
+    },
   });
 
   await queueEmailJob({
@@ -132,6 +145,7 @@ export const markBookingAsPaid = async (params: {
     where: { id: bookingId },
     data: {
       status: "COMPLETED",
+      paymentState: "PAID_IN_FULL",
       remainingBalanceCents: 0,
     },
   });

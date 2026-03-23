@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
 import { invalidateAvailabilityCache } from "@/lib/cache/availability";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 const timeSchema = z.string().regex(/^\d{2}:\d{2}$/);
 const businessHourSchema = z.object({
@@ -31,7 +34,7 @@ const parseTimeString = (value: string | null | undefined): Date | null => {
     return null;
   }
 
-  const [hours, minutes] = value.split(":").map((part) => Number(part));
+  const [hours, minutes] = value.split(":").map(Number);
   if (Number.isNaN(hours) || Number.isNaN(minutes)) {
     return null;
   }
@@ -40,11 +43,15 @@ const parseTimeString = (value: string | null | undefined): Date | null => {
 };
 
 export const GET = async (): Promise<NextResponse> => {
+  if (!(await getAdminSession())) {
+    return createAdminUnauthorizedResponse();
+  }
+
   const businessHours = await prisma.businessHours.findMany({
     orderBy: { dayOfWeek: "asc" },
   });
 
-  const payload = businessHours.map((entry) => ({
+  const payload = businessHours.map((entry: (typeof businessHours)[number]) => ({
     id: entry.id,
     dayOfWeek: entry.dayOfWeek,
     openingTime: toTimeString(entry.openingTime),
@@ -56,6 +63,10 @@ export const GET = async (): Promise<NextResponse> => {
 };
 
 export const PUT = async (request: Request): Promise<NextResponse> => {
+  if (!(await getAdminSession())) {
+    return createAdminUnauthorizedResponse();
+  }
+
   const body = await request.json();
   const parsed = updateBusinessHoursSchema.safeParse(body);
 
@@ -84,7 +95,7 @@ export const PUT = async (request: Request): Promise<NextResponse> => {
 
   const payload = [...updated]
     .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
-    .map((entry) => ({
+    .map((entry: (typeof updated)[number]) => ({
       id: entry.id,
       dayOfWeek: entry.dayOfWeek,
       openingTime: toTimeString(entry.openingTime),

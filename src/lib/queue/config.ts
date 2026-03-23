@@ -3,7 +3,9 @@ import Redis from "ioredis";
 
 import { env } from "@/lib/config/env";
 
-export const redisConnection = new Redis(env.REDIS_URL ?? "");
+export const redisConnection = new Redis(env.REDIS_URL ?? "", {
+  maxRetriesPerRequest: null,
+});
 
 export const EMAIL_QUEUE_NAME = "email-queue";
 

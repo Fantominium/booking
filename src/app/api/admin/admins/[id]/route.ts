@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
+export const dynamic = "force-dynamic";
+
 const checkAuthentication = async (): Promise<boolean> => {
   const session = await getServerSession(authOptions);
   return !!session?.user;

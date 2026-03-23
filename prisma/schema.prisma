@@ -20,6 +20,24 @@ enum BookingStatus {
   CANCELLED
 }
 
+enum OfferingType {
+  SESSION
+  EVENT
+  RENTAL
+}
+
+enum PaymentMethod {
+  CARD
+  BANK_TRANSFER
+}
+
+enum PaymentState {
+  UNPAID
+  PENDING_BANK_TRANSFER
+  DEPOSIT_PAID
+  PAID_IN_FULL
+}
+
 enum PaymentAuditAction {
   INTENT_CREATED
   PAYMENT_CONFIRMED
@@ -56,6 +74,7 @@ model Service {
   id               String    @id @default(uuid())
   name             String    @unique
   description      String?
+  offeringType     OfferingType @default(SESSION) @map("offering_type")
   durationMin      Int
   priceCents       Int
   downpaymentCents Int
@@ -77,9 +96,12 @@ model Booking {
   startTime             DateTime      @map("start_time")
   endTime               DateTime      @map("end_time")
   status                BookingStatus @default(PENDING)
+  paymentMethod         PaymentMethod  @default(CARD) @map("payment_method")
+  paymentState          PaymentState   @default(UNPAID) @map("payment_state")
   emailDeliveryStatus   EmailDeliveryStatus @default(RETRYING) @map("email_delivery_status")
   stripePaymentIntentId String?       @unique @map("stripe_payment_intent_id")
   stripeCustomerId      String?       @map("stripe_customer_id")
+  bankTransferReference String?       @map("bank_transfer_reference")
   downpaymentPaidCents  Int           @default(0) @map("downpayment_paid_cents")
   remainingBalanceCents Int           @map("remaining_balance_cents")
   createdAt             DateTime      @default(now()) @map("created_at")
@@ -119,10 +141,11 @@ model DateOverride {
 }
 
 model SystemSettings {
-  id               String   @id @default(uuid())
-  maxBookingsPerDay Int     @default(8) @map("max_bookings_per_day")
-  bufferMinutes     Int     @default(15) @map("buffer_minutes")
-  updatedAt         DateTime @updatedAt @map("updated_at")
+  id                      String   @id @default(uuid())
+  maxBookingsPerDay       Int      @default(8) @map("max_bookings_per_day")
+  bufferMinutes           Int      @default(15) @map("buffer_minutes")
+  bankTransferInstructions String? @map("bank_transfer_instructions")
+  updatedAt               DateTime @updatedAt @map("updated_at")
 
   @@map("system_settings")
 }

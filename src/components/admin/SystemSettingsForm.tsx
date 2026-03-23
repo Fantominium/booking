@@ -12,17 +12,19 @@ type SystemSettingsFormProps = {
 type SettingsDraft = {
   maxBookingsPerDay: string;
   bufferMinutes: string;
+  bankTransferInstructions: string;
 };
 
 export const SystemSettingsForm = ({ initialSettings }: SystemSettingsFormProps): JSX.Element => {
   const [draft, setDraft] = useState<SettingsDraft>({
     maxBookingsPerDay: String(initialSettings.maxBookingsPerDay),
     bufferMinutes: String(initialSettings.bufferMinutes),
+    bankTransferInstructions: initialSettings.bankTransferInstructions ?? "",
   });
   const [status, setStatus] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const field = event.target.dataset.field as keyof SettingsDraft | undefined;
     const value = event.target.value;
 
@@ -46,6 +48,7 @@ export const SystemSettingsForm = ({ initialSettings }: SystemSettingsFormProps)
           body: JSON.stringify({
             maxBookingsPerDay: Number(draft.maxBookingsPerDay),
             bufferMinutes: Number(draft.bufferMinutes),
+            bankTransferInstructions: draft.bankTransferInstructions.trim() || null,
           }),
         });
 
@@ -98,6 +101,17 @@ export const SystemSettingsForm = ({ initialSettings }: SystemSettingsFormProps)
           />
         </label>
       </div>
+
+      <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <span>Bank transfer instructions</span>
+        <textarea
+          value={draft.bankTransferInstructions}
+          data-field="bankTransferInstructions"
+          onChange={handleChange}
+          className="min-h-32 rounded-md border border-slate-300 px-3 py-2"
+          placeholder="Explain the account name, account number, sort code, and what reference the customer must use."
+        />
+      </label>
 
       <div className="flex items-center justify-between">
         <span className="text-sm text-slate-600">{status}</span>

@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
 import { invalidateAvailabilityCache } from "@/lib/cache/availability";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 const timeSchema = z.string().regex(/^\d{2}:\d{2}$/);
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
@@ -30,7 +33,7 @@ const parseTimeString = (value: string | null | undefined): Date | null => {
     return null;
   }
 
-  const [hours, minutes] = value.split(":").map((part) => Number(part));
+  const [hours, minutes] = value.split(":").map(Number);
   if (Number.isNaN(hours) || Number.isNaN(minutes)) {
     return null;
   }
@@ -39,16 +42,20 @@ const parseTimeString = (value: string | null | undefined): Date | null => {
 };
 
 const parseDateString = (value: string): Date => {
-  const [year, month, day] = value.split("-").map((part) => Number(part));
+  const [year, month, day] = value.split("-").map(Number);
   return new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
 };
 
 export const GET = async (): Promise<NextResponse> => {
+  if (!(await getAdminSession())) {
+    return createAdminUnauthorizedResponse();
+  }
+
   const overrides = await prisma.dateOverride.findMany({
     orderBy: { date: "asc" },
   });
 
-  const payload = overrides.map((entry) => ({
+  const payload = overrides.map((entry: (typeof overrides)[number]) => ({
     id: entry.id,
     date: entry.date.toISOString().slice(0, 10),
     isBlocked: entry.isBlocked,
@@ -61,6 +68,10 @@ export const GET = async (): Promise<NextResponse> => {
 };
 
 export const POST = async (request: Request): Promise<NextResponse> => {
+  if (!(await getAdminSession())) {
+    return createAdminUnauthorizedResponse();
+  }
+
   const body = await request.json();
   const parsed = createDateOverrideSchema.safeParse(body);
 

@@ -1,0 +1,477 @@
+openapi: 3.0.3
+info:
+  title: TruFlow Journey Hardening Remediation Contract
+  version: 0.1.0
+  description: |
+    Feature-local OpenAPI artifact for the endpoints impacted by
+    003-journey-hardening-remediation. This is intentionally scoped to the
+    remediation surface and is expected to be merged into the repository's
+    canonical API contract during implementation.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/bookings:
+    post:
+      summary: Create a booking and return the payment-choice outcome payload.
+      description: |
+        Creates a booking for the selected offering and returns either an
+        immediate-payment payload or a bank-transfer pending payload.
+      tags:
+        - Bookings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookingRequest"
+      responses:
+        "200":
+          description: Booking created with payment-choice outcome details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateBookingResponse"
+        "400":
+          description: Invalid booking request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Requested slot or offering is no longer available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/availability/{serviceId}:
+    get:
+      summary: Retrieve availability for a bookable offering.
+      tags:
+        - Availability
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Reachable dates or slots for the offering.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AvailabilityResponse"
+        "404":
+          description: Offering not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/admin/dashboard/today:
+    get:
+      summary: Return dashboard bookings for the current day.
+      tags:
+        - Admin Dashboard
+      security:
+        - adminSession: []
+      responses:
+        "200":
+          description: Authenticated admin dashboard bookings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDashboardTodayResponse"
+        "401":
+          description: Missing or invalid admin session.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Authenticated but not authorized for admin access.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/admin/dashboard/pending-actions:
+    get:
+      summary: Return pending admin follow-up items, including pending transfer bookings.
+      tags:
+        - Admin Dashboard
+      security:
+        - adminSession: []
+      responses:
+        "200":
+          description: Authenticated admin pending actions.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminPendingActionsResponse"
+        "401":
+          description: Missing or invalid admin session.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/admin/services:
+    get:
+      summary: List admin-managed offerings.
+      tags:
+        - Admin Services
+      security:
+        - adminSession: []
+      responses:
+        "200":
+          description: Offering list for admin management.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminServicesResponse"
+        "401":
+          description: Missing or invalid admin session.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      summary: Create or update an offering required by a supported journey.
+      tags:
+        - Admin Services
+      security:
+        - adminSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminServiceUpsertRequest"
+      responses:
+        "200":
+          description: Offering persisted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminServiceResponse"
+        "401":
+          description: Missing or invalid admin session.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/admin/business-hours:
+    get:
+      summary: Retrieve working-hours configuration for admin management.
+      tags:
+        - Admin Availability
+      security:
+        - adminSession: []
+      responses:
+        "200":
+          description: Business-hours configuration.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessHoursResponse"
+        "401":
+          description: Missing or invalid admin session.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/admin/date-overrides:
+    get:
+      summary: Retrieve holiday and emergency blocking rules.
+      tags:
+        - Admin Availability
+      security:
+        - adminSession: []
+      responses:
+        "200":
+          description: Date override rules.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DateOverridesResponse"
+        "401":
+          description: Missing or invalid admin session.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  securitySchemes:
+    adminSession:
+      type: apiKey
+      in: cookie
+      name: truflow.session-token
+  schemas:
+    CreateBookingRequest:
+      type: object
+      required:
+        - serviceId
+        - startTime
+        - customerName
+        - customerEmail
+        - customerPhone
+        - paymentChoice
+      properties:
+        serviceId:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        customerName:
+          type: string
+        customerEmail:
+          type: string
+          format: email
+        customerPhone:
+          type: string
+        paymentChoice:
+          type: string
+          enum:
+            - IMMEDIATE_PAYMENT
+            - BANK_TRANSFER
+    CreateBookingResponse:
+      type: object
+      required:
+        - id
+        - bookingState
+        - paymentChoice
+      properties:
+        id:
+          type: string
+        bookingState:
+          type: string
+          enum:
+            - PAYMENT_PENDING_IMMEDIATE
+            - CONFIRMED_PAID
+            - RESERVED_PENDING_TRANSFER
+            - REQUIRES_CORRECTION
+        paymentChoice:
+          type: string
+          enum:
+            - IMMEDIATE_PAYMENT
+            - BANK_TRANSFER
+        paymentIntentId:
+          type: string
+          nullable: true
+        clientSecret:
+          type: string
+          nullable: true
+        bankTransferInstructions:
+          $ref: "#/components/schemas/BankTransferInstructions"
+    BankTransferInstructions:
+      type: object
+      nullable: true
+      properties:
+        accountName:
+          type: string
+        accountNumberMasked:
+          type: string
+        sortCodeMasked:
+          type: string
+        reference:
+          type: string
+        paymentWindow:
+          type: string
+        customerMessage:
+          type: string
+    AvailabilityResponse:
+      type: object
+      properties:
+        dates:
+          type: array
+          items:
+            type: string
+            format: date
+        slots:
+          type: array
+          items:
+            $ref: "#/components/schemas/AvailabilitySlot"
+    AvailabilitySlot:
+      type: object
+      required:
+        - start
+        - available
+      properties:
+        start:
+          type: string
+          format: date-time
+        available:
+          type: boolean
+        reason:
+          type: string
+          nullable: true
+    AdminDashboardTodayResponse:
+      type: object
+      properties:
+        bookings:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminBookingSummary"
+    AdminPendingActionsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminPendingAction"
+    AdminServicesResponse:
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminServiceResponse"
+    AdminServiceUpsertRequest:
+      type: object
+      required:
+        - name
+        - durationMin
+        - priceCents
+        - downpaymentCents
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        durationMin:
+          type: integer
+        priceCents:
+          type: integer
+        downpaymentCents:
+          type: integer
+        offeringType:
+          type: string
+          enum:
+            - SESSION
+            - EVENT
+            - RENTAL
+          nullable: true
+    AdminServiceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        durationMin:
+          type: integer
+        priceCents:
+          type: integer
+        downpaymentCents:
+          type: integer
+        isActive:
+          type: boolean
+        offeringType:
+          type: string
+          nullable: true
+    BusinessHoursResponse:
+      type: object
+      properties:
+        days:
+          type: array
+          items:
+            $ref: "#/components/schemas/BusinessHoursDay"
+    BusinessHoursDay:
+      type: object
+      properties:
+        dayOfWeek:
+          type: integer
+        isOpen:
+          type: boolean
+        openingTime:
+          type: string
+          nullable: true
+        closingTime:
+          type: string
+          nullable: true
+    DateOverridesResponse:
+      type: object
+      properties:
+        overrides:
+          type: array
+          items:
+            $ref: "#/components/schemas/DateOverride"
+    DateOverride:
+      type: object
+      properties:
+        id:
+          type: string
+        date:
+          type: string
+          format: date
+        isBlocked:
+          type: boolean
+        reason:
+          type: string
+          nullable: true
+    AdminBookingSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        customerName:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        status:
+          type: string
+        paymentState:
+          type: string
+          nullable: true
+        serviceName:
+          type: string
+    AdminPendingAction:
+      type: object
+      properties:
+        bookingId:
+          type: string
+        actionType:
+          type: string
+          enum:
+            - PENDING_TRANSFER
+            - PAYMENT_FOLLOW_UP
+            - AVAILABILITY_CONFLICT
+        message:
+          type: string
+        dueAt:
+          type: string
+          format: date-time
+          nullable: true
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          oneOf:
+            - type: string
+            - type: object
+              properties:
+                code:
+                  type: string
+                message:
+                  type: string

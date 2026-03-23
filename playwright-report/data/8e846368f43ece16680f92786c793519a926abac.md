@@ -1,0 +1,82 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "TruFlow logo TruFlow" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img "TruFlow logo" [ref=e7]
+        - heading "TruFlow" [level=1] [ref=e8]
+      - button "Close menu" [expanded] [ref=e9]:
+        - img [ref=e10]
+        - img [ref=e11]
+  - main [ref=e14]:
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - paragraph [ref=e19]: TruFlow booking platform
+          - heading "Reserve the right TruFlow experience without broken journeys." [level=1] [ref=e20]
+          - paragraph [ref=e21]: Start with a guided session, a hosted event, or a rental booking. Every route leads to availability, customer details, and a final payment choice.
+          - link "View all offerings" [ref=e23] [cursor=pointer]:
+            - /url: /book
+        - generic [ref=e24]:
+          - heading "Quick paths" [level=2] [ref=e25]
+          - generic [ref=e26]:
+            - link "Book a session One-to-one appointments with secure deposit or bank transfer." [ref=e27] [cursor=pointer]:
+              - /url: /book?type=SESSION
+              - generic [ref=e28]: Book a session
+              - generic [ref=e29]: One-to-one appointments with secure deposit or bank transfer.
+            - link "Reserve an event Hosted group experiences with clear availability and payment steps." [ref=e30] [cursor=pointer]:
+              - /url: /book?type=EVENT
+              - generic [ref=e31]: Reserve an event
+              - generic [ref=e32]: Hosted group experiences with clear availability and payment steps.
+            - link "Reserve a rental Private space reservations with booking confirmation and transfer references." [ref=e33] [cursor=pointer]:
+              - /url: /book?type=RENTAL
+              - generic [ref=e34]: Reserve a rental
+              - generic [ref=e35]: Private space reservations with booking confirmation and transfer references.
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e39]: 📅
+          - heading "Reachable journeys" [level=3] [ref=e40]
+          - paragraph [ref=e41]: Every public CTA takes you into a complete flow with valid next steps.
+        - generic [ref=e42]:
+          - generic [ref=e44]: 💳
+          - heading "Clear payment choices" [level=3] [ref=e45]
+          - paragraph [ref=e46]: Card deposits and bank transfer reservations are explained before you commit.
+        - generic [ref=e47]:
+          - generic [ref=e49]: ✨
+          - heading "Operational admin tools" [level=3] [ref=e50]
+          - paragraph [ref=e51]: Services, availability, emergency blocks, and payment states stay manageable.
+  - button "Open Next.js Dev Tools" [ref=e57] [cursor=pointer]:
+    - img [ref=e58]
+  - alert [ref=e61]
+  - dialog "Navigation menu" [ref=e62]:
+    - generic [ref=e63]:
+      - button "Close navigation menu" [active] [ref=e64]
+      - generic [ref=e65]:
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - generic [ref=e68]: Explore TruFlow
+            - generic [ref=e69]: Navigation menu
+          - button "Close menu" [expanded] [ref=e70]:
+            - img [ref=e71]
+            - img [ref=e72]
+        - navigation "Menu navigation" [ref=e75]:
+          - link "Home" [ref=e76] [cursor=pointer]:
+            - /url: /
+          - link "Sessions" [ref=e77] [cursor=pointer]:
+            - /url: /book?type=SESSION
+          - link "Events" [ref=e78] [cursor=pointer]:
+            - /url: /book?type=EVENT
+          - link "Rentals" [ref=e79] [cursor=pointer]:
+            - /url: /book?type=RENTAL
+          - link "All offerings" [ref=e80] [cursor=pointer]:
+            - /url: /book
+        - generic [ref=e81]:
+          - generic [ref=e82]: Theme
+          - button "Switch to dark mode" [ref=e83]:
+            - img [ref=e84]
+```

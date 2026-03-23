@@ -1,8 +1,18 @@
 import { format, parseISO, startOfDay, addMinutes, differenceInMinutes } from "date-fns";
-import type { Booking, BusinessHours } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { getOrSetCached, cacheKeys, CACHE_TTL, invalidateCache } from "@/lib/cache/redis";
+
+type AvailabilityBusinessHours = {
+  dayOfWeek: number;
+  openingTime: Date | null;
+  closingTime: Date | null;
+  isOpen: boolean;
+};
+
+type AvailabilityBooking = {
+  startTime: Date;
+};
 
 export interface TimeSlot {
   time: string; // HH:MM format
@@ -62,7 +72,7 @@ export const invalidateAvailabilityCache = (): void => {
 };
 
 export const invalidateAvailabilityCacheForService = (serviceId: string): void => {
-  Array.from(availabilityCache.keys()).forEach((key) => {
+  Array.from(availabilityCache.keys()).forEach((key: string) => {
     if (key.startsWith(`availability:${serviceId}:`)) {
       availabilityCache.delete(key);
     }
@@ -138,7 +148,9 @@ async function calculateAvailabilityDirect(
       };
     }
     // Use custom hours if available, otherwise use regular business hours
-    const businessHour = businessHours.find((h) => h.dayOfWeek === dayOfWeek);
+    const businessHour = businessHours.find(
+      (h: (typeof businessHours)[number]) => h.dayOfWeek === dayOfWeek,
+    );
     if (!businessHour || !businessHour.isOpen) {
       return {
         date,
@@ -172,7 +184,9 @@ async function calculateAvailabilityDirect(
     };
   } else {
     // No date override - use regular business hours
-    const businessHour = businessHours.find((h) => h.dayOfWeek === dayOfWeek);
+    const businessHour = businessHours.find(
+      (h: (typeof businessHours)[number]) => h.dayOfWeek === dayOfWeek,
+    );
     if (
       !businessHour ||
       !businessHour.isOpen ||
@@ -203,7 +217,7 @@ async function calculateAvailabilityDirect(
 /**
  * Get business hours with caching
  */
-async function getBusinessHoursWithCache(): Promise<BusinessHours[]> {
+async function getBusinessHoursWithCache(): Promise<AvailabilityBusinessHours[]> {
   const cacheKey = cacheKeys.businessHours();
 
   return getOrSetCached(cacheKey, CACHE_TTL.BUSINESS_HOURS, () =>
@@ -216,7 +230,10 @@ async function getBusinessHoursWithCache(): Promise<BusinessHours[]> {
 /**
  * Get booking conflicts for a service and date with caching
  */
-async function getBookingConflictsWithCache(serviceId: string, date: string): Promise<Booking[]> {
+async function getBookingConflictsWithCache(
+  serviceId: string,
+  date: string,
+): Promise<AvailabilityBooking[]> {
   const cacheKey = cacheKeys.bookingConflicts(serviceId, date);
 
   return getOrSetCached(cacheKey, CACHE_TTL.BOOKING_CONFLICTS, async () => {
@@ -247,7 +264,7 @@ function generateTimeSlots(
   startTime: string,
   endTime: string,
   durationMin: number,
-  existingBookings: Booking[],
+  existingBookings: AvailabilityBooking[],
 ): TimeSlot[] {
   // Parse time strings (format: "HH:MM")
   const [startHour, startMinute] = startTime.split(":").map(Number);
@@ -268,10 +285,10 @@ function generateTimeSlots(
     addMinutes(start, index * intervalMinutes),
   );
 
-  return slotStarts.map((currentSlot) => {
+  return slotStarts.map((currentSlot: (typeof slotStarts)[number]) => {
     const slotEndTime = addMinutes(currentSlot, durationMin);
 
-    const hasConflict = existingBookings.some((booking) => {
+    const hasConflict = existingBookings.some((booking: (typeof existingBookings)[number]) => {
       const bookingStart = booking.startTime;
       const bookingEnd = addMinutes(bookingStart, durationMin);
 

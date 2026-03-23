@@ -8,14 +8,10 @@
  */
 
 import { test, expect } from "@playwright/test";
-import type { Page, Locator } from "@playwright/test";
 
 const ADMIN_EMAIL = "admin@truflow.local";
-const ADMIN_PASSWORD = "TestPassword123!";
-
-const getHamburgerButton = (page: Page): Locator => {
-  return page.locator("[data-testid='hamburger-button']:visible").first();
-};
+const ADMIN_PASSWORD =
+  process.env.E2E_ADMIN_PASSWORD ?? process.env.ADMIN_PASSWORD ?? process.env.ADMIN_SEED_PASSWORD ?? "";
 
 test.describe("Admin Navigation Flow", () => {
   test.describe("Unauthenticated Access", () => {
@@ -39,12 +35,14 @@ test.describe("Admin Navigation Flow", () => {
     test("should not show admin menu controls for guests", async ({ page }) => {
       await page.goto("/");
 
-      await expect(getHamburgerButton(page)).toHaveCount(0);
+      await expect(page.locator('a[href^="/admin"]')).toHaveCount(0);
     });
   });
 
   test.describe("Authenticated Admin Access", () => {
     test.beforeEach(async ({ page }) => {
+      test.skip(!ADMIN_PASSWORD, "Admin password is not configured for E2E navigation tests.");
+
       // Login as admin
       await page.goto("/admin/login");
 
@@ -57,18 +55,15 @@ test.describe("Admin Navigation Flow", () => {
       await expect(page).toHaveURL("/admin");
     });
 
-    test("should show admin hamburger in header after login", async ({ page }) => {
-      const hamburger = getHamburgerButton(page);
-      await expect(hamburger).toBeVisible();
+    test("should show the admin dropdown in the desktop header after login", async ({ page }) => {
+      await expect(page.getByRole("button", { name: /^dashboard$/i })).toBeVisible();
     });
 
-    test("should open admin menu and show all admin navigation links", async ({ page }) => {
+    test("should open the admin dropdown and show all admin navigation links", async ({ page }) => {
       await page.goto("/admin");
 
-      const hamburger = getHamburgerButton(page);
-      await hamburger.click();
+      await page.getByRole("button", { name: /^dashboard$/i }).click();
 
-      await expect(page.getByText("Admin")).toBeVisible();
       await expect(page.getByRole("link", { name: /^dashboard$/i })).toBeVisible();
       await expect(page.getByRole("link", { name: /^services$/i })).toBeVisible();
       await expect(page.getByRole("link", { name: /^bookings$/i })).toBeVisible();
@@ -79,7 +74,7 @@ test.describe("Admin Navigation Flow", () => {
     test("should navigate to Services via admin menu", async ({ page }) => {
       await page.goto("/admin");
 
-      await getHamburgerButton(page).click();
+      await page.getByRole("button", { name: /^dashboard$/i }).click();
 
       const servicesLink = page.getByRole("link", { name: /^services$/i });
       await servicesLink.click();
@@ -91,7 +86,7 @@ test.describe("Admin Navigation Flow", () => {
     test("should navigate to Bookings via admin menu", async ({ page }) => {
       await page.goto("/admin");
 
-      await getHamburgerButton(page).click();
+      await page.getByRole("button", { name: /^dashboard$/i }).click();
       await page.getByRole("link", { name: /^bookings$/i }).click();
 
       await expect(page).toHaveURL("/admin/bookings");
@@ -101,7 +96,7 @@ test.describe("Admin Navigation Flow", () => {
     test("should navigate to Availability via admin menu", async ({ page }) => {
       await page.goto("/admin");
 
-      await getHamburgerButton(page).click();
+      await page.getByRole("button", { name: /^dashboard$/i }).click();
       await page.getByRole("link", { name: /^availability$/i }).click();
 
       await expect(page).toHaveURL("/admin/availability");
@@ -111,7 +106,7 @@ test.describe("Admin Navigation Flow", () => {
     test("should mark current section with aria-current", async ({ page }) => {
       await page.goto("/admin/services");
 
-      await getHamburgerButton(page).click();
+      await page.getByRole("button", { name: /^services$/i }).click();
 
       const servicesLink = page.getByRole("link", { name: /^services$/i });
 
@@ -119,51 +114,34 @@ test.describe("Admin Navigation Flow", () => {
       await expect(servicesLink).toHaveAttribute("aria-current", "page");
     });
 
-    test("should close menu after selecting a link", async ({ page }) => {
+    test("should close the dropdown on Escape key", async ({ page }) => {
       await page.goto("/admin");
 
-      const hamburger = getHamburgerButton(page);
-      await hamburger.click();
+      const dropdown = page.getByRole("button", { name: /^dashboard$/i });
+      await dropdown.click();
 
-      await expect(hamburger).toHaveAttribute("aria-expanded", "true");
-
-      // Click Services link
-      await page.getByRole("link", { name: /^services$/i }).click();
-
-      // Wait for navigation
-      await expect(page).toHaveURL("/admin/services");
-
-      await expect(getHamburgerButton(page)).toHaveAttribute("aria-expanded", "false");
-    });
-
-    test("should close menu on Escape key", async ({ page }) => {
-      await page.goto("/admin");
-
-      const hamburger = getHamburgerButton(page);
-      await hamburger.click();
-
-      await expect(hamburger).toHaveAttribute("aria-expanded", "true");
+      await expect(dropdown).toHaveAttribute("aria-expanded", "true");
 
       await page.keyboard.press("Escape");
 
-      await expect(hamburger).toHaveAttribute("aria-expanded", "false");
+      await expect(dropdown).toHaveAttribute("aria-expanded", "false");
     });
 
-    test("should support keyboard navigation for menu trigger", async ({ page }) => {
+    test("should support keyboard navigation for the dropdown trigger", async ({ page }) => {
       await page.goto("/admin");
 
-      const hamburger = getHamburgerButton(page);
-      await hamburger.focus();
+      const dropdown = page.getByRole("button", { name: /^dashboard$/i });
+      await dropdown.focus();
       await page.keyboard.press("Enter");
 
-      await expect(hamburger).toHaveAttribute("aria-expanded", "true");
+      await expect(dropdown).toHaveAttribute("aria-expanded", "true");
       await expect(page.getByRole("link", { name: /^dashboard$/i })).toBeVisible();
     });
 
     test("should allow tabbing through admin menu items", async ({ page }) => {
       await page.goto("/admin");
 
-      await getHamburgerButton(page).click();
+      await page.getByRole("button", { name: /^dashboard$/i }).click();
 
       await page.keyboard.press("Tab");
       await page.keyboard.press("Tab");
@@ -174,8 +152,10 @@ test.describe("Admin Navigation Flow", () => {
     });
   });
 
-  test.describe("Hamburger Icon", () => {
+  test.describe("Desktop Admin Controls", () => {
     test.beforeEach(async ({ page }) => {
+      test.skip(!ADMIN_PASSWORD, "Admin password is not configured for E2E navigation tests.");
+
       // Login
       await page.goto("/admin/login");
       await page.getByLabel(/email/i).fill(ADMIN_EMAIL);
@@ -184,14 +164,8 @@ test.describe("Admin Navigation Flow", () => {
       await expect(page).toHaveURL("/admin");
     });
 
-    test("should show open-menu label when collapsed", async ({ page }) => {
-      await expect(getHamburgerButton(page)).toHaveAttribute("aria-label", "Open menu");
-    });
-
-    test("should switch to close-menu label when expanded", async ({ page }) => {
-      const hamburger = getHamburgerButton(page);
-      await hamburger.click();
-      await expect(hamburger).toHaveAttribute("aria-label", "Close menu");
+    test("should render the sign out button", async ({ page }) => {
+      await expect(page.getByRole("button", { name: /sign out/i })).toBeVisible();
     });
   });
 
@@ -199,7 +173,7 @@ test.describe("Admin Navigation Flow", () => {
     test("should hide admin menu from guest sessions", async ({ page }) => {
       await page.goto("/");
 
-      await expect(getHamburgerButton(page)).toHaveCount(0);
+      await expect(page.locator('a[href^="/admin"]')).toHaveCount(0);
     });
 
     test("should hide admin navigation links in guest header", async ({ page }) => {
@@ -211,17 +185,17 @@ test.describe("Admin Navigation Flow", () => {
     });
 
     test("should show admin menu only after authentication", async ({ page }) => {
-      // Start as guest
-      await page.goto("/");
-      await expect(getHamburgerButton(page)).toHaveCount(0);
+      test.skip(!ADMIN_PASSWORD, "Admin password is not configured for E2E navigation tests.");
 
-      // Login
+      await page.goto("/");
+      await expect(page.locator('a[href^="/admin"]')).toHaveCount(0);
+
       await page.goto("/admin/login");
       await page.getByLabel(/email/i).fill(ADMIN_EMAIL);
       await page.getByLabel(/password/i).fill(ADMIN_PASSWORD);
       await page.getByRole("button", { name: /sign in|login/i }).click();
 
-      await expect(getHamburgerButton(page)).toBeVisible();
+      await expect(page.getByRole("button", { name: /^dashboard$/i })).toBeVisible();
     });
   });
 });

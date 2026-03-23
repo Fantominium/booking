@@ -7,6 +7,7 @@ import { z } from "zod";
 export type ServiceFormValues = {
   name: string;
   description: string;
+  offeringType: "SESSION" | "EVENT" | "RENTAL";
   durationMin: number;
   priceCents: number;
   downpaymentCents: number;
@@ -25,6 +26,7 @@ const serviceSchema: z.ZodTypeAny = z
   .object({
     name: z.string().min(1, "Name is required"),
     description: z.string(),
+    offeringType: z.enum(["SESSION", "EVENT", "RENTAL"]),
     durationMin: z.number().int().positive("Duration must be greater than 0"),
     priceCents: z.number().int().nonnegative("Price is required"),
     downpaymentCents: z.number().int().nonnegative("Downpayment is required"),
@@ -51,7 +53,7 @@ export const ServiceForm = ({
   }, [variant]);
 
   const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       const target = event.target;
       const field = target.dataset.field as keyof ServiceFormValues | undefined;
       if (!field) {
@@ -82,6 +84,7 @@ export const ServiceForm = ({
       const input: Record<string, unknown> = {
         name: values.name,
         description: values.description,
+        offeringType: values.offeringType,
         durationMin: values.durationMin,
         priceCents: values.priceCents,
         downpaymentCents: values.downpaymentCents,
@@ -134,6 +137,19 @@ export const ServiceForm = ({
           className="rounded-md border border-slate-200 px-3 py-2"
           rows={3}
         />
+      </label>
+      <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <span>Offering type</span>
+        <select
+          value={values.offeringType}
+          data-field="offeringType"
+          onChange={handleChange}
+          className="rounded-md border border-slate-200 px-3 py-2"
+        >
+          <option value="SESSION">Session</option>
+          <option value="EVENT">Event</option>
+          <option value="RENTAL">Rental</option>
+        </select>
       </label>
       <div className="grid gap-3 md:grid-cols-3">
         <label className="flex flex-col gap-1 text-sm text-slate-700">

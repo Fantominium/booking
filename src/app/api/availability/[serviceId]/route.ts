@@ -8,6 +8,8 @@ import {
 import { calculateAvailableSlotsForDate } from "@/lib/services/availability";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 const parseDate = (value: string): Date => {
   const [year, month, day] = value.split("-").map(Number);
   return new Date(Date.UTC(year, month - 1, day));
@@ -85,7 +87,7 @@ export const GET = async (
 
     const payload = {
       date: dateParam,
-      slots: slots.map((slot) => ({
+      slots: slots.map((slot: (typeof slots)[number]) => ({
         start: slot.start.toISOString(),
         end: slot.end.toISOString(),
       })),

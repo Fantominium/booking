@@ -118,12 +118,20 @@ export const purgeOldCustomerData = async (): Promise<number> => {
     select: { customerEmail: true },
   });
 
-  const uniqueEmails = Array.from(
-    new Set(bookings.map((booking) => booking.customerEmail).filter(Boolean)),
-  ).filter((email) => !email.startsWith("redacted+"));
+  const emails: string[] = [];
+
+  bookings.forEach((booking: (typeof bookings)[number]) => {
+    if (booking.customerEmail) {
+      emails.push(booking.customerEmail);
+    }
+  });
+
+  const uniqueEmails = Array.from(new Set(emails)).filter(
+    (email) => !email.startsWith("redacted+"),
+  );
 
   await Promise.all(
-    uniqueEmails.map((email) =>
+    uniqueEmails.map((email: (typeof uniqueEmails)[number]) =>
       anonymizeCustomerData({
         email,
         reason: "AUTO_PURGE_AGE",

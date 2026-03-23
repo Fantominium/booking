@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { queueEmailJob } from "@/lib/services/email";
 
+export const dynamic = "force-dynamic";
+
 export const POST = async (
   _request: Request,
   context: { params: Promise<{ id: string }> },

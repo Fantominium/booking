@@ -8,6 +8,7 @@ import { ServiceList } from "@/components/admin/ServiceList";
 const emptyService: ServiceFormValues = {
   name: "",
   description: "",
+  offeringType: "SESSION",
   durationMin: 60,
   priceCents: 0,
   downpaymentCents: 0,

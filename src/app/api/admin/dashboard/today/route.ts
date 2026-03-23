@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
+import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 const startOfTodayUtc = (): Date => {
   const now = new Date();
@@ -14,6 +17,10 @@ const addDays = (date: Date, days: number): Date => {
 };
 
 export const GET = async (): Promise<NextResponse> => {
+  if (!(await getAdminSession())) {
+    return createAdminUnauthorizedResponse();
+  }
+
   const today = startOfTodayUtc();
   const tomorrow = addDays(today, 1);
 
@@ -30,7 +37,7 @@ export const GET = async (): Promise<NextResponse> => {
 
   return NextResponse.json({
     date: today.toISOString().slice(0, 10),
-    bookings: bookings.map((booking) => ({
+    bookings: bookings.map((booking: (typeof bookings)[number]) => ({
       id: booking.id,
       serviceName: booking.service.name,
       customerName: booking.customerName,

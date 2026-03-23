@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { signIn, getSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function AdminLogin(): React.ReactElement {
   const [email, setEmail] = useState("");
@@ -10,6 +10,7 @@ export default function AdminLogin(): React.ReactElement {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleEmailChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
     setEmail(e.target.value);
@@ -40,7 +41,8 @@ export default function AdminLogin(): React.ReactElement {
           // Check session to ensure authentication worked
           const session = await getSession();
           if (session) {
-            router.push("/admin");
+            const callbackUrl = searchParams.get("callbackUrl") || "/admin";
+            router.push(callbackUrl);
             router.refresh();
           } else {
             setError("Authentication failed");
@@ -53,7 +55,7 @@ export default function AdminLogin(): React.ReactElement {
         setIsLoading(false);
       }
     },
-    [email, password, router],
+    [email, password, router, searchParams],
   );
 
   return (
@@ -76,7 +78,7 @@ export default function AdminLogin(): React.ReactElement {
                 required
                 value={email}
                 onChange={handleEmailChange}
-                className="border-border bg-surface text-foreground focus:border-primary focus:ring-primary focus:ring-opacity-50 mt-1 block min-h-[44px] w-full rounded-lg border px-3 py-3 placeholder-neutral-400 focus:ring-2 focus:outline-none"
+                className="border-border bg-surface text-foreground focus:border-primary focus:ring-primary focus:ring-opacity-50 mt-1 block w-full rounded-lg border px-3 py-3 placeholder-neutral-400 focus:ring-2 focus:outline-none"
                 placeholder="Enter your email"
                 disabled={isLoading}
                 aria-describedby={error ? "email-error" : undefined}
@@ -93,7 +95,7 @@ export default function AdminLogin(): React.ReactElement {
                 required
                 value={password}
                 onChange={handlePasswordChange}
-                className="border-border bg-surface text-foreground focus:border-primary focus:ring-primary focus:ring-opacity-50 mt-1 block min-h-[44px] w-full rounded-lg border px-3 py-3 placeholder-neutral-400 focus:ring-2 focus:outline-none"
+                className="border-border bg-surface text-foreground focus:border-primary focus:ring-primary focus:ring-opacity-50 mt-1 block w-full rounded-lg border px-3 py-3 placeholder-neutral-400 focus:ring-2 focus:outline-none"
                 placeholder="Enter your password"
                 disabled={isLoading}
                 aria-describedby={error ? "password-error" : undefined}
@@ -114,7 +116,7 @@ export default function AdminLogin(): React.ReactElement {
             <button
               type="submit"
               disabled={isLoading || !email.trim() || !password.trim()}
-              className="bg-primary hover:bg-primary-dark focus:ring-primary flex min-h-[44px] w-full items-center justify-center rounded-lg px-4 py-3 font-semibold text-white shadow-lg transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="bg-primary hover:bg-primary-dark focus:ring-primary flex w-full items-center justify-center rounded-lg px-4 py-3 font-semibold text-white shadow-lg transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               aria-describedby="login-button-status"
             >
               {isLoading ? (

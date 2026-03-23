@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 type RouteParams = {
   params: Promise<{ id: string }>;
@@ -10,6 +13,7 @@ type RouteParams = {
 const updateServiceSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   description: z.string().max(5000).nullable().optional(),
+  offeringType: z.enum(["SESSION", "EVENT", "RENTAL"]).optional(),
   durationMin: z.number().int().positive().optional(),
   priceCents: z.number().int().nonnegative().optional(),
   downpaymentCents: z.number().int().nonnegative().optional(),
@@ -21,6 +25,10 @@ const validatePricing = (params: { priceCents: number; downpaymentCents: number 
 };
 
 export const PATCH = async (request: Request, { params }: RouteParams): Promise<NextResponse> => {
+  if (!(await getAdminSession())) {
+    return createAdminUnauthorizedResponse();
+  }
+
   const { id } = await params;
   const body = await request.json();
   const parsed = updateServiceSchema.safeParse(body);
@@ -48,8 +56,8 @@ export const PATCH = async (request: Request, { params }: RouteParams): Promise<
     where: { id },
     data: {
       name: parsed.data.name ?? existing.name,
-      description:
-        parsed.data.description === undefined ? existing.description : parsed.data.description,
+      ...(parsed.data.description === undefined ? {} : { description: parsed.data.description }),
+      offeringType: parsed.data.offeringType ?? existing.offeringType,
       durationMin: parsed.data.durationMin ?? existing.durationMin,
       priceCents: nextPriceCents,
       downpaymentCents: nextDownpayment,
@@ -61,6 +69,10 @@ export const PATCH = async (request: Request, { params }: RouteParams): Promise<
 };
 
 export const DELETE = async (_request: Request, { params }: RouteParams): Promise<NextResponse> => {
+  if (!(await getAdminSession())) {
+    return createAdminUnauthorizedResponse();
+  }
+
   const { id } = await params;
 
   const upcomingBooking = await prisma.booking.findFirst({

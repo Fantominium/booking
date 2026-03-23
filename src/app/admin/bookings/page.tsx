@@ -29,6 +29,10 @@ const BookingManagementPage = (): JSX.Element => {
       return "";
     }
 
+    if (selectedBooking.paymentState === "PENDING_BANK_TRANSFER") {
+      return "Awaiting bank transfer";
+    }
+
     if (selectedBooking.remainingBalanceCents === 0) {
       return "Paid in full";
     }
@@ -84,6 +88,10 @@ const BookingManagementPage = (): JSX.Element => {
             </div>
             <div>
               <span className="font-semibold text-slate-900">Payment status:</span> {paymentStatus}
+            </div>
+            <div>
+              <span className="font-semibold text-slate-900">Payment method:</span>{" "}
+              {selectedBooking.paymentMethod === "BANK_TRANSFER" ? "Bank transfer" : "Card"}
             </div>
             <div>
               <span className="font-semibold text-slate-900">Email status:</span> {emailStatusLabel}

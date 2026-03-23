@@ -2,6 +2,7 @@
   "name": "truflow-booking",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@8.15.8",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -16,7 +17,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "worker:email": "tsx src/workers/email-worker.ts",
-    "prepare": "lefthook install"
+    "prepare": "node -e \"const fs=require('node:fs'); if (fs.existsSync('.git')) require('node:child_process').execSync('lefthook install',{stdio:'inherit'});\""
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",

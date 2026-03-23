@@ -4,9 +4,11 @@ import { Menu, X } from "lucide-react";
 
 interface HamburgerIconProps {
   isOpen: boolean;
-  onClick: () => void;
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;
   ariaLabel?: string;
+  controlsId?: string;
+  testId?: string;
 }
 
 export const HamburgerIcon = ({
@@ -14,15 +16,18 @@ export const HamburgerIcon = ({
   onClick,
   className = "",
   ariaLabel,
+  controlsId = "mobile-navigation-modal",
+  testId = "hamburger-button",
 }: HamburgerIconProps): JSX.Element => {
   return (
     <button
       type="button"
       onClick={onClick}
+      aria-haspopup="dialog"
       aria-expanded={isOpen}
       aria-label={ariaLabel ?? (isOpen ? "Close menu" : "Open menu")}
-      aria-controls="mobile-menu"
-      data-testid="hamburger-button"
+      aria-controls={controlsId}
+      data-testid={testId}
       className={`relative flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-300 bg-white/95 p-2 text-slate-900 transition hover:bg-slate-100 focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 ${className}`}
     >
       <Menu

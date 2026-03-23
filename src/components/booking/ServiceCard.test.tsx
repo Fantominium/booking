@@ -11,6 +11,7 @@ describe("ServiceCard", () => {
           id: "service-1",
           name: "Deep Tissue Massage",
           description: "Deep pressure",
+          offeringType: "SESSION",
           durationMin: 60,
           priceCents: 8000,
           downpaymentCents: 2000,
