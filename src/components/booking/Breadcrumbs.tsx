@@ -1,21 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
 import { useBreadcrumbs } from "../../lib/nav/useBreadcrumbs";
+import {
+  HouseIcon,
+  BookIcon,
+  CalendarIcon,
+  CircleCheckIcon,
+  ChevronRightIcon,
+} from "./BreadcrumbIcons";
 
 /**
  * Breadcrumbs Component
  *
- * Displays navigation breadcrumbs during the booking flow.
+ * Displays navigation breadcrumbs during the booking flow using accessible stencil icons.
  * Features:
- * - Auto-truncates on mobile (320px): Home > ... > Current
- * - Maintains WCAG 2.2 AA contrast ratios
- * - Semantic HTML with aria-label for accessibility
+ * - Icon-based navigation: house (home), book (booking), checkmark (confirmation)
+ * - Fully accessible with ARIA labels and semantic HTML
+ * - Responsive design: icons scale and display on all device sizes
+ * - Clear visual hierarchy with visual indicators
+ * - Tooltip on hover via title attribute for additional context
  *
- * Usage:
- * - Automatically shows/hides based on current path
- * - No props needed - driven by usePathname() internally
+ * Navigation:
+ * - From booking page: can navigate back to services or home
+ * - From confirmation: can navigate to home only
  */
 export function Breadcrumbs(): React.ReactElement | null {
   const segments = useBreadcrumbs();
@@ -25,53 +33,56 @@ export function Breadcrumbs(): React.ReactElement | null {
     return null;
   }
 
-  // Mobile truncation: Show only Home and Current when space constrained
-  const shouldTruncate = segments.length > 2;
+  const getIconComponent = (icon: string): React.ComponentType<{ className?: string }> => {
+    switch (icon) {
+      case "home":
+        return HouseIcon;
+      case "book":
+        return BookIcon;
+      case "calendar":
+        return CalendarIcon;
+      case "checkmark":
+        return CircleCheckIcon;
+      default:
+        return HouseIcon;
+    }
+  };
 
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center">
-      <ol className="flex items-center space-x-2">
+    <nav aria-label="Breadcrumb" className="flex items-center gap-2 py-2">
+      <ol className="flex items-center gap-1 sm:gap-2">
         {segments.map((segment, index) => {
           const isLast = index === segments.length - 1;
-          const isFirst = index === 0;
-
-          // Mobile truncation logic: show first and last, hide middle
-          const hideOnMobile = shouldTruncate && !isFirst && !isLast;
+          const IconComponent = getIconComponent(segment.icon);
 
           return (
-            <li
-              key={segment.href}
-              className={`flex items-center ${hideOnMobile ? "hidden sm:flex" : "flex"}`}
-            >
+            <li key={segment.href} className="flex items-center gap-2">
               {index > 0 && (
-                <ChevronRight className="mr-2 h-4 w-4 text-neutral-400" aria-hidden="true" />
+                <ChevronRightIcon className="h-4 w-4 flex-shrink-0 text-neutral-400 sm:h-5 sm:w-5" />
               )}
 
               {isLast ? (
-                <span className="text-foreground font-medium" aria-current="page">
-                  {segment.label}
+                <span
+                  className="text-foreground flex items-center rounded-md p-1.5 sm:p-2"
+                  aria-current="page"
+                  aria-label={`${segment.label} — current page`}
+                  title={segment.label}
+                >
+                  <IconComponent className="h-5 w-5 flex-shrink-0 sm:h-6 sm:w-6" />
                 </span>
               ) : (
                 <Link
                   href={segment.href}
-                  className="hover:text-foreground text-neutral-600 transition-colors"
+                  aria-label={segment.label}
+                  title={segment.label}
+                  className="hover:text-foreground flex items-center rounded-md p-1.5 text-neutral-500 transition-colors hover:bg-neutral-100 focus:ring-2 focus:ring-slate-300 focus:ring-offset-1 focus:outline-none sm:p-2"
                 >
-                  {segment.label}
+                  <IconComponent className="h-5 w-5 flex-shrink-0 sm:h-6 sm:w-6" />
                 </Link>
               )}
             </li>
           );
         })}
-
-        {/* Ellipsis for truncated middle items on mobile */}
-        {shouldTruncate && (
-          <li className="flex items-center sm:hidden">
-            <ChevronRight className="mr-2 h-4 w-4 text-neutral-400" aria-hidden="true" />
-            <span className="text-neutral-400" aria-hidden="true">
-              ...
-            </span>
-          </li>
-        )}
       </ol>
     </nav>
   );

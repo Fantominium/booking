@@ -8,18 +8,27 @@ export interface NavSegment {
   href: string;
   current: boolean;
   priority: number; // Lower = higher priority (kept during truncation)
+  icon: "home" | "book" | "calendar" | "checkmark";
 }
 
 /**
- * Maps booking flow paths to breadcrumb segments
+ * Maps booking flow paths to breadcrumb segments with icon types
  * Following the spec: Home > Services > Date & Time > Details > Payment > Confirmation
  */
-const BOOKING_FLOW_SEGMENTS: Record<string, { label: string; priority: number }> = {
-  "/book": { label: "Services", priority: 1 },
-  "/book/time": { label: "Date & Time", priority: 2 },
-  "/book/details": { label: "Details", priority: 3 },
-  "/book/payment": { label: "Payment", priority: 4 },
-  "/book/confirmation": { label: "Confirmation", priority: 5 },
+const BOOKING_FLOW_SEGMENTS: Record<
+  string,
+  { label: string; priority: number; icon: "home" | "book" | "checkmark" }
+> = {
+  "/book": { label: "Services", priority: 1, icon: "book" },
+  "/book/success": { label: "Confirmation", priority: 5, icon: "checkmark" },
+};
+
+/**
+ * Map service pages to booking icon
+ * /book/[serviceId] represents the session/booking page
+ */
+const isServicePage = (pathname: string): boolean => {
+  return /^\/book\/[a-f0-9-]+$/.test(pathname) && !pathname.endsWith("/success");
 };
 
 /**
@@ -28,8 +37,11 @@ const BOOKING_FLOW_SEGMENTS: Record<string, { label: string; priority: number }>
  * Rules:
  * - Only displays during booking flow (paths starting with /book)
  * - Always includes "Home" as first segment
- * - Maps current path to appropriate label
+ * - Maps current path to appropriate label and icon
  * - Priority used for mobile truncation (Home > ... > Current)
+ * - Navigation logic:
+ *   - From service page: can go back to services list or home
+ *   - From confirmation: can only go home
  */
 export function useBreadcrumbs(): NavSegment[] | null {
   const pathname = usePathname();
@@ -46,10 +58,42 @@ export function useBreadcrumbs(): NavSegment[] | null {
         href: "/",
         current: false,
         priority: 0, // Highest priority - always shown
+        icon: "home",
       },
     ];
 
-    // Find the matching booking step
+    // Check for confirmation page first
+    if (pathname === "/book/success") {
+      segments.push({
+        label: "Confirmation",
+        href: pathname,
+        current: true,
+        priority: 5,
+        icon: "checkmark",
+      });
+      return segments;
+    }
+
+    // Check if it's a service page (booking session)
+    if (isServicePage(pathname)) {
+      segments.push({
+        label: "Booking",
+        href: "/book",
+        current: false,
+        priority: 1,
+        icon: "book",
+      });
+      segments.push({
+        label: "Session",
+        href: pathname,
+        current: true,
+        priority: 2,
+        icon: "calendar",
+      });
+      return segments;
+    }
+
+    // Check for services list page
     const stepInfo = BOOKING_FLOW_SEGMENTS[pathname as keyof typeof BOOKING_FLOW_SEGMENTS];
     if (stepInfo) {
       segments.push({
@@ -57,6 +101,7 @@ export function useBreadcrumbs(): NavSegment[] | null {
         href: pathname,
         current: true,
         priority: stepInfo.priority,
+        icon: stepInfo.icon,
       });
     }
 

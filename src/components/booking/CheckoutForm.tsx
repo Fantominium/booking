@@ -28,7 +28,7 @@ const useCheckoutForm = (
     customerName: "",
     customerEmail: "",
     customerPhone: "",
-    paymentMethod: "CARD",
+    paymentMethod: "BANK_TRANSFER",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -91,6 +91,7 @@ export const CheckoutForm = ({ onSubmit }: CheckoutFormProps): JSX.Element => {
       </label>
       <fieldset className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
         <legend className="px-1 text-sm font-semibold text-slate-950">Payment options</legend>
+        {/* TODO: Card deposit payment — coming soon; unhide when Stripe integration is live
         <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-800">
           <input
             id="payment-method-card"
@@ -105,6 +106,7 @@ export const CheckoutForm = ({ onSubmit }: CheckoutFormProps): JSX.Element => {
             <span>Secure the booking online now and handle any remaining balance later.</span>
           </label>
         </div>
+        */}
         <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-800">
           <input
             id="payment-method-bank-transfer"

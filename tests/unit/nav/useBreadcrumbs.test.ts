@@ -31,69 +31,64 @@ describe("useBreadcrumbs", () => {
       href: "/",
       current: false,
       priority: 0,
+      icon: "home",
     });
     expect(result.current?.[1]).toMatchObject({
       label: "Services",
       href: "/book",
       current: true,
       priority: 1,
+      icon: "book",
     });
   });
 
-  it("returns breadcrumbs for /book/time (Date & Time step)", () => {
-    vi.mocked(usePathname).mockReturnValue("/book/time");
+  it("returns breadcrumbs for /book/[serviceId] (Booking session page)", () => {
+    vi.mocked(usePathname).mockReturnValue("/book/550e8400-e29b-41d4-a716-446655440000");
     const { result } = renderHook(() => useBreadcrumbs());
 
-    expect(result.current).toHaveLength(2);
+    expect(result.current).toHaveLength(3);
+    expect(result.current?.[0]).toMatchObject({
+      label: "Home",
+      href: "/",
+      current: false,
+      icon: "home",
+    });
     expect(result.current?.[1]).toMatchObject({
-      label: "Date & Time",
-      href: "/book/time",
+      label: "Booking",
+      href: "/book",
+      current: false,
+      icon: "book",
+    });
+    expect(result.current?.[2]).toMatchObject({
+      label: "Session",
       current: true,
-      priority: 2,
+      icon: "book",
     });
   });
 
-  it("returns breadcrumbs for /book/details (Details step)", () => {
-    vi.mocked(usePathname).mockReturnValue("/book/details");
+  it("returns breadcrumbs for /book/success (Confirmation page)", () => {
+    vi.mocked(usePathname).mockReturnValue("/book/success");
     const { result } = renderHook(() => useBreadcrumbs());
 
     expect(result.current).toHaveLength(2);
-    expect(result.current?.[1]).toMatchObject({
-      label: "Details",
-      href: "/book/details",
-      current: true,
-      priority: 3,
+    expect(result.current?.[0]).toMatchObject({
+      label: "Home",
+      href: "/",
+      current: false,
+      priority: 0,
+      icon: "home",
     });
-  });
-
-  it("returns breadcrumbs for /book/payment (Payment step)", () => {
-    vi.mocked(usePathname).mockReturnValue("/book/payment");
-    const { result } = renderHook(() => useBreadcrumbs());
-
-    expect(result.current).toHaveLength(2);
-    expect(result.current?.[1]).toMatchObject({
-      label: "Payment",
-      href: "/book/payment",
-      current: true,
-      priority: 4,
-    });
-  });
-
-  it("returns breadcrumbs for /book/confirmation (Confirmation step)", () => {
-    vi.mocked(usePathname).mockReturnValue("/book/confirmation");
-    const { result } = renderHook(() => useBreadcrumbs());
-
-    expect(result.current).toHaveLength(2);
     expect(result.current?.[1]).toMatchObject({
       label: "Confirmation",
-      href: "/book/confirmation",
+      href: "/book/success",
       current: true,
       priority: 5,
+      icon: "checkmark",
     });
   });
 
   it("prioritizes Home (0) for mobile truncation", () => {
-    vi.mocked(usePathname).mockReturnValue("/book/confirmation");
+    vi.mocked(usePathname).mockReturnValue("/book/success");
     const { result } = renderHook(() => useBreadcrumbs());
 
     // Home should have priority 0 (highest)
@@ -103,10 +98,28 @@ describe("useBreadcrumbs", () => {
   });
 
   it("marks only the current step as current", () => {
-    vi.mocked(usePathname).mockReturnValue("/book/time");
+    vi.mocked(usePathname).mockReturnValue("/book/550e8400-e29b-41d4-a716-446655440000");
     const { result } = renderHook(() => useBreadcrumbs());
 
     expect(result.current?.[0].current).toBe(false);
-    expect(result.current?.[1].current).toBe(true);
+    expect(result.current?.[1].current).toBe(false);
+    expect(result.current?.[2].current).toBe(true);
+  });
+
+  it("provides correct icons for navigation", () => {
+    vi.mocked(usePathname).mockReturnValue("/book/550e8400-e29b-41d4-a716-446655440000");
+    const { result } = renderHook(() => useBreadcrumbs());
+
+    expect(result.current?.[0].icon).toBe("home");
+    expect(result.current?.[1].icon).toBe("book");
+    expect(result.current?.[2].icon).toBe("book");
+  });
+
+  it("uses checkmark icon for confirmation page", () => {
+    vi.mocked(usePathname).mockReturnValue("/book/success");
+    const { result } = renderHook(() => useBreadcrumbs());
+
+    expect(result.current?.[0].icon).toBe("home");
+    expect(result.current?.[1].icon).toBe("checkmark");
   });
 });
