@@ -5,12 +5,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { OFFERING_LABELS } from "@/lib/offerings";
 
 import { Breadcrumbs } from "./booking/Breadcrumbs";
-import { AdminDropdown } from "./navigation/AdminDropdown";
 import { HamburgerIcon } from "./navigation/HamburgerIcon";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -66,6 +65,7 @@ export function Header(): React.ReactElement {
   const router = useRouter();
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const canUseDOM = typeof globalThis.window !== "undefined";
   const isAdmin = status === "authenticated" && session?.user?.role === "admin";
   const isAdminRoute = pathname?.startsWith("/admin") ?? false;
@@ -272,9 +272,20 @@ export function Header(): React.ReactElement {
 
                 <nav className="flex flex-col gap-2" aria-label="Menu navigation">
                   {visibleNavItems.map(({ href, label }) => {
-                    const baseHref = href.split("?")[0];
-                    const isCurrent =
-                      baseHref === "/" ? pathname === "/" : pathname?.startsWith(baseHref);
+                    const [baseHref, queryString] = href.split("?");
+                    const isCurrent = (() => {
+                      if (queryString) {
+                        const itemParams = new URLSearchParams(queryString);
+                        return (
+                          pathname === baseHref &&
+                          [...itemParams.entries()].every(
+                            ([k, v]) => searchParams.get(k) === v,
+                          )
+                        );
+                      }
+                      if (baseHref === "/") return pathname === "/";
+                      return pathname === baseHref || (pathname?.startsWith(baseHref + "/") ?? false);
+                    })();
 
                     return (
                       <Link
@@ -344,7 +355,6 @@ export function Header(): React.ReactElement {
           </nav>
 
           <div className="flex items-center gap-3">
-            {isAdmin ? <AdminDropdown /> : null}
             <HamburgerIcon
               isOpen={isMenuOpen}
               onClick={toggleMenu}
@@ -352,7 +362,7 @@ export function Header(): React.ReactElement {
               testId="hamburger-button-desktop"
               className="hidden md:flex"
             />
-            {isAdmin ? (
+            {!isAdminRoute && isAdmin ? (
               <button
                 type="button"
                 onClick={handleSignOut}
@@ -361,7 +371,6 @@ export function Header(): React.ReactElement {
                 Sign out
               </button>
             ) : null}
-            <ThemeToggle testId="theme-toggle-desktop" />
           </div>
         </div>
 
