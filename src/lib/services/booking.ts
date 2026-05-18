@@ -72,8 +72,7 @@ export const createBookingWithLock = async (params: {
         startTime: input.startTime,
         endTime,
         paymentMethod: input.paymentMethod,
-        paymentState:
-          input.paymentMethod === "BANK_TRANSFER" ? "PENDING_BANK_TRANSFER" : "UNPAID",
+        paymentState: input.paymentMethod === "BANK_TRANSFER" ? "PENDING_BANK_TRANSFER" : "UNPAID",
         bankTransferReference,
         remainingBalanceCents: Math.max(input.priceCents - input.downpaymentCents, 0),
         downpaymentPaidCents: 0,
@@ -87,8 +86,9 @@ export const createBookingWithLock = async (params: {
 export const confirmBookingStatus = async (params: {
   prisma: PrismaClient;
   bookingId: string;
+  downpaymentPaidCents?: number;
 }): Promise<void> => {
-  const { prisma, bookingId } = params;
+  const { prisma, bookingId, downpaymentPaidCents } = params;
 
   const booking = await prisma.booking.update({
     where: { id: bookingId },
@@ -99,7 +99,7 @@ export const confirmBookingStatus = async (params: {
   await prisma.booking.update({
     where: { id: booking.id },
     data: {
-      downpaymentPaidCents: booking.service.downpaymentCents,
+      downpaymentPaidCents: Math.max(downpaymentPaidCents ?? booking.downpaymentPaidCents, 0),
       paymentState: "DEPOSIT_PAID",
     },
   });

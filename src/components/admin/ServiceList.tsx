@@ -5,6 +5,7 @@ import { useCallback, useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ServiceForm, type ServiceFormValues } from "@/components/admin/ServiceForm";
+import { getServiceDurationOptions } from "@/lib/service-duration-options";
 import type { Service } from "@/types/service";
 
 type ServiceListProps = {
@@ -149,63 +150,78 @@ export const ServiceList = ({ refreshKey }: ServiceListProps): React.JSX.Element
       </header>
 
       <div className="grid gap-4">
-        {services.map((service) => (
-          <div key={service.id} className="rounded-lg border border-slate-100 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div className="text-sm font-semibold text-slate-900">{service.name}</div>
-                <div className="text-xs text-slate-600">{`${service.offeringType} · ${service.durationMin} min · $${service.priceCents / 100} · Downpayment $${service.downpaymentCents / 100}`}</div>
-                <div className="text-xs text-slate-500">
-                  {service.isActive ? "Active" : "Inactive"}
+        {services.map((service) => {
+          const durationOptions = getServiceDurationOptions(service);
+
+          return (
+            <div key={service.id} className="rounded-lg border border-slate-100 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">{service.name}</div>
+                  <div className="text-xs text-slate-600">{`${service.offeringType} · ${service.durationMin} min · $${service.priceCents / 100} · Downpayment $${service.downpaymentCents / 100}`}</div>
+                  {durationOptions.length > 1 ? (
+                    <div className="mt-1 text-xs text-slate-500">
+                      Options:{" "}
+                      {durationOptions
+                        .map(
+                          (option) =>
+                            `${option.durationMin} min ($${(option.priceCents / 100).toFixed(2)})`,
+                        )
+                        .join(" · ")}
+                    </div>
+                  ) : null}
+                  <div className="text-xs text-slate-500">
+                    {service.isActive ? "Active" : "Inactive"}
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  data-id={service.id}
-                  onClick={handleEditClick}
-                  className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700"
-                >
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  data-id={service.id}
-                  onClick={handleDeleteClick}
-                  className="rounded-md border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600"
-                >
-                  Delete
-                </button>
-                {deleteError?.id === service.id ? (
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
                     data-id={service.id}
-                    onClick={handleMarkInactive}
-                    className="rounded-md border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-700"
+                    onClick={handleEditClick}
+                    className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700"
                   >
-                    Mark inactive
+                    Edit
                   </button>
-                ) : null}
+                  <button
+                    type="button"
+                    data-id={service.id}
+                    onClick={handleDeleteClick}
+                    className="rounded-md border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600"
+                  >
+                    Delete
+                  </button>
+                  {deleteError?.id === service.id ? (
+                    <button
+                      type="button"
+                      data-id={service.id}
+                      onClick={handleMarkInactive}
+                      className="rounded-md border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-700"
+                    >
+                      Mark inactive
+                    </button>
+                  ) : null}
+                </div>
               </div>
+
+              {editingServiceId === service.id ? (
+                <div className="mt-4">
+                  <ServiceForm
+                    initialValues={mapServiceToForm(service)}
+                    onSubmit={handleInlineSubmit}
+                    onCancel={handleEditCancel}
+                    submitLabel="Save"
+                    variant="inline"
+                  />
+                </div>
+              ) : null}
+
+              {deleteError?.id === service.id ? (
+                <p className="mt-3 text-sm text-rose-600">{deleteError.message}</p>
+              ) : null}
             </div>
-
-            {editingServiceId === service.id ? (
-              <div className="mt-4">
-                <ServiceForm
-                  initialValues={mapServiceToForm(service)}
-                  onSubmit={handleInlineSubmit}
-                  onCancel={handleEditCancel}
-                  submitLabel="Save"
-                  variant="inline"
-                />
-              </div>
-            ) : null}
-
-            {deleteError?.id === service.id ? (
-              <p className="mt-3 text-sm text-rose-600">{deleteError.message}</p>
-            ) : null}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {statusMessage ? <p className="text-sm text-rose-600">{statusMessage}</p> : null}

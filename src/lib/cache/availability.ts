@@ -36,6 +36,7 @@ type AvailabilityCacheKeyParams = {
   startDate?: string | null;
   endDate?: string | null;
   date?: string | null;
+  durationMin?: number | null;
 };
 
 const DEFAULT_TTL_MS = 5 * 60 * 1000;
@@ -45,7 +46,7 @@ export const buildAvailabilityCacheKey = (params: AvailabilityCacheKeyParams): s
   const rangeKey = params.date
     ? `date:${params.date}`
     : `range:${params.startDate ?? ""}:${params.endDate ?? ""}`;
-  return `availability:${params.serviceId}:${rangeKey}`;
+  return `availability:${params.serviceId}:${params.durationMin ?? "default"}:${rangeKey}`;
 };
 
 export const getAvailabilityCache = <T>(key: string): T | null => {

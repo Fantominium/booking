@@ -7,6 +7,7 @@ import { BookingConfirmationEmail } from "@/lib/email/templates/booking-confirma
 import { RefundNotificationEmail } from "@/lib/email/templates/refund-notification";
 import { prisma } from "@/lib/prisma";
 import { createIcsEvent } from "@/lib/services/ics";
+import { getBookedServiceDurationMinutes } from "@/lib/services/booking-duration";
 import type { EmailJobPayload } from "@/lib/services/email";
 
 const updateEmailStatus = async (
@@ -24,6 +25,8 @@ const handler = async (job: Job<EmailJobPayload>): Promise<void> => {
     where: { id: job.data.bookingId },
     include: { service: true },
   });
+
+  const settings = await prisma.systemSettings.findFirst();
 
   if (!booking) {
     throw new Error("Booking not found");
@@ -43,7 +46,11 @@ const handler = async (job: Job<EmailJobPayload>): Promise<void> => {
           booking.startTime.getUTCHours(),
           booking.startTime.getUTCMinutes(),
         ],
-        durationMinutes: booking.service.durationMin,
+        durationMinutes: getBookedServiceDurationMinutes({
+          startTime: booking.startTime,
+          endTime: booking.endTime,
+          bufferMinutes: settings?.bufferMinutes ?? 0,
+        }),
         location: "TruFlow Studio",
       });
 

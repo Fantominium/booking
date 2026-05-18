@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { getBookedServiceDurationMinutes } from "@/lib/services/booking-duration";
 import { createIcsEvent } from "@/lib/services/ics";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +17,8 @@ export const GET = async (
     include: { service: true },
   });
 
+  const settings = await prisma.systemSettings.findFirst();
+
   if (!booking) {
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   }
@@ -30,7 +33,11 @@ export const GET = async (
       booking.startTime.getUTCHours(),
       booking.startTime.getUTCMinutes(),
     ],
-    durationMinutes: booking.service.durationMin,
+    durationMinutes: getBookedServiceDurationMinutes({
+      startTime: booking.startTime,
+      endTime: booking.endTime,
+      bufferMinutes: settings?.bufferMinutes ?? 0,
+    }),
     location: "TruFlow Studio",
   });
 

@@ -5,6 +5,7 @@ import { createBookingWithLock, attachPaymentIntent } from "@/lib/services/booki
 import { createPaymentIntent } from "@/lib/services/payment";
 import { prisma } from "@/lib/prisma";
 import { isAppError } from "@/lib/errors";
+import { resolveServiceDurationOption } from "@/lib/service-duration-options";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,8 @@ export const POST = async (request: Request): Promise<NextResponse> => {
   }
 
   try {
+    const selectedOption = resolveServiceDurationOption(service, parsed.data.selectedDurationMin);
+
     const booking = await createBookingWithLock({
       prisma,
       input: {
@@ -46,10 +49,10 @@ export const POST = async (request: Request): Promise<NextResponse> => {
         customerPhone: parsed.data.customerPhone,
         startTime: new Date(parsed.data.startTime),
         paymentMethod: parsed.data.paymentMethod,
-        serviceDurationMin: service.durationMin,
+        serviceDurationMin: selectedOption.durationMin,
         bufferMinutes: settings.bufferMinutes,
-        priceCents: service.priceCents,
-        downpaymentCents: service.downpaymentCents,
+        priceCents: selectedOption.priceCents,
+        downpaymentCents: selectedOption.downpaymentCents,
       },
     });
 
@@ -67,7 +70,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
 
     const intent = await createPaymentIntent({
       bookingId: booking.id,
-      amountCents: service.downpaymentCents,
+      amountCents: selectedOption.downpaymentCents,
       currency: "usd",
     });
 

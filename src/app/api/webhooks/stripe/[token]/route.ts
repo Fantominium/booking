@@ -58,7 +58,11 @@ export const POST = async (
     });
 
     if (booking && booking.status !== "CONFIRMED") {
-      await confirmBookingStatus({ prisma, bookingId: booking.id });
+      await confirmBookingStatus({
+        prisma,
+        bookingId: booking.id,
+        downpaymentPaidCents: intent.amount,
+      });
 
       await logPaymentAudit({
         bookingId: booking.id,

@@ -12,6 +12,7 @@ const paymentMethodSchema = z.enum(["CARD", "BANK_TRANSFER"]);
 export const createBookingRequestSchema = z.object({
   serviceId: uuidSchema,
   startTime: dateTimeSchema,
+  selectedDurationMin: z.number().int().positive().optional(),
   customerName: z.string().min(1).max(255),
   customerEmail: emailSchema,
   customerPhone: z.string().min(5).max(20),

@@ -4,6 +4,8 @@ import type React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { z } from "zod";
 
+import { getServiceDurationOptions } from "@/lib/service-duration-options";
+
 export type ServiceFormValues = {
   name: string;
   description: string;
@@ -51,6 +53,10 @@ export const ServiceForm = ({
   const formClassName = useMemo(() => {
     return variant === "inline" ? "grid gap-3" : "grid gap-4";
   }, [variant]);
+
+  const durationOptions = useMemo(() => {
+    return getServiceDurationOptions(values);
+  }, [values]);
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -185,6 +191,21 @@ export const ServiceForm = ({
             min={0}
           />
         </label>
+      </div>
+      <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-3">
+        <p className="text-xs font-semibold tracking-[0.08em] text-slate-700 uppercase">
+          Customer-facing duration badges
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {durationOptions.map((option) => (
+            <span
+              key={`preview-${option.durationMin}`}
+              className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700"
+            >
+              {option.durationMin} min · ${(option.priceCents / 100).toFixed(2)}
+            </span>
+          ))}
+        </div>
       </div>
       <label className="flex items-center gap-2 text-sm text-slate-700">
         <input

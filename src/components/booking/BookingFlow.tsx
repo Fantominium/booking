@@ -14,6 +14,8 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
 
 type BookingFlowProps = {
   serviceId: string;
+  selectedDurationMin: number;
+  selectedPriceCents: number;
 };
 
 type BookingResponse = {
@@ -23,7 +25,11 @@ type BookingResponse = {
   paymentState: "UNPAID" | "PENDING_BANK_TRANSFER" | "DEPOSIT_PAID" | "PAID_IN_FULL";
 };
 
-export const BookingFlow = ({ serviceId }: BookingFlowProps): React.JSX.Element => {
+export const BookingFlow = ({
+  serviceId,
+  selectedDurationMin,
+  selectedPriceCents,
+}: BookingFlowProps): React.JSX.Element => {
   const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
   const [selectedSlot, setSelectedSlot] = useState<string | undefined>(undefined);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -38,10 +44,10 @@ export const BookingFlow = ({ serviceId }: BookingFlowProps): React.JSX.Element 
   }, []);
 
   const { data: availableDates = [] } = useQuery({
-    queryKey: ["availability", "dates", serviceId, today, endDate],
+    queryKey: ["availability", "dates", serviceId, selectedDurationMin, today, endDate],
     queryFn: async (): Promise<string[]> => {
       const response = await fetch(
-        `/api/availability/${serviceId}?startDate=${today}&endDate=${endDate}`,
+        `/api/availability/${serviceId}?startDate=${today}&endDate=${endDate}&durationMin=${selectedDurationMin}`,
       );
       const data = (await response.json()) as { dates: string[] };
       return data.dates;
@@ -49,13 +55,13 @@ export const BookingFlow = ({ serviceId }: BookingFlowProps): React.JSX.Element 
   });
 
   const { data: slots = [] } = useQuery({
-    queryKey: ["availability", "slots", serviceId, selectedDate],
+    queryKey: ["availability", "slots", serviceId, selectedDurationMin, selectedDate],
     queryFn: async (): Promise<TimeSlot[]> => {
       if (!selectedDate) {
         return [];
       }
       const response = await fetch(
-        `/api/availability/${serviceId}?startDate=${today}&date=${selectedDate}`,
+        `/api/availability/${serviceId}?startDate=${today}&date=${selectedDate}&durationMin=${selectedDurationMin}`,
       );
       const data = (await response.json()) as { slots: TimeSlot[] };
       return data.slots;
@@ -93,6 +99,7 @@ export const BookingFlow = ({ serviceId }: BookingFlowProps): React.JSX.Element 
         body: JSON.stringify({
           serviceId,
           startTime: selectedSlot,
+          selectedDurationMin,
           customerName: data.customerName,
           customerEmail: data.customerEmail,
           customerPhone: data.customerPhone,
@@ -101,7 +108,9 @@ export const BookingFlow = ({ serviceId }: BookingFlowProps): React.JSX.Element 
       });
 
       if (!response.ok) {
-        setStatusMessage("We could not create your booking. Please review your details and try again.");
+        setStatusMessage(
+          "We could not create your booking. Please review your details and try again.",
+        );
         return;
       }
 
@@ -114,7 +123,7 @@ export const BookingFlow = ({ serviceId }: BookingFlowProps): React.JSX.Element 
         globalThis.location.href = `/book/success?bookingId=${booking.id}`;
       }
     },
-    [selectedSlot, serviceId],
+    [selectedDurationMin, selectedSlot, serviceId],
   );
 
   const handlePaymentComplete = useCallback(() => {
@@ -149,6 +158,10 @@ export const BookingFlow = ({ serviceId }: BookingFlowProps): React.JSX.Element 
       {selectedSlot ? (
         <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-950">Your details and payment choice</h2>
+          <p className="text-sm text-slate-700">
+            Selected treatment length: {selectedDurationMin} minutes. Session price: $
+            {(selectedPriceCents / 100).toFixed(2)}.
+          </p>
           <CheckoutForm onSubmit={handleCheckoutSubmit} />
         </section>
       ) : null}
