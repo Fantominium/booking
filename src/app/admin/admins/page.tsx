@@ -156,10 +156,12 @@ const ManageAdminsPage = (): JSX.Element => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 p-6">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(186,230,253,0.18),transparent_45%),linear-gradient(180deg,#fdfefe_0%,#f5f7fb_100%)] p-6 dark:bg-[radial-gradient(circle_at_top,rgba(144,202,249,0.12),transparent_45%),linear-gradient(180deg,#121212_0%,#171717_100%)]">
       <div className="mx-auto max-w-4xl">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-neutral-900">Manage Administrators</h1>
+          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">
+            Manage Administrators
+          </h1>
           <button
             onClick={handleToggleForm}
             className="bg-primary hover:bg-primary-dark focus:ring-primary rounded-lg px-4 py-2 font-semibold text-white focus:ring-2 focus:ring-offset-2 focus:outline-none"
@@ -172,7 +174,7 @@ const ManageAdminsPage = (): JSX.Element => {
 
         {error && (
           <div
-            className="mb-4 rounded-lg bg-red-50 p-4 text-red-800"
+            className="mb-4 rounded-lg bg-red-50 p-4 text-red-800 dark:text-red-100"
             role="alert"
             aria-live="polite"
           >
@@ -181,11 +183,17 @@ const ManageAdminsPage = (): JSX.Element => {
         )}
 
         {showAddForm && (
-          <div id="add-admin-form" className="mb-6 rounded-lg bg-white p-6 shadow-md">
-            <h2 className="mb-4 text-xl font-semibold">Add New Administrator</h2>
+          <div
+            id="add-admin-form"
+            className="dark:bg-surface-elevated mb-6 rounded-lg bg-white p-6 shadow-md"
+          >
+            <h2 className="mb-4 text-xl font-semibold dark:text-white">Add New Administrator</h2>
             <form onSubmit={handleAddAdmin} className="space-y-4">
               <div>
-                <label htmlFor="admin-email" className="block text-sm font-medium text-neutral-700">
+                <label
+                  htmlFor="admin-email"
+                  className="block text-sm font-medium text-neutral-700 dark:text-slate-200"
+                >
                   Email Address
                 </label>
                 <input
@@ -194,7 +202,7 @@ const ManageAdminsPage = (): JSX.Element => {
                   required
                   value={email}
                   onChange={handleEmailChange}
-                  className="focus:border-primary focus:ring-primary mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 focus:ring-1 focus:outline-none"
+                  className="focus:border-primary focus:ring-primary mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 focus:ring-1 focus:outline-none dark:border-slate-700"
                   disabled={isSubmitting}
                 />
               </div>
@@ -202,7 +210,7 @@ const ManageAdminsPage = (): JSX.Element => {
               <div>
                 <label
                   htmlFor="admin-password"
-                  className="block text-sm font-medium text-neutral-700"
+                  className="block text-sm font-medium text-neutral-700 dark:text-slate-200"
                 >
                   Password
                 </label>
@@ -213,10 +221,12 @@ const ManageAdminsPage = (): JSX.Element => {
                   minLength={8}
                   value={password}
                   onChange={handlePasswordChange}
-                  className="focus:border-primary focus:ring-primary mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 focus:ring-1 focus:outline-none"
+                  className="focus:border-primary focus:ring-primary mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 focus:ring-1 focus:outline-none dark:border-slate-700"
                   disabled={isSubmitting}
                 />
-                <p className="mt-1 text-sm text-neutral-500">Must be at least 8 characters</p>
+                <p className="mt-1 text-sm text-neutral-500 dark:text-slate-400">
+                  Must be at least 8 characters
+                </p>
               </div>
 
               <button
@@ -230,39 +240,46 @@ const ManageAdminsPage = (): JSX.Element => {
           </div>
         )}
 
-        <div className="rounded-lg bg-white shadow-md">
+        <div className="dark:bg-surface-elevated rounded-lg bg-white shadow-md">
           <div className="p-6">
-            <h2 className="mb-4 text-xl font-semibold">Current Administrators</h2>
+            <h2 className="mb-4 text-xl font-semibold dark:text-white">Current Administrators</h2>
 
             {admins.length === 0 ? (
-              <p className="text-neutral-600">No administrators found.</p>
+              <p className="text-neutral-600 dark:text-slate-300">No administrators found.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-neutral-200">
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-neutral-700">
+                    <tr className="border-b border-neutral-200 dark:border-slate-700">
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-neutral-700 dark:text-slate-200">
                         Email
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-neutral-700">
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-neutral-700 dark:text-slate-200">
                         Created
                       </th>
-                      <th className="px-4 py-3 text-right text-sm font-semibold text-neutral-700">
+                      <th className="px-4 py-3 text-right text-sm font-semibold text-neutral-700 dark:text-slate-200">
                         Actions
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {admins.map((admin) => (
-                      <tr key={admin.id} className="border-b border-neutral-100 last:border-0">
-                        <td className="px-4 py-3 text-sm text-neutral-900">{admin.email}</td>
-                        <td className="px-4 py-3 text-sm text-neutral-600">
+                      <tr
+                        key={admin.id}
+                        className="border-b border-neutral-100 last:border-0 dark:border-slate-700"
+                      >
+                        <td className="px-4 py-3 text-sm text-neutral-900 dark:text-slate-100">
+                          {admin.email}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-neutral-600 dark:text-slate-300">
                           {formatDate(admin.createdAt)}
                         </td>
                         <td className="px-4 py-3 text-right">
                           {deleteConfirmId === admin.id ? (
                             <div className="flex items-center justify-end gap-2">
-                              <span className="text-sm text-neutral-600">Confirm delete?</span>
+                              <span className="text-sm text-neutral-600 dark:text-slate-300">
+                                Confirm delete?
+                              </span>
                               <button
                                 onClick={handleConfirmDelete(admin.id)}
                                 disabled={isSubmitting}
@@ -274,7 +291,7 @@ const ManageAdminsPage = (): JSX.Element => {
                               <button
                                 onClick={handleCancelDelete}
                                 disabled={isSubmitting}
-                                className="rounded bg-neutral-200 px-3 py-1 text-sm font-medium text-neutral-700 hover:bg-neutral-300 focus:ring-2 focus:ring-neutral-400 focus:ring-offset-2 focus:outline-none"
+                                className="rounded bg-neutral-200 px-3 py-1 text-sm font-medium text-neutral-700 hover:bg-neutral-300 focus:ring-2 focus:ring-neutral-400 focus:ring-offset-2 focus:outline-none dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
                                 aria-label="Cancel delete"
                               >
                                 Cancel

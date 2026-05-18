@@ -47,17 +47,22 @@ export const ServiceCard = ({ service }: ServiceCardProps): JSX.Element => {
 
   return (
     <div
-      className="flex h-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+      className="dark:bg-surface-elevated flex h-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700"
       data-testid="service-card"
     >
       <div className="flex flex-1 flex-col gap-3">
-        <span className="inline-flex w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold tracking-[0.12em] text-slate-700 uppercase">
+        <span className="inline-flex w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold tracking-[0.12em] text-slate-700 uppercase dark:bg-slate-800 dark:text-slate-200">
           {OFFERING_LABELS[service.offeringType]}
         </span>
-        <h3 className="min-h-14 text-xl font-semibold text-slate-950" data-testid="service-name">
+        <h3
+          className="min-h-14 text-xl font-semibold text-slate-950 dark:text-white"
+          data-testid="service-name"
+        >
           {service.name}
         </h3>
-        <p className="min-h-18 text-sm leading-6 text-slate-700">{service.description ?? ""}</p>
+        <p className="min-h-18 text-sm leading-6 text-slate-700 dark:text-slate-200">
+          {service.description ?? ""}
+        </p>
 
         <div
           className="flex min-h-8 flex-wrap items-start gap-2"
@@ -73,8 +78,8 @@ export const ServiceCard = ({ service }: ServiceCardProps): JSX.Element => {
                 onClick={handleDurationSelect}
                 className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
                   isSelected
-                    ? "border-slate-900 bg-slate-900 text-white"
-                    : "border-slate-300 bg-white text-slate-700 hover:border-slate-400"
+                    ? "border-slate-900 bg-slate-900 text-white dark:border-blue-300 dark:bg-blue-300 dark:text-slate-950"
+                    : "border-slate-300 bg-white text-slate-700 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
                 }`}
                 aria-pressed={isSelected}
                 disabled={durationOptions.length === 1}
@@ -85,13 +90,13 @@ export const ServiceCard = ({ service }: ServiceCardProps): JSX.Element => {
           })}
         </div>
       </div>
-      <div className="flex items-center justify-end text-sm font-medium text-slate-800">
+      <div className="flex items-center justify-end text-sm font-medium text-slate-800 dark:text-slate-100">
         <span data-testid="service-price">${(selectedOption.priceCents / 100).toFixed(2)}</span>
       </div>
       <Link
         href={`/book/${service.id}?durationMin=${selectedOption.durationMin}`}
         aria-label={`${ctaLabel} ${service.name}`}
-        className="mt-auto inline-flex items-center justify-center rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950"
+        className="mt-auto inline-flex items-center justify-center rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950 dark:bg-blue-300 dark:text-slate-950 dark:hover:bg-blue-200 dark:focus-visible:outline-blue-300"
       >
         {ctaLabel}
       </Link>

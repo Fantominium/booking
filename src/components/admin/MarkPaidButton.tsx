@@ -35,7 +35,7 @@ export const MarkPaidButton = ({ bookingId, onComplete }: MarkPaidButtonProps): 
   return (
     <button
       type="button"
-      className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700"
+      className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
       onClick={handleClick}
       disabled={isSubmitting}
       aria-label="Mark balance as paid"

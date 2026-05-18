@@ -1,6 +1,9 @@
 "use client";
 
+import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import React, { createContext, useContext, useEffect, useState } from "react";
+
+import { createAccessibleMuiTheme } from "./muiTheme";
 
 type Theme = "light" | "dark" | "system";
 
@@ -37,6 +40,7 @@ export function ThemeProvider({
     return savedTheme ?? defaultTheme;
   });
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
+  const muiTheme = React.useMemo(() => createAccessibleMuiTheme(resolvedTheme), [resolvedTheme]);
 
   // Handle system theme detection and resolved theme calculation
   useEffect(() => {
@@ -55,6 +59,8 @@ export function ThemeProvider({
 
       // Apply theme to document
       document.documentElement.setAttribute("data-theme", newResolvedTheme);
+      document.documentElement.classList.toggle("dark", newResolvedTheme === "dark");
+      document.documentElement.style.colorScheme = newResolvedTheme;
     };
 
     updateResolvedTheme();
@@ -76,5 +82,9 @@ export function ThemeProvider({
     resolvedTheme,
   };
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>
+      <MuiThemeProvider theme={muiTheme}>{children}</MuiThemeProvider>
+    </ThemeContext.Provider>
+  );
 }

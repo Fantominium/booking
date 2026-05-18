@@ -124,33 +124,33 @@ export const ServiceForm = ({
 
   return (
     <form className={formClassName} onSubmit={handleSubmit}>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
         <span>Name</span>
         <input
           type="text"
           value={values.name}
           data-field="name"
           onChange={handleChange}
-          className="rounded-md border border-slate-200 px-3 py-2"
+          className="rounded-md border border-slate-200 px-3 py-2 dark:border-slate-700"
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
         <span>Description</span>
         <textarea
           value={values.description}
           data-field="description"
           onChange={handleChange}
-          className="rounded-md border border-slate-200 px-3 py-2"
+          className="rounded-md border border-slate-200 px-3 py-2 dark:border-slate-700"
           rows={3}
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
         <span>Offering type</span>
         <select
           value={values.offeringType}
           data-field="offeringType"
           onChange={handleChange}
-          className="rounded-md border border-slate-200 px-3 py-2"
+          className="rounded-md border border-slate-200 px-3 py-2 dark:border-slate-700"
         >
           <option value="SESSION">Session</option>
           <option value="EVENT">Event</option>
@@ -158,56 +158,56 @@ export const ServiceForm = ({
         </select>
       </label>
       <div className="grid gap-3 md:grid-cols-3">
-        <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           <span>Duration (min)</span>
           <input
             type="number"
             value={values.durationMin}
             data-field="durationMin"
             onChange={handleChange}
-            className="rounded-md border border-slate-200 px-3 py-2"
+            className="rounded-md border border-slate-200 px-3 py-2 dark:border-slate-700"
             min={1}
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           <span>Price (cents)</span>
           <input
             type="number"
             value={values.priceCents}
             data-field="priceCents"
             onChange={handleChange}
-            className="rounded-md border border-slate-200 px-3 py-2"
+            className="rounded-md border border-slate-200 px-3 py-2 dark:border-slate-700"
             min={0}
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           <span>Downpayment (cents)</span>
           <input
             type="number"
             value={values.downpaymentCents}
             data-field="downpaymentCents"
             onChange={handleChange}
-            className="rounded-md border border-slate-200 px-3 py-2"
+            className="rounded-md border border-slate-200 px-3 py-2 dark:border-slate-700"
             min={0}
           />
         </label>
       </div>
-      <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-3">
-        <p className="text-xs font-semibold tracking-[0.08em] text-slate-700 uppercase">
+      <div className="dark:bg-surface rounded-md border border-slate-200 bg-slate-50 px-3 py-3 dark:border-slate-700">
+        <p className="text-xs font-semibold tracking-[0.08em] text-slate-700 uppercase dark:text-slate-200">
           Customer-facing duration badges
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
           {durationOptions.map((option) => (
             <span
               key={`preview-${option.durationMin}`}
-              className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700"
+              className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
             >
               {option.durationMin} min · ${(option.priceCents / 100).toFixed(2)}
             </span>
           ))}
         </div>
       </div>
-      <label className="flex items-center gap-2 text-sm text-slate-700">
+      <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
         <input
           type="checkbox"
           checked={values.isActive}
@@ -228,7 +228,7 @@ export const ServiceForm = ({
         {onCancel ? (
           <button
             type="button"
-            className="rounded-md border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
+            className="rounded-md border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             onClick={handleCancel}
           >
             Cancel

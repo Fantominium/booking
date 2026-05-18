@@ -67,10 +67,10 @@ const AvailabilityPage = async (): Promise<JSX.Element> => {
     }));
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-6 bg-slate-50 px-6 py-10">
+    <main className="mx-auto flex max-w-4xl flex-col gap-6 bg-[radial-gradient(circle_at_top,rgba(186,230,253,0.18),transparent_45%),linear-gradient(180deg,#fdfefe_0%,#f5f7fb_100%)] px-6 py-10 dark:bg-[radial-gradient(circle_at_top,rgba(144,202,249,0.12),transparent_45%),linear-gradient(180deg,#121212_0%,#171717_100%)]">
       <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-slate-900">Availability settings</h1>
-        <p className="text-slate-700">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Availability settings</h1>
+        <p className="text-slate-700 dark:text-slate-200">
           Manage weekly business hours and keep your calendar up to date.
         </p>
       </header>

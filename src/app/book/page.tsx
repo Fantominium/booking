@@ -28,45 +28,49 @@ const BookPage = async ({ searchParams }: BookPageProps): Promise<JSX.Element> =
   }));
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-10">
-      <header className="flex flex-col gap-4">
-        <p className="text-sm font-semibold tracking-[0.18em] text-slate-600 uppercase">
-          Booking journeys
-        </p>
-        <div className="flex flex-col gap-3">
-          <h1 className="text-4xl font-bold text-slate-950">Reserve a session, event, or rental</h1>
-          <p className="max-w-3xl text-lg leading-8 text-slate-700">
-            Every route below leads to a complete booking journey with availability, customer
-            details, and payment choice at the end.
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(186,230,253,0.22),transparent_45%),linear-gradient(180deg,#fdfefe_0%,#f5f7fb_100%)] dark:bg-[radial-gradient(circle_at_top,rgba(144,202,249,0.14),transparent_45%),linear-gradient(180deg,#121212_0%,#171717_100%)]">
+      <main className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-10">
+        <header className="flex flex-col gap-4">
+          <p className="text-sm font-semibold tracking-[0.18em] text-slate-600 uppercase dark:text-slate-300">
+            Booking journeys
           </p>
-        </div>
-      </header>
+          <div className="flex flex-col gap-3">
+            <h1 className="text-4xl font-bold text-slate-950 dark:text-white">
+              Reserve a session, event, or rental
+            </h1>
+            <p className="max-w-3xl text-lg leading-8 text-slate-700 dark:text-slate-200">
+              Every route below leads to a complete booking journey with availability, customer
+              details, and payment choice at the end.
+            </p>
+          </div>
+        </header>
 
-      {groupedServices.map(({ offeringType, services: offeringServices }) => {
-        if (offeringServices.length === 0) {
-          return null;
-        }
+        {groupedServices.map(({ offeringType, services: offeringServices }) => {
+          if (offeringServices.length === 0) {
+            return null;
+          }
 
-        return (
-          <section key={offeringType} className="flex flex-col gap-5">
-            <header className="flex flex-col gap-2">
-              <h2 className="text-2xl font-semibold text-slate-950">
-                {OFFERING_LABELS[offeringType as keyof typeof OFFERING_LABELS]}s
-              </h2>
-              <p className="max-w-2xl text-sm leading-6 text-slate-700">
-                {OFFERING_DESCRIPTIONS[offeringType as keyof typeof OFFERING_DESCRIPTIONS]}
-              </p>
-            </header>
+          return (
+            <section key={offeringType} className="flex flex-col gap-5">
+              <header className="flex flex-col gap-2">
+                <h2 className="text-2xl font-semibold text-slate-950 dark:text-white">
+                  {OFFERING_LABELS[offeringType as keyof typeof OFFERING_LABELS]}s
+                </h2>
+                <p className="max-w-2xl text-sm leading-6 text-slate-700 dark:text-slate-200">
+                  {OFFERING_DESCRIPTIONS[offeringType as keyof typeof OFFERING_DESCRIPTIONS]}
+                </p>
+              </header>
 
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {offeringServices.map((service: (typeof offeringServices)[number]) => (
-                <ServiceCard key={service.id} service={service} />
-              ))}
-            </div>
-          </section>
-        );
-      })}
-    </main>
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {offeringServices.map((service: (typeof offeringServices)[number]) => (
+                  <ServiceCard key={service.id} service={service} />
+                ))}
+              </div>
+            </section>
+          );
+        })}
+      </main>
+    </div>
   );
 };
 

@@ -331,7 +331,7 @@ export function Header(): React.ReactElement {
                 alt="TruFlow logo"
                 width={36}
                 height={36}
-                className="h-9 w-9"
+                className="h-9 w-9 rounded-md dark:bg-white/15 dark:p-0.5"
               />
               <h1 className="text-xl font-semibold tracking-[0.02em] text-slate-950 dark:text-slate-50">
                 TruFlow
@@ -377,7 +377,7 @@ export function Header(): React.ReactElement {
                 alt="TruFlow logo"
                 width={34}
                 height={34}
-                className="h-8.5 w-8.5"
+                className="h-8.5 w-8.5 rounded-md dark:bg-white/15 dark:p-0.5"
               />
               <h1 className="text-lg font-semibold tracking-[0.02em] text-slate-950 dark:text-slate-50">
                 TruFlow

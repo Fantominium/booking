@@ -143,10 +143,12 @@ export const ServiceList = ({ refreshKey }: ServiceListProps): React.JSX.Element
   );
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6">
+    <section className="dark:bg-surface-elevated flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700">
       <header className="flex flex-col gap-1">
-        <h2 className="text-xl font-semibold text-slate-900">Services</h2>
-        <p className="text-sm text-slate-600">Manage service pricing and availability.</p>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Services</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          Manage service pricing and availability.
+        </p>
       </header>
 
       <div className="grid gap-4">
@@ -154,13 +156,18 @@ export const ServiceList = ({ refreshKey }: ServiceListProps): React.JSX.Element
           const durationOptions = getServiceDurationOptions(service);
 
           return (
-            <div key={service.id} className="rounded-lg border border-slate-100 p-4">
+            <div
+              key={service.id}
+              className="dark:bg-surface rounded-lg border border-slate-100 p-4 dark:border-slate-700"
+            >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <div className="text-sm font-semibold text-slate-900">{service.name}</div>
-                  <div className="text-xs text-slate-600">{`${service.offeringType} · ${service.durationMin} min · $${service.priceCents / 100} · Downpayment $${service.downpaymentCents / 100}`}</div>
+                  <div className="text-sm font-semibold text-slate-900 dark:text-white">
+                    {service.name}
+                  </div>
+                  <div className="text-xs text-slate-600 dark:text-slate-300">{`${service.offeringType} · ${service.durationMin} min · $${service.priceCents / 100} · Downpayment $${service.downpaymentCents / 100}`}</div>
                   {durationOptions.length > 1 ? (
-                    <div className="mt-1 text-xs text-slate-500">
+                    <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       Options:{" "}
                       {durationOptions
                         .map(
@@ -170,7 +177,7 @@ export const ServiceList = ({ refreshKey }: ServiceListProps): React.JSX.Element
                         .join(" · ")}
                     </div>
                   ) : null}
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-slate-500 dark:text-slate-400">
                     {service.isActive ? "Active" : "Inactive"}
                   </div>
                 </div>
@@ -179,7 +186,7 @@ export const ServiceList = ({ refreshKey }: ServiceListProps): React.JSX.Element
                     type="button"
                     data-id={service.id}
                     onClick={handleEditClick}
-                    className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700"
+                    className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   >
                     Edit
                   </button>

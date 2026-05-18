@@ -64,7 +64,9 @@ export default function AdminLogin(): React.ReactElement {
         <div className="w-full space-y-8">
           <div className="text-center">
             <h1 className="text-foreground text-3xl font-bold">Admin Login</h1>
-            <p className="mt-2 text-neutral-600">Sign in to access the admin dashboard</p>
+            <p className="mt-2 text-neutral-600 dark:text-slate-200">
+              Sign in to access the admin dashboard
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -106,7 +108,7 @@ export default function AdminLogin(): React.ReactElement {
               <div
                 id="login-error"
                 role="alert"
-                className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+                className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-100"
                 aria-live="polite"
               >
                 {error}
@@ -135,7 +137,7 @@ export default function AdminLogin(): React.ReactElement {
           </form>
 
           <div className="text-center">
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-neutral-600 dark:text-slate-300">
               Need access? Contact your system administrator.
             </p>
           </div>
