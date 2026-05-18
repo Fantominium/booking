@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 type DatePickerProps = {
   dates: string[];
@@ -10,35 +10,45 @@ type DatePickerProps = {
 };
 
 export const DatePicker = ({ dates, selectedDate, onSelect }: DatePickerProps): JSX.Element => {
-  const handleSelect = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      const value = event.currentTarget.dataset.date;
-      if (value) {
-        onSelect(value);
+  const availableDates = useMemo(() => [...dates].sort(), [dates]);
+  const availableDateSet = useMemo(() => new Set(availableDates), [availableDates]);
+
+  const minDate = availableDates[0];
+  const maxDate = availableDates.at(-1);
+
+  const handleDateFieldChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
+      const value = event.currentTarget.value;
+
+      if (!value) {
+        return;
       }
+
+      if (!availableDateSet.has(value)) {
+        event.currentTarget.setCustomValidity("This date is not available for booking.");
+        event.currentTarget.reportValidity();
+        return;
+      }
+
+      event.currentTarget.setCustomValidity("");
+      onSelect(value);
     },
-    [onSelect],
+    [availableDateSet, onSelect],
   );
 
   return (
-    <div className="grid grid-cols-2 gap-2" data-testid="calendar">
-      {dates.map((date) => (
-        <button
-          key={date}
-          type="button"
-          data-date={date}
-          data-testid="available-date"
-          aria-label={`Select date ${date}`}
-          onClick={handleSelect}
-          className={`rounded-md border px-3 py-2 text-sm ${
-            selectedDate === date
-              ? "border-slate-900 bg-slate-900 text-white"
-              : "border-slate-200 bg-white text-slate-700"
-          }`}
-        >
-          {date}
-        </button>
-      ))}
+    <div className="flex flex-col gap-3" data-testid="calendar">
+      <input
+        type="date"
+        data-testid="date-input"
+        value={selectedDate ?? ""}
+        onChange={handleDateFieldChange}
+        min={minDate}
+        max={maxDate}
+        disabled={!availableDates.length}
+        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+        aria-label="Select booking date"
+      />
     </div>
   );
 };
