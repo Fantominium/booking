@@ -1,104 +1,180 @@
 # TruFlow Booking
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+TruFlow Booking is a Next.js application for customer booking journeys and admin operations, with a separate email worker backed by PostgreSQL and Redis.
 
-## Getting Started
+## Stack
 
-First, run the development server:
+- Web app: Next.js + React + TypeScript
+- Database: PostgreSQL + Prisma ORM
+- Queue and worker: Redis + BullMQ email worker
+- Test tools: Vitest and Playwright
+
+## Prerequisites
+
+- Node.js 20+
+- pnpm 8+
+- Docker Desktop (recommended for PostgreSQL and Redis)
+
+## Quick Start (Local Host)
+
+1. Install dependencies.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+```
+
+2. Create your local environment files.
+
+```bash
+cp .env.local.example .env.local
+cp .env.local .env
+```
+
+3. Start PostgreSQL and Redis with Docker.
+
+```bash
+docker compose --env-file .env.compose.example up -d postgres redis
+```
+
+4. Run Prisma migrations.
+
+```bash
+pnpm exec prisma migrate dev
+```
+
+5. Seed local data (services, settings, local admin account).
+
+```bash
+pnpm exec prisma db seed
+```
+
+6. Start the web app.
+
+```bash
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-### Type Checking
+7. In a second terminal, start the email worker.
 
 ```bash
-pnpm typecheck
+pnpm worker:email
 ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+8. Open http://localhost:3000.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Testing
+Use .env.local for host development. The following keys are required by runtime validation:
 
-This project uses Vitest for unit and integration tests, and Playwright for end-to-end tests.
-
-### Running Tests
-
-```bash
-# Run all unit and integration tests
-pnpm test
-
-# Run TypeScript type checks
-pnpm typecheck
-
-# Run tests in watch mode
-pnpm test:watch
-
-# Run end-to-end tests
-pnpm test:e2e
+```dotenv
+DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/truflow_booking_dev
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+RESEND_API_KEY=re_...
+NEXTAUTH_SECRET=replace_with_generated_secret
+WEBHOOK_URL_TOKEN=replace_with_generated_token
+REDIS_URL=redis://localhost:6379
+NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
-### Test Configuration
+Notes:
 
-- **Unit & Integration Tests**: Vitest with Happy DOM (for better ESM support)
-- **E2E Tests**: Playwright
-- **Config Files**:
-  - `vitest.config.mts` - Vitest configuration
-  - `playwright.config.ts` - Playwright configuration
+- Copy values from .env.local.example as your baseline.
+- If you use local Docker defaults, set DATABASE_URL to postgresql://postgres:devpassword@localhost:5432/truflow_booking_dev?schema=public.
+- Use test keys locally for Stripe and Resend.
+- Do not commit .env files.
 
-  ## Environment Variables
+## Seeded Local Admin (Local/Test Only)
 
-  Create `.env.local` with the following keys:
+After running the seed command, a local admin account is available for development and automated tests only.
 
-  ```dotenv
-  DATABASE_URL=
-  STRIPE_SECRET_KEY=
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
-  STRIPE_WEBHOOK_SECRET=
-  RESEND_API_KEY=
-  NEXTAUTH_SECRET=
-  WEBHOOK_URL_TOKEN=
-  REDIS_URL=
-  NEXT_PUBLIC_API_URL=
-  ```
+- Email: admin@truflow.local
+- Password: TestPassword123!
 
-## Container Runtime
+This account must never be used as a production bootstrap path.
 
-Container scaffolding for the web app, worker, PostgreSQL, and Redis is available for the platform-overhaul path.
+## Run All Applications Locally
+
+The local development setup includes these processes:
+
+- Web application on port 3000
+- Email worker process
+- PostgreSQL on port 5432
+- Redis on port 6379
+
+To run everything:
+
+1. Start PostgreSQL and Redis.
+2. Run migrations and seed.
+3. Start the web app.
+4. Start the worker.
+
+## Full Docker Runtime (Optional)
+
+To start web, worker, PostgreSQL, and Redis in containers:
 
 ```bash
 docker compose --env-file .env.compose.example up --build
 ```
 
-Health endpoint:
+Health check:
 
 ```bash
 curl http://localhost:3000/api/health
 ```
 
-See the detailed planning and runtime docs in [docs/overhaul/LOCAL_DEVELOPMENT_BOOTSTRAP.md](docs/overhaul/LOCAL_DEVELOPMENT_BOOTSTRAP.md), [docs/overhaul/GITHUB_ACTIONS_PIPELINE_PLAN.md](docs/overhaul/GITHUB_ACTIONS_PIPELINE_PLAN.md), and [docs/overhaul/CONTAINER_RUNTIME_TOPOLOGY_PLAN.md](docs/overhaul/CONTAINER_RUNTIME_TOPOLOGY_PLAN.md).
+Stop containers:
 
-## Learn More
+```bash
+docker compose --env-file .env.compose.example down -v
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Common Commands
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Development
+pnpm dev
+pnpm worker:email
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Quality
+pnpm typecheck
+pnpm lint
 
-## Deploy on Vercel
+# Tests
+pnpm test
+pnpm test:watch
+pnpm test:coverage
+pnpm test:e2e
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Storybook
+pnpm storybook
+pnpm build-storybook
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Verification Checklist
+
+- Home page loads at http://localhost:3000
+- Booking flow loads at http://localhost:3000/book?type=SESSION
+- Admin login page loads at http://localhost:3000/admin/login
+- Worker process starts without Redis or database connection errors
+- Prisma migrations and seed complete successfully
+
+## Troubleshooting
+
+- Missing environment variable errors:
+  - Re-check .env.local against .env.local.example.
+- Database connection errors:
+  - Confirm PostgreSQL is running and DATABASE_URL is valid.
+- Redis connection errors:
+  - Confirm Redis is running and REDIS_URL points to localhost:6379.
+- Migration or seed failures:
+  - Re-run pnpm exec prisma migrate dev and pnpm exec prisma db seed after fixing DB connectivity.
+- Port conflicts:
+  - Stop processes using ports 3000, 5432, or 6379 and retry.
+
+## Additional Docs
+
+- Local bootstrap details: docs/overhaul/LOCAL_DEVELOPMENT_BOOTSTRAP.md
+- Deployment: docs/deployment.md
+- Contribution guide: CONTRIBUTING.md
