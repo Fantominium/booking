@@ -278,13 +278,13 @@ export function Header(): React.ReactElement {
                         const itemParams = new URLSearchParams(queryString);
                         return (
                           pathname === baseHref &&
-                          [...itemParams.entries()].every(
-                            ([k, v]) => searchParams.get(k) === v,
-                          )
+                          [...itemParams.entries()].every(([k, v]) => searchParams.get(k) === v)
                         );
                       }
                       if (baseHref === "/") return pathname === "/";
-                      return pathname === baseHref || (pathname?.startsWith(baseHref + "/") ?? false);
+                      return (
+                        pathname === baseHref || (pathname?.startsWith(baseHref + "/") ?? false)
+                      );
                     })();
 
                     return (
