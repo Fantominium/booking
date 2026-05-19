@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 
 import { Providers } from "@/components/Providers";
 import { SkipToMainLink } from "@/components/accessibility";
@@ -27,7 +28,9 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased`}>
         <SkipToMainLink />
         <Providers>
-          <Header />
+          <Suspense fallback={null}>
+            <Header />
+          </Suspense>
           <main id="main-content" tabIndex={-1}>
             {children}
           </main>

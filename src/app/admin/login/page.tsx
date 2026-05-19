@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { signIn, getSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function AdminLogin(): React.ReactElement {
   const [email, setEmail] = useState("");
@@ -10,7 +10,6 @@ export default function AdminLogin(): React.ReactElement {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const handleEmailChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
     setEmail(e.target.value);
@@ -41,7 +40,11 @@ export default function AdminLogin(): React.ReactElement {
           // Check session to ensure authentication worked
           const session = await getSession();
           if (session) {
-            const callbackUrl = searchParams.get("callbackUrl") || "/admin";
+            const callbackUrl =
+              typeof globalThis.window !== "undefined"
+                ? new URLSearchParams(globalThis.window.location.search).get("callbackUrl") ||
+                  "/admin"
+                : "/admin";
             router.push(callbackUrl);
             router.refresh();
           } else {
@@ -55,7 +58,7 @@ export default function AdminLogin(): React.ReactElement {
         setIsLoading(false);
       }
     },
-    [email, password, router, searchParams],
+    [email, password, router],
   );
 
   return (
