@@ -17,6 +17,7 @@ export const Default: Story = {
       id: "service-1",
       name: "Deep Tissue Massage",
       description: "Deep pressure focused massage.",
+      offeringType: "SESSION",
       durationMin: 60,
       priceCents: 8000,
       downpaymentCents: 2000,

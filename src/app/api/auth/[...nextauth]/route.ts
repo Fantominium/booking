@@ -5,6 +5,8 @@ import { verifyPassword } from "@/lib/auth/password";
 import { env } from "@/lib/config/env";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -32,7 +34,7 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        return { id: admin.id, email: admin.email };
+        return { id: admin.id, email: admin.email, role: "admin" };
       },
     }),
   ],
@@ -43,6 +45,7 @@ export const authOptions: NextAuthOptions = {
       const newToken = { ...token };
       if (user) {
         newToken.id = user.id;
+        newToken.role = user.role;
       }
       return newToken;
     },
@@ -53,6 +56,7 @@ export const authOptions: NextAuthOptions = {
           ? {
               ...session.user,
               id: token.id as string,
+              role: token.role as "admin",
             }
           : undefined,
       };

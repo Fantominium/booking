@@ -7,6 +7,9 @@ import {
 } from "@/lib/cache/availability";
 import { calculateAvailableSlotsForDate } from "@/lib/services/availability";
 import { prisma } from "@/lib/prisma";
+import { resolveServiceDurationOption } from "@/lib/service-duration-options";
+
+export const dynamic = "force-dynamic";
 
 const parseDate = (value: string): Date => {
   const [year, month, day] = value.split("-").map(Number);
@@ -28,6 +31,7 @@ export const GET = async (
   const startDateParam = searchParams.get("startDate");
   const endDateParam = searchParams.get("endDate");
   const dateParam = searchParams.get("date");
+  const durationMinParam = searchParams.get("durationMin");
 
   if (!startDateParam) {
     return NextResponse.json({ error: "startDate is required" }, { status: 400 });
@@ -49,12 +53,18 @@ export const GET = async (
 
   const businessHours = await prisma.businessHours.findMany();
   const overrides = await prisma.dateOverride.findMany();
+  const requestedDuration = Number.parseInt(durationMinParam ?? "", 10);
+  const selectedOption = resolveServiceDurationOption(
+    service,
+    Number.isNaN(requestedDuration) ? undefined : requestedDuration,
+  );
 
   const cacheKey = buildAvailabilityCacheKey({
     serviceId: service.id,
     startDate: startDateParam,
     endDate: endDateParam,
     date: dateParam,
+    durationMin: selectedOption.durationMin,
   });
   const cached = getAvailabilityCache<Record<string, unknown>>(cacheKey);
 
@@ -76,7 +86,10 @@ export const GET = async (
 
     const slots = calculateAvailableSlotsForDate({
       date: targetDate,
-      service,
+      service: {
+        ...service,
+        durationMin: selectedOption.durationMin,
+      },
       bookings: dayBookings,
       businessHours,
       overrides,
@@ -85,7 +98,7 @@ export const GET = async (
 
     const payload = {
       date: dateParam,
-      slots: slots.map((slot) => ({
+      slots: slots.map((slot: (typeof slots)[number]) => ({
         start: slot.start.toISOString(),
         end: slot.end.toISOString(),
       })),
@@ -114,7 +127,10 @@ export const GET = async (
 
     const slots = calculateAvailableSlotsForDate({
       date: cursor,
-      service,
+      service: {
+        ...service,
+        durationMin: selectedOption.durationMin,
+      },
       bookings: dayBookings,
       businessHours,
       overrides,

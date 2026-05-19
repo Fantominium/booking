@@ -116,57 +116,59 @@ export const DateOverrideForm = ({ initialOverrides }: DateOverrideFormProps): J
   }, []);
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6">
+    <div className="dark:bg-surface-elevated flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700">
       <div className="flex flex-col gap-1">
-        <h2 className="text-xl font-semibold text-slate-900">Date overrides</h2>
-        <p className="text-sm text-slate-600">Add holiday closures or special opening hours.</p>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Date overrides</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          Add holiday closures or special opening hours.
+        </p>
       </div>
 
       <form className="grid gap-4 md:grid-cols-5" onSubmit={handleSubmit}>
-        <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           <span>Date</span>
           <input
             type="date"
             value={draft.date}
             data-field="date"
             onChange={handleDraftChange}
-            className="rounded-md border border-slate-300 px-2 py-1"
+            className="rounded-md border border-slate-300 px-2 py-1 dark:border-slate-700"
             required
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           <span>Open</span>
           <input
             type="time"
             value={draft.customOpenTime}
             data-field="customOpenTime"
             onChange={handleDraftChange}
-            className="rounded-md border border-slate-300 px-2 py-1"
+            className="rounded-md border border-slate-300 px-2 py-1 dark:border-slate-700"
             disabled={draft.isBlocked}
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           <span>Close</span>
           <input
             type="time"
             value={draft.customCloseTime}
             data-field="customCloseTime"
             onChange={handleDraftChange}
-            className="rounded-md border border-slate-300 px-2 py-1"
+            className="rounded-md border border-slate-300 px-2 py-1 dark:border-slate-700"
             disabled={draft.isBlocked}
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           <span>Reason</span>
           <input
             type="text"
             value={draft.reason}
             data-field="reason"
             onChange={handleDraftChange}
-            className="rounded-md border border-slate-300 px-2 py-1"
+            className="rounded-md border border-slate-300 px-2 py-1 dark:border-slate-700"
           />
         </label>
-        <label className="flex items-center gap-2 text-sm text-slate-700">
+        <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
           <input
             type="checkbox"
             checked={draft.isBlocked}
@@ -176,10 +178,10 @@ export const DateOverrideForm = ({ initialOverrides }: DateOverrideFormProps): J
           Blocked
         </label>
         <div className="flex items-center justify-between md:col-span-5">
-          <span className="text-sm text-slate-600">{status}</span>
+          <span className="text-sm text-slate-600 dark:text-slate-300">{status}</span>
           <button
             type="submit"
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white dark:bg-blue-300 dark:text-slate-950"
             disabled={isSaving}
             aria-label="Add date override"
           >
@@ -192,20 +194,22 @@ export const DateOverrideForm = ({ initialOverrides }: DateOverrideFormProps): J
         {rows.map((entry) => (
           <div
             key={entry.id}
-            className="flex flex-col gap-2 rounded-lg border border-slate-100 p-3 md:flex-row md:items-center md:justify-between"
+            className="dark:bg-surface flex flex-col gap-2 rounded-lg border border-slate-100 p-3 md:flex-row md:items-center md:justify-between dark:border-slate-700"
           >
-            <div className="flex flex-col text-sm text-slate-700">
-              <span className="font-semibold text-slate-900">{entry.date}</span>
+            <div className="flex flex-col text-sm text-slate-700 dark:text-slate-200">
+              <span className="font-semibold text-slate-900 dark:text-white">{entry.date}</span>
               <span>
                 {entry.isBlocked
                   ? "Blocked"
                   : `Open ${entry.customOpenTime ?? "--"} - ${entry.customCloseTime ?? "--"}`}
               </span>
-              {entry.reason ? <span className="text-slate-500">{entry.reason}</span> : null}
+              {entry.reason ? (
+                <span className="text-slate-500 dark:text-slate-400">{entry.reason}</span>
+              ) : null}
             </div>
             <button
               type="button"
-              className="rounded-md border border-slate-300 px-3 py-1 text-sm text-slate-700"
+              className="rounded-md border border-slate-300 px-3 py-1 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               data-id={entry.id}
               onClick={handleDelete}
               aria-label={`Delete override for ${entry.date}`}

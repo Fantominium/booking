@@ -14,12 +14,12 @@ export const checkRefundSla = async (): Promise<
     },
   });
 
-  const alerts = pendingRefunds.map((entry) => ({
+  const alerts = pendingRefunds.map((entry: (typeof pendingRefunds)[number]) => ({
     bookingId: entry.bookingId,
     amountCents: entry.amountCents,
   }));
 
-  alerts.forEach((alert) => {
+  alerts.forEach((alert: (typeof alerts)[number]) => {
     console.warn(`Refund SLA exceeded for booking ${alert.bookingId} amount ${alert.amountCents}`);
   });
 

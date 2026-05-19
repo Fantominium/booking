@@ -1,23 +1,58 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
+
+const durationPriceOptionSchema = z.object({
+  durationMin: z.number().int().positive(),
+  priceCents: z.number().int().nonnegative(),
+});
 
 const serviceInputSchema = z
   .object({
     name: z.string().min(1).max(255),
     description: z.string().max(5000).nullable().optional(),
+    offeringType: z.enum(["SESSION", "EVENT", "RENTAL"]),
     durationMin: z.number().int().positive(),
     priceCents: z.number().int().nonnegative(),
     downpaymentCents: z.number().int().nonnegative(),
+    durationPriceOptions: z.array(durationPriceOptionSchema).max(10).optional().nullable(),
     isActive: z.boolean().optional(),
   })
   .refine((value) => value.downpaymentCents <= value.priceCents, {
     message: "Downpayment cannot exceed price",
     path: ["downpaymentCents"],
-  });
+  })
+  .refine(
+    (value) => {
+      const options = value.durationPriceOptions ?? [];
+      return new Set(options.map((option) => option.durationMin)).size === options.length;
+    },
+    {
+      message: "Duration options must be unique",
+      path: ["durationPriceOptions"],
+    },
+  )
+  .refine(
+    (value) => {
+      const options = value.durationPriceOptions ?? [];
+      return options.length > 0;
+    },
+    {
+      message: "At least one duration option is required",
+      path: ["durationPriceOptions"],
+    },
+  );
 
 export const GET = async (): Promise<NextResponse> => {
+  if (!(await getAdminSession())) {
+    return createAdminUnauthorizedResponse();
+  }
+
   const services = await prisma.service.findMany({
     orderBy: { name: "asc" },
   });
@@ -26,6 +61,10 @@ export const GET = async (): Promise<NextResponse> => {
 };
 
 export const POST = async (request: Request): Promise<NextResponse> => {
+  if (!(await getAdminSession())) {
+    return createAdminUnauthorizedResponse();
+  }
+
   const body = await request.json();
   const parsed = serviceInputSchema.safeParse(body);
 
@@ -33,15 +72,25 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
+  const data: Prisma.ServiceCreateInput = {
+    name: parsed.data.name,
+    description: parsed.data.description ?? null,
+    offeringType: parsed.data.offeringType,
+    durationMin: parsed.data.durationMin,
+    priceCents: parsed.data.priceCents,
+    downpaymentCents: parsed.data.downpaymentCents,
+    isActive: parsed.data.isActive ?? true,
+  };
+
+  if (parsed.data.durationPriceOptions !== undefined) {
+    data.durationPriceOptions =
+      parsed.data.durationPriceOptions === null
+        ? Prisma.DbNull
+        : (parsed.data.durationPriceOptions as Prisma.InputJsonValue);
+  }
+
   const service = await prisma.service.create({
-    data: {
-      name: parsed.data.name,
-      description: parsed.data.description ?? null,
-      durationMin: parsed.data.durationMin,
-      priceCents: parsed.data.priceCents,
-      downpaymentCents: parsed.data.downpaymentCents,
-      isActive: parsed.data.isActive ?? true,
-    },
+    data,
   });
 
   return NextResponse.json({ service }, { status: 201 });

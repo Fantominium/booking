@@ -1,0 +1,31 @@
+architecture-beta
+    group user(cloud)[User Journeys]
+    service browser(internet)[Customer And Admin Browser] in user
+
+    group delivery(cloud)[Delivery Controls]
+    service github(actions)[GitHub Actions] in delivery
+    service preview(server)[Preview Or Staging Environment] in delivery
+
+    group app(cloud)[Application Runtime]
+    service web(server)[Nextjs Web App] in app
+    service worker(server)[Background Worker] in app
+
+    group data(cloud)[Backing Services]
+    service postgres(database)[PostgreSQL] in data
+    service redis(database)[Redis] in data
+
+    group providers(cloud)[External Providers]
+    service stripe(internet)[Payment Provider] in providers
+    service resend(internet)[Email Provider] in providers
+
+    browser:R --> L:web
+    github:B --> T:preview
+    github:R --> L:web{group}
+    github:R --> L:worker{group}
+    web:B --> T:postgres
+    web:B --> T:redis
+    worker:B --> T:redis
+    worker:L --> R:resend
+    web:R --> L:stripe
+    preview:B --> T:web{group}
+    preview:B --> T:worker{group}

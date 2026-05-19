@@ -1,9 +1,10 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 
 :root {
   /* Light mode - calming color palette */
-  --background: #fdfffe;
-  --foreground: #2c3e50;
+  --background: #fcfdff;
+  --foreground: #0f172a;
 
   /* Calming blues */
   --blue-50: #f0f8ff;
@@ -69,10 +70,14 @@
   --success-dark: var(--green-700);
 
   /* Surface colors */
-  --surface: var(--neutral-50);
+  --surface: #f8fafc;
   --surface-elevated: #ffffff;
-  --border: var(--neutral-200);
-  --border-light: var(--neutral-100);
+  --border: #cbd5e1;
+  --border-light: #e2e8f0;
+
+  /* High-contrast theme toggle colors (4.5:1 ratio minimum) */
+  --theme-light: var(--gold-500); /* Sun icon in light mode */
+  --theme-dark: var(--blue-200); /* Moon icon in dark mode */
 }
 
 @theme inline {
@@ -147,55 +152,63 @@
 /* Dark mode theme */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0f172a;
-    --foreground: #f1f5f9;
+    --background: #121212;
+    --foreground: #ffffff;
 
     /* Adjust colors for dark mode */
-    --primary: var(--blue-400);
-    --primary-light: var(--blue-300);
-    --primary-dark: var(--blue-600);
+    --primary: #90caf9;
+    --primary-light: #bbdefb;
+    --primary-dark: #64b5f6;
 
-    --secondary: var(--gold-300);
-    --secondary-light: var(--gold-200);
-    --secondary-dark: var(--gold-500);
+    --secondary: #ffcc80;
+    --secondary-light: #ffe0b2;
+    --secondary-dark: #ffb74d;
 
-    --success: var(--green-400);
-    --success-light: var(--green-300);
-    --success-dark: var(--green-600);
+    --success: #81c784;
+    --success-light: #a5d6a7;
+    --success-dark: #66bb6a;
 
-    --surface: var(--neutral-800);
-    --surface-elevated: var(--neutral-700);
-    --border: var(--neutral-700);
-    --border-light: var(--neutral-600);
+    --surface: #1e1e1e;
+    --surface-elevated: #252525;
+    --border: rgba(255, 255, 255, 0.24);
+    --border-light: rgba(255, 255, 255, 0.18);
+
+    /* High-contrast theme toggle colors for dark mode */
+    --theme-light: var(--gold-400);
+    --theme-dark: var(--blue-300);
   }
 }
 
 /* Manual dark mode class for theme toggle */
 [data-theme="dark"] {
-  --background: #0f172a;
-  --foreground: #f1f5f9;
+  --background: #121212;
+  --foreground: #ffffff;
 
-  --primary: var(--blue-400);
-  --primary-light: var(--blue-300);
-  --primary-dark: var(--blue-600);
+  --primary: #90caf9;
+  --primary-light: #bbdefb;
+  --primary-dark: #64b5f6;
 
-  --secondary: var(--gold-300);
-  --secondary-light: var(--gold-200);
-  --secondary-dark: var(--gold-500);
+  --secondary: #ffcc80;
+  --secondary-light: #ffe0b2;
+  --secondary-dark: #ffb74d;
 
-  --success: var(--green-400);
-  --success-light: var(--green-300);
-  --success-dark: var(--green-600);
+  --success: #81c784;
+  --success-light: #a5d6a7;
+  --success-dark: #66bb6a;
 
-  --surface: var(--neutral-800);
-  --surface-elevated: var(--neutral-700);
-  --border: var(--neutral-700);
-  --border-light: var(--neutral-600);
+  --surface: #1e1e1e;
+  --surface-elevated: #252525;
+  --border: rgba(255, 255, 255, 0.24);
+  --border-light: rgba(255, 255, 255, 0.18);
+
+  /* High-contrast theme toggle colors for dark mode */
+  --theme-light: var(--gold-400);
+  --theme-dark: var(--blue-300);
 }
 
 [data-theme="light"] {
-  --background: #fdfffe;
-  --foreground: #2c3e50;
+  --background: #fcfdff;
+  --foreground: #0f172a;
 
   --primary: var(--blue-500);
   --primary-light: var(--blue-300);
@@ -209,10 +222,14 @@
   --success-light: var(--green-200);
   --success-dark: var(--green-700);
 
-  --surface: var(--neutral-50);
+  --surface: #f8fafc;
   --surface-elevated: #ffffff;
-  --border: var(--neutral-200);
-  --border-light: var(--neutral-100);
+  --border: #cbd5e1;
+  --border-light: #e2e8f0;
+
+  /* High-contrast theme toggle colors for light mode */
+  --theme-light: var(--gold-500);
+  --theme-dark: var(--blue-200);
 }
 
 button,
@@ -240,6 +257,115 @@ body {
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
+}
+
+[data-theme="dark"] :where(.text-slate-950, .text-slate-900, .text-slate-800, .text-gray-900) {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] :where(.text-slate-700, .text-slate-600, .text-slate-500, .text-gray-700) {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+[data-theme="dark"]
+  :where(
+    .text-slate-400,
+    .text-gray-600,
+    .text-gray-500,
+    .text-neutral-900,
+    .text-neutral-800,
+    .text-neutral-700,
+    .text-neutral-600,
+    .text-neutral-500
+  ) {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+[data-theme="dark"]
+  :where(
+    .text-blue-950,
+    .text-blue-900,
+    .text-gold-900,
+    .text-green-950,
+    .text-green-900,
+    .text-amber-950
+  ) {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+[data-theme="dark"] :where(.bg-white, .bg-slate-50, .bg-slate-100, .bg-gray-100) {
+  background-color: #1e1e1e !important;
+}
+
+[data-theme="dark"]
+  :where(
+    .bg-neutral-50,
+    .bg-neutral-100,
+    .bg-neutral-200,
+    .bg-neutral-300,
+    .bg-gray-50,
+    .bg-blue-50,
+    .bg-gold-50,
+    .bg-green-50
+  ) {
+  background-color: #1e1e1e !important;
+}
+
+[data-theme="dark"] :where(.bg-amber-50) {
+  background-color: rgba(245, 158, 11, 0.14) !important;
+}
+
+[data-theme="dark"] :where(.bg-red-50) {
+  background-color: rgba(239, 68, 68, 0.14) !important;
+}
+
+[data-theme="dark"] :where(.bg-white\/90, .bg-white\/95, .bg-white\/80) {
+  background-color: rgba(30, 30, 30, 0.95) !important;
+}
+
+[data-theme="dark"] :where(.border-slate-200, .border-slate-300, .border-gray-300) {
+  border-color: rgba(255, 255, 255, 0.24) !important;
+}
+
+[data-theme="dark"]
+  :where(
+    .border-slate-100,
+    .border-slate-400,
+    .border-gray-200,
+    .border-neutral-100,
+    .border-neutral-200,
+    .border-neutral-300
+  ) {
+  border-color: rgba(255, 255, 255, 0.24) !important;
+}
+
+[data-theme="dark"]
+  :where(.hover\:bg-slate-50:hover, .hover\:bg-slate-100:hover, .hover\:bg-gray-100:hover) {
+  background-color: #252525 !important;
+}
+
+[data-theme="dark"]
+  :where(
+    .hover\:bg-neutral-200:hover,
+    .hover\:bg-neutral-300:hover,
+    .hover\:bg-red-200:hover,
+    .hover\:bg-gray-50:hover
+  ) {
+  background-color: #252525 !important;
+}
+
+[data-theme="dark"] :where(.focus\:ring-offset-2, .focus\:ring-offset-background) {
+  --tw-ring-offset-color: #121212 !important;
+}
+
+[data-theme="dark"] :where(input, select, textarea) {
+  background-color: #1e1e1e;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+[data-theme="dark"] :where(input::placeholder, textarea::placeholder) {
+  color: rgba(255, 255, 255, 0.62);
 }
 
 /* Screen reader utilities */

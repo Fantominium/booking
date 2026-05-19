@@ -3,7 +3,11 @@
 import React from "react";
 import { useTheme } from "./ThemeProvider";
 
-export function ThemeToggle(): React.ReactElement {
+type ThemeToggleProps = {
+  testId?: string;
+};
+
+export function ThemeToggle({ testId }: ThemeToggleProps): React.ReactElement {
   const { theme, setTheme, resolvedTheme } = useTheme();
 
   const handleToggle = React.useCallback((): void => {
@@ -19,9 +23,10 @@ export function ThemeToggle(): React.ReactElement {
 
   const getIcon = (): React.ReactElement => {
     if (resolvedTheme === "dark") {
+      // Sun icon for dark mode - using high-contrast gold color (Research R-003)
       return (
         <svg
-          className="h-5 w-5"
+          className="text-theme-light h-5 w-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -36,9 +41,10 @@ export function ThemeToggle(): React.ReactElement {
         </svg>
       );
     }
+    // Moon icon for light mode - using high-contrast blue color (Research R-003)
     return (
       <svg
-        className="h-5 w-5"
+        className="text-theme-dark h-5 w-5"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -61,8 +67,8 @@ export function ThemeToggle(): React.ReactElement {
   return (
     <button
       onClick={handleToggle}
-      data-testid="theme-toggle"
-      className="hover:bg-surface hover:text-foreground focus:ring-primary min-h-11 min-w-11 rounded-lg p-2 text-neutral-600 transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none"
+      data-testid={testId}
+      className="hover:bg-surface hover:text-foreground focus:ring-primary min-h-11 min-w-11 rounded-xl border border-slate-300 p-2 text-slate-900 transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none dark:border-slate-600 dark:text-slate-50"
       aria-label={getLabel()}
       title={getLabel()}
     >

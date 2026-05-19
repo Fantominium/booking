@@ -1,15 +1,15 @@
 <!--
-SYNC IMPACT REPORT (Constitution v1.6.0)
+SYNC IMPACT REPORT (Constitution v2.0.0)
 ==========================================
-Integration: Added accessibility audit score requirement to Definition of Done.
-- Version: 1.5.0 → 1.6.0 (MINOR: Expanded Definition of Done requirements)
-- Status: Expanded accessibility completion requirements
+Integration: Expanded governance to support platform-overhaul delivery, GitHub Actions CI/CD, full-stack containerisation, graceful-failure UX, and release readiness for first live payments.
+- Version: 1.6.0 → 2.0.0 (MAJOR: broadened project scope and mandatory delivery controls)
+- Status: Platform overhaul governance baseline established
 - Ratified: 2026-02-01
-- Last Amended: 2026-02-12
-- New Sections: None (updated existing Definition of Done)
-- Modified Principles: XI. Definition of Done (NON-NEGOTIABLE)
-- Templates aligned: ✅ .specify/templates/plan-template.md, ✅ .specify/templates/spec-template.md, ✅ .specify/templates/tasks-template.md
-- No breaking changes (additive only)
+- Last Amended: 2026-03-19
+- New Sections: XII. Continuous Governance Feedback
+- Modified Principles: Project Vision, XI. Definition of Done (NON-NEGOTIABLE), Technology Standards, Deployment & Hosting, Data Model & Domain Rules, Security & Data
+- Templates aligned: Pending follow-up alignment for platform-overhaul artifacts
+- Breaking changes: Governance now explicitly requires GitHub Actions CI/CD, full-stack containerisation, additional release artifacts, and broader platform extensibility rules
 ==========================================
 -->
 
@@ -17,13 +17,15 @@ Integration: Added accessibility audit score requirement to Definition of Done.
 
 ## Project Vision
 
-Build a professional, high-trust booking platform for a massage therapy business that bridges the gap between customer convenience and administrative control. The system prioritizes a seamless "happy path" for customers—booking a single service with a down-payment—while providing the business owner with robust tools to manage availability and verify payments.
+Build a professional, high-trust booking platform that starts with the current TruFlow massage booking experience and can evolve into a broader reservation platform without abandoning safety, accessibility, or operational rigor. The system must preserve a seamless customer happy path while supporting robust administrative control, containerised delivery, governed CI/CD, and future extensibility for additional booking models and payment methods.
 
 **Core Value Propositions**:
 
-- **Simplicity**: One booking = One service. No complex carts or multi-day logic.
+- **Simplicity**: The current customer journey remains easy to understand, with the minimum number of steps needed to complete a reservation safely.
 - **Reliability**: Zero double-bookings via atomic database transactions.
-- **Transparency**: Clear pricing, down-payment rules, and instant confirmation (Email + ICS).
+- **Transparency**: Clear pricing, payment rules, confirmation behavior, and operational status.
+- **Extensibility**: Architecture and governance must allow future support for broader booking models and additional payment methods through approved specification-driven changes.
+- **Operational Readiness**: CI/CD, containerisation, observability, and release gates are part of the product quality bar, not afterthoughts.
 
 **Happy Path User Flow**:
 
@@ -77,7 +79,11 @@ Every external dependency is a liability. Add dependencies only when building th
 
 ### XI. Definition of Done (NON-NEGOTIABLE)
 
-Work is only considered complete when it satisfies all Definition of Done gates: Storybook stories exist for every user-facing component that requires UI documentation or variants; all HTTP endpoints are represented in `spec/openapi.yaml`; unit, integration, and E2E tests are implemented with required coverage and all tests pass; linting reports zero errors; accessibility audits achieve excellent scores; and all necessary documentation is updated. Any exception must be explicitly documented and approved.
+Work is only considered complete when it satisfies all Definition of Done gates: Storybook stories exist for every user-facing component that requires UI documentation or variants; all HTTP endpoints are represented in `spec/openapi.yaml`; unit, integration, E2E, smoke, and BDD acceptance coverage are implemented where required and all tests pass; linting reports zero errors; accessibility audits achieve excellent scores; GitHub Actions pipeline checks pass; containerised runtime verification succeeds; and all necessary documentation and release artifacts are updated. Any exception must be explicitly documented and approved.
+
+### XII. Continuous Governance Feedback
+
+Major platform work must not only follow the standards, it must improve them when durable best practices are discovered. If an initiative establishes repeatable guidance for CI/CD, containerisation, accessibility, failure handling, documentation, release readiness, or operational support, the relevant governing documents, templates, and checklists MUST be updated before the work is considered fully complete.
 
 ## Development Workflow
 
@@ -85,6 +91,7 @@ Work is only considered complete when it satisfies all Definition of Done gates:
 - **Implementation Phase**: Tasks are generated from specification; developers implement following TDD; peer code review ensures constitution compliance and accessibility standards.
 - **Testing Phase**: Unit, integration, and E2E tests validate acceptance scenarios and accessibility conformance; all tests pass before merge. Test coverage reports reviewed.
 - **Documentation**: Feature documentation (quickstart, API contracts, data models) is maintained alongside code. JSDoc and comments capture intent.
+- **Governance Feedback**: Major initiatives update the constitution, DoR, DoD, and supporting checklists when they establish durable best practices.
 
 ## Definition of Done (NON-NEGOTIABLE)
 
@@ -95,7 +102,10 @@ All deliverables MUST satisfy the following before merge or release:
 - **Tests**: Unit, integration, and E2E tests are implemented with required coverage, and all tests pass.
 - **Linting**: All lint rules pass with zero errors.
 - **Accessibility audits**: Lighthouse Accessibility score ≥ 95 and manual WCAG 2.2 AA checks are verified.
-- **Documentation**: Required documentation is updated (README, docs/, specs, and API contracts as applicable).
+- **Documentation**: Required documentation is updated (README, docs/, specs, API contracts, local startup guidance, architecture/data diagrams, and release checklists as applicable).
+- **CI/CD**: Required GitHub Actions workflows are implemented and passing.
+- **Containerisation**: Containerised runtime topology is verified for relevant delivery stages.
+- **Release Readiness**: Production-readiness and first-payments readiness artifacts are updated where relevant.
 
 ## Technology Standards
 
@@ -111,7 +121,9 @@ All deliverables MUST satisfy the following before merge or release:
 - **Database**: PostgreSQL via Prisma ORM
 - **State Management**: React Query (TanStack Query) for server state; React Context for simple client state
 - **API Specification**: OpenAPI (Swagger) 3.0 - all endpoints defined in `spec/openapi.yaml` before implementation
-- **Payments**: Stripe (PaymentIntents API) via a modular payment provider interface so additional methods can be integrated later without core refactors
+- **CI/CD**: GitHub Actions is the mandatory CI/CD control plane for build, validation, scanning, preview verification, and release gating
+- **Containerisation**: The application runtime is containerised across the web app, worker, and supporting services unless an explicit approved exception exists
+- **Payments**: Payment architecture must remain provider-agnostic; Stripe is the initial provider, implemented behind a modular payment provider interface so additional methods can be integrated later without core refactors
 - **Validation**: Zod schemas at system boundaries (API inputs, form submissions)
 - **Date Handling**: date-fns library
 - **Calendar Files**: ics package for ICS generation
@@ -170,6 +182,7 @@ All deliverables MUST satisfy the following before merge or release:
 - Wrap awaits in try/catch with structured errors.
 - Send errors through the project's logging utilities.
 - Apply retries, backoff, and cancellation to network/IO calls.
+- User-facing errors must be graceful, actionable, minimally informative, and sanitized so secrets, provider internals, infrastructure details, and sensitive operational state are never exposed.
 
 **Architecture**:
 
@@ -190,6 +203,7 @@ All deliverables MUST satisfy the following before merge or release:
 - **Unit Tests**: Every function, component, hook using Jest or Vitest.
 - **Integration Tests**: API routes, database interactions, third-party service integrations.
 - **E2E Tests**: Critical user flows using Playwright.
+- **BDD & Smoke Tests**: BDD scenarios and smoke-test support code are first-class test artifacts and must pass the same linting, static analysis, and pipeline validation as application code.
 - **Storybook**: Every UI component must have a Storybook story documented.
 - Test files colocated with source: `component.tsx` → `component.test.tsx`.
 - Minimum 90% code coverage for unit tests; 100% for critical paths.
@@ -212,6 +226,7 @@ All deliverables MUST satisfy the following before merge or release:
 - Service listing and calendar components built in Storybook first.
 - Stripe Elements integrated for payment collection.
 - All interactive MUI components styled consistently with Tailwind or minimal `sx` prop usage.
+- Degraded states, timeouts, retries, and partial failures must preserve usability, accessibility, and clear recovery guidance where practical.
 
 **Dependency Management**:
 
@@ -229,6 +244,9 @@ All deliverables MUST satisfy the following before merge or release:
 - Environment variables managed via hosting provider secrets; no secrets in code or repo.
 - Production deployments must include database migrations and smoke checks.
 - Use preview deployments for every pull request.
+- Full runtime topology for relevant environments must include the web app, worker, and required backing services in a containerised form unless an approved exception is documented.
+- GitHub Actions is the authoritative merge and release gate; local hooks may assist developers but do not replace pipeline enforcement.
+- Production and staging releases must include evidence for healthchecks, smoke verification, and rollback readiness.
 
 ## API Design Principles
 
@@ -249,10 +267,13 @@ All deliverables MUST satisfy the following before merge or release:
 
 - All API inputs validated using Zod schemas before processing.
 - Return structured error responses with field-level validation messages.
+- Customer-facing and admin-facing API responses must not expose secrets, provider internals, or infrastructure details.
 
 ## Data Model & Domain Rules
 
-**Single-Service Booking Model** (strict 1:1 relationship):
+**Current Booking Model**:
+
+The current implementation is a single-service booking model optimized for the existing TruFlow massage workflow. This remains valid for the current product, but future approved platform-overhaul work may generalize the domain model into broader bookable-item and reservation concepts.
 
 **Service Entity**:
 
@@ -284,6 +305,11 @@ All deliverables MUST satisfy the following before merge or release:
 - System settings include `maxBookingsPerDay` configurable by admin
 - Changes to settings are audited and take effect immediately
 
+**Future Platform Extensibility Rule**:
+
+- Major approved platform work may introduce more general reservation entities, additional pricing models, richer availability policies, media assets, and additional payment methods.
+- Such changes MUST be explicitly defined in a specification, documented with updated Mermaid diagrams, and accompanied by migration, release, and operational readiness artifacts.
+
 ## Security & Data
 
 - Validate and sanitize all external input with schema validators or type guards.
@@ -294,6 +320,7 @@ All deliverables MUST satisfy the following before merge or release:
 - Keep secrets in secure storage; rotate regularly; request least-privilege scopes.
 - Favor immutable flows and defensive copies for sensitive data.
 - Use vetted crypto libraries only; patch dependencies promptly.
+- Present safe, minimally informative error messages to end users and detailed diagnostics only through structured logs and operator tooling.
 
 ## Accessibility Standards
 
@@ -334,7 +361,7 @@ All deliverables MUST satisfy the following before merge or release:
 - Submit buttons never disabled; validation triggered on attempt.
 - On invalid input, focus moves to first invalid field via `element.focus()`.
 
-**Cognitive Accessibility**:
+## Cognitive Accessibility
 
 - Prefer plain language; consistent page structure and navigation order.
 - Keep interfaces clean and simple; reduce unnecessary distractions.
@@ -343,27 +370,27 @@ All deliverables MUST satisfy the following before merge or release:
 
 Feature development follows a phased approach to manage complexity and ensure solid foundations:
 
-**Phase 1: Foundation**
+### Phase 1: Foundation
 
 - Initialize Next.js with TypeScript, Tailwind, Storybook, and MUI
 - Define `spec/openapi.yaml` API specification
 - Set up Prisma with Service and Booking schema
 - Configure PostgreSQL database
 
-**Phase 2: Core Logic (TDD Focus)**
+### Phase 2: Core Logic (TDD Focus)
 
 - Implement `AvailabilityService` (Backend): Calculate slots based on business hours and existing bookings
 - Implement `BookingService` (Backend): Transactional logic to create bookings with row-level locking
 - Unit and integration tests for all business logic
 
-**Phase 3: Customer Frontend**
+### Phase 3: Customer Frontend
 
 - Build Service Listing components in Storybook
 - Build Calendar component with disabled date logic
 - Integrate Stripe Elements for payment collection
 - Implement booking form with Zod validation
 
-**Phase 4: Admin Panel**
+### Phase 4: Admin Panel
 
 - Build Dashboard with authentication
 - Implement MUI DataGrid for booking management
@@ -371,7 +398,7 @@ Feature development follows a phased approach to manage complexity and ensure so
 - Add "Max bookings per day" setting with validation and audit trail
 - Admin-specific E2E tests
 
-**Phase 5: Notifications & Webhooks**
+### Phase 5: Notifications & Webhooks
 
 - Implement Stripe webhooks for payment confirmation
 - Create ICS generation logic using `ics` package
@@ -386,4 +413,4 @@ This constitution supersedes all other development practices. All pull requests 
 
 **Compliance Review**: Random feature audits verify constitution compliance quarterly. Non-compliance findings are escalated and resolved before next release.
 
-**Version**: 1.6.0 | **Ratified**: 2026-02-01 | **Last Amended**: 2026-02-12
+**Version**: 2.0.0 | **Ratified**: 2026-02-01 | **Last Amended**: 2026-03-19

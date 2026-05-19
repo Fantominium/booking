@@ -164,6 +164,18 @@ export const BookingList = ({ onSelectBooking }: BookingListProps): JSX.Element 
       },
       { field: "status", headerName: "Status", flex: 0.7, minWidth: 120 },
       {
+        field: "paymentState",
+        headerName: "Payment",
+        flex: 0.9,
+        minWidth: 180,
+      },
+      {
+        field: "paymentMethod",
+        headerName: "Method",
+        flex: 0.8,
+        minWidth: 140,
+      },
+      {
         field: "remainingBalanceCents",
         headerName: "Balance",
         flex: 0.7,
@@ -186,29 +198,31 @@ export const BookingList = ({ onSelectBooking }: BookingListProps): JSX.Element 
   const getRowId = useCallback((row: AdminBooking) => row.id, []);
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6">
+    <section className="dark:bg-surface-elevated flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700">
       <header className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold text-slate-900">Bookings</h2>
-        <p className="text-sm text-slate-600">Filter and manage upcoming appointments.</p>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Bookings</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          Filter and manage upcoming appointments.
+        </p>
       </header>
 
       <div className="grid gap-3 md:grid-cols-4">
-        <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           <span>Search</span>
           <input
             type="text"
             value={searchInput}
             onChange={handleSearchChange}
-            className="rounded-md border border-slate-200 px-3 py-2"
+            className="rounded-md border border-slate-200 px-3 py-2 dark:border-slate-700"
             placeholder="Name or phone"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           <span>Status</span>
           <select
             value={filters.status}
             onChange={handleStatusChange}
-            className="rounded-md border border-slate-200 px-3 py-2"
+            className="rounded-md border border-slate-200 px-3 py-2 dark:border-slate-700"
           >
             <option value="">All</option>
             <option value="PENDING">Pending</option>
@@ -217,22 +231,22 @@ export const BookingList = ({ onSelectBooking }: BookingListProps): JSX.Element 
             <option value="CANCELLED">Cancelled</option>
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           <span>Start date</span>
           <input
             type="date"
             value={filters.startDate}
             onChange={handleStartDateChange}
-            className="rounded-md border border-slate-200 px-3 py-2"
+            className="rounded-md border border-slate-200 px-3 py-2 dark:border-slate-700"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           <span>End date</span>
           <input
             type="date"
             value={filters.endDate}
             onChange={handleEndDateChange}
-            className="rounded-md border border-slate-200 px-3 py-2"
+            className="rounded-md border border-slate-200 px-3 py-2 dark:border-slate-700"
           />
         </label>
       </div>

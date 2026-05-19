@@ -7,11 +7,15 @@ const emailSchema = z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/i);
 const dateTimeSchema = z
   .string()
   .refine((value) => !Number.isNaN(Date.parse(value)), "Invalid datetime");
+const offeringTypeSchema = z.enum(["SESSION", "EVENT", "RENTAL"]);
+const paymentMethodSchema = z.enum(["CARD", "BANK_TRANSFER"]);
+const paymentStateSchema = z.enum(["UNPAID", "PENDING_BANK_TRANSFER", "DEPOSIT_PAID", "PAID_IN_FULL"]);
 
 export const serviceSchema = z.object({
   id: uuidSchema,
   name: z.string().min(1).max(255),
   description: z.string().max(5000).nullable().optional(),
+  offeringType: offeringTypeSchema,
   durationMin: z.number().int().positive(),
   priceCents: z.number().int().nonnegative(),
   downpaymentCents: z.number().int().nonnegative(),
@@ -29,9 +33,12 @@ export const bookingSchema = z.object({
   startTime: z.union([dateTimeSchema, z.date()]),
   endTime: z.union([dateTimeSchema, z.date()]),
   status: z.enum(["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"]),
+  paymentMethod: paymentMethodSchema,
+  paymentState: paymentStateSchema,
   emailDeliveryStatus: z.enum(["SUCCESS", "FAILED", "RETRYING"]),
   stripePaymentIntentId: z.string().nullable().optional(),
   stripeCustomerId: z.string().nullable().optional(),
+  bankTransferReference: z.string().nullable().optional(),
   downpaymentPaidCents: z.number().int().nonnegative(),
   remainingBalanceCents: z.number().int().nonnegative(),
   createdAt: z.union([dateTimeSchema, z.date()]),
@@ -59,6 +66,7 @@ export const systemSettingsSchema = z.object({
   id: uuidSchema,
   maxBookingsPerDay: z.number().int().min(1),
   bufferMinutes: z.number().int().min(0),
+  bankTransferInstructions: z.string().nullable().optional(),
   updatedAt: z.union([dateTimeSchema, z.date()]),
 });
 

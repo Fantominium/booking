@@ -1,5 +1,5 @@
 const nextConfig = {
-  srcDir: "src",
+  output: "standalone",
   async headers() {
     return [
       {

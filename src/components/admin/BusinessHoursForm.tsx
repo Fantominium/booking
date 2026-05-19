@@ -79,12 +79,12 @@ export const BusinessHoursForm = ({ initialHours }: BusinessHoursFormProps): JSX
 
   return (
     <form
-      className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6"
+      className="dark:bg-surface-elevated flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700"
       onSubmit={handleSubmit}
     >
       <div className="flex flex-col gap-1">
-        <h2 className="text-xl font-semibold text-slate-900">Business hours</h2>
-        <p className="text-sm text-slate-600">
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Business hours</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-300">
           Update your weekly availability. Times use your local timezone.
         </p>
       </div>
@@ -93,12 +93,12 @@ export const BusinessHoursForm = ({ initialHours }: BusinessHoursFormProps): JSX
         {rows.map((entry) => (
           <div
             key={entry.dayOfWeek}
-            className="grid gap-3 rounded-lg border border-slate-100 p-4 md:grid-cols-4"
+            className="dark:bg-surface grid gap-3 rounded-lg border border-slate-100 p-4 md:grid-cols-4 dark:border-slate-700"
           >
-            <div className="text-sm font-semibold text-slate-900">
+            <div className="text-sm font-semibold text-slate-900 dark:text-white">
               {dayLabels[entry.dayOfWeek] ?? `Day ${entry.dayOfWeek}`}
             </div>
-            <label className="flex items-center gap-2 text-sm text-slate-700">
+            <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
               <input
                 type="checkbox"
                 checked={entry.isOpen}
@@ -108,7 +108,7 @@ export const BusinessHoursForm = ({ initialHours }: BusinessHoursFormProps): JSX
               />
               Open
             </label>
-            <label className="flex flex-col gap-1 text-sm text-slate-700">
+            <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
               <span>Open</span>
               <input
                 type="time"
@@ -117,11 +117,11 @@ export const BusinessHoursForm = ({ initialHours }: BusinessHoursFormProps): JSX
                 data-field="openingTime"
                 onChange={handleTimeChange}
                 disabled={!entry.isOpen}
-                className="rounded-md border border-slate-300 px-2 py-1"
+                className="rounded-md border border-slate-300 px-2 py-1 dark:border-slate-700"
                 aria-label={`${dayLabels[entry.dayOfWeek] ?? "day"} opening time`}
               />
             </label>
-            <label className="flex flex-col gap-1 text-sm text-slate-700">
+            <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
               <span>Close</span>
               <input
                 type="time"
@@ -130,7 +130,7 @@ export const BusinessHoursForm = ({ initialHours }: BusinessHoursFormProps): JSX
                 data-field="closingTime"
                 onChange={handleTimeChange}
                 disabled={!entry.isOpen}
-                className="rounded-md border border-slate-300 px-2 py-1"
+                className="rounded-md border border-slate-300 px-2 py-1 dark:border-slate-700"
                 aria-label={`${dayLabels[entry.dayOfWeek] ?? "day"} closing time`}
               />
             </label>
@@ -139,10 +139,10 @@ export const BusinessHoursForm = ({ initialHours }: BusinessHoursFormProps): JSX
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-sm text-slate-600">{status}</span>
+        <span className="text-sm text-slate-600 dark:text-slate-300">{status}</span>
         <button
           type="submit"
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white dark:bg-blue-300 dark:text-slate-950"
           disabled={isSaving}
           aria-label="Save business hours"
         >

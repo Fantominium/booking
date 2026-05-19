@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { requireAdminPageSession } from "@/lib/auth/admin";
 import { AdminDashboardClient } from "@/components/admin/AdminDashboardClient";
 
 // Force dynamic rendering for admin pages that use database queries
@@ -16,6 +17,8 @@ const addDays = (date: Date, days: number): Date => {
 };
 
 const AdminDashboardPage = async (): Promise<JSX.Element> => {
+  await requireAdminPageSession("/admin");
+
   const today = startOfTodayUtc();
   const tomorrow = addDays(today, 1);
 
@@ -40,7 +43,7 @@ const AdminDashboardPage = async (): Promise<JSX.Element> => {
   });
 
   // Format data for client component
-  const bookingsData = bookings.map((booking) => ({
+  const bookingsData = bookings.map((booking: (typeof bookings)[number]) => ({
     id: booking.id,
     customerName: booking.customerName,
     startTime: booking.startTime.toISOString(),
@@ -50,7 +53,7 @@ const AdminDashboardPage = async (): Promise<JSX.Element> => {
     },
   }));
 
-  const unpaidBalancesData = unpaidBalances.map((booking) => ({
+  const unpaidBalancesData = unpaidBalances.map((booking: (typeof unpaidBalances)[number]) => ({
     id: booking.id,
     customerName: booking.customerName,
     remainingBalanceCents: booking.remainingBalanceCents,

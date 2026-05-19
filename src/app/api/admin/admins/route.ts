@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth/password";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
+export const dynamic = "force-dynamic";
+
 const createAdminSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(8, "Password must be at least 8 characters"),

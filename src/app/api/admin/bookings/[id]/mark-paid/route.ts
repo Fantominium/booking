@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { markBookingAsPaid } from "@/lib/services/booking";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 type RouteParams = {
   params: Promise<{ id: string }>;
 };

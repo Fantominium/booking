@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { createPaymentIntentRequestSchema } from "@/lib/schemas/api";
 import { createPaymentIntent } from "@/lib/services/payment";
 
+export const dynamic = "force-dynamic";
+
 export const POST = async (request: Request): Promise<NextResponse> => {
   const body = await request.json();
   const parsed = createPaymentIntentRequestSchema.safeParse(body);

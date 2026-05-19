@@ -1,3 +1,14 @@
+.git
+.github
+.next
+coverage
+dist
+html
+node_modules
+playwright-report
+storybook-static
+test-results
+docs/overhaul/*.png
 node_modules/
 .git/
 .next/

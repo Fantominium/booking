@@ -1,0 +1,58 @@
+erDiagram
+    BOOKABLE_ITEM ||--|| AVAILABILITY_POLICY : uses
+    BOOKABLE_ITEM ||--o{ MEDIA_ASSET : has
+    BOOKABLE_ITEM ||--o{ RESERVATION : receives
+    RESERVATION ||--o{ PAYMENT_ATTEMPT : creates
+    RESERVATION ||--o{ AUDIT_EVENT : emits
+    ADMIN_USER ||--o{ AUDIT_EVENT : triggers
+
+    BOOKABLE_ITEM {
+        string id PK
+        string type
+        string title
+        string status
+    }
+
+    AVAILABILITY_POLICY {
+        string id PK
+        int capacity
+        int bufferMinutes
+        int minAdvanceMinutes
+    }
+
+    MEDIA_ASSET {
+        string id PK
+        string bookableItemId FK
+        string url
+        string altText
+    }
+
+    RESERVATION {
+        string id PK
+        string bookableItemId FK
+        string status
+        string customerEmail
+        datetime startAt
+        datetime endAt
+    }
+
+    PAYMENT_ATTEMPT {
+        string id PK
+        string reservationId FK
+        string provider
+        string externalPaymentId
+        string status
+    }
+
+    AUDIT_EVENT {
+        string id PK
+        string reservationId FK
+        string eventType
+        datetime createdAt
+    }
+
+    ADMIN_USER {
+        string id PK
+        string email
+        string role
+    }

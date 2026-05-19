@@ -5,9 +5,43 @@ on:
     branches: ["main"]
   pull_request:
 
+env:
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/truflow_booking_ci?schema=public
+  STRIPE_SECRET_KEY: sk_test_ci_placeholder
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
+  STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+  RESEND_API_KEY: re_ci_placeholder
+  NEXTAUTH_SECRET: ci_secret_key
+  WEBHOOK_URL_TOKEN: ci_webhook_token
+  REDIS_URL: redis://localhost:6379
+  NEXT_PUBLIC_API_URL: http://localhost:3000
+
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: truflow_booking_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d truflow_booking_ci"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,12 +56,71 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate Prisma schema
+        run: pnpm exec prisma validate
+
+      - name: Apply migrations
+        run: pnpm exec prisma migrate deploy
 
       - name: Lint
         run: pnpm lint
 
-      - name: Test
+      - name: Typecheck
+        run: pnpm typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    needs: validate
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: truflow_booking_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d truflow_booking_ci"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply migrations
+        run: pnpm exec prisma migrate deploy
+
+      - name: Seed database
+        run: pnpm exec prisma db seed
+
+      - name: Run unit and integration tests
+        env:
+          NODE_ENV: test
         run: pnpm test
 
       - name: Security audit
@@ -38,3 +131,26 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: npx snyk test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm build
+

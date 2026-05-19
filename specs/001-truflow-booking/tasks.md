@@ -80,7 +80,7 @@
 - [x] T028 Configure next-auth with CredentialsProvider for email/password in app/api/auth/[...nextauth]/route.ts
 - [x] T029 [P] Create Admin model and database integration for next-auth
 - [x] T030 [P] Implement bcrypt password hashing in lib/auth/password.ts
-- [x] T031 [P] Create authentication middleware for admin routes in middleware.ts
+- [x] T031 [P] Create authentication middleware for admin routes in proxy.ts
 - [x] T032 [P] Implement session management with HttpOnly, Secure, SameSite=Strict cookies
 
 ### Core Business Logic Services
@@ -489,7 +489,7 @@
 
 ### Security Hardening Implementation
 
-- [x] T203 [P] Implement HTTPS redirect middleware (FR-042) in middleware.ts
+- [x] T203 [P] Implement HTTPS redirect middleware (FR-042) in proxy.ts
 - [x] T204 [P] Add Content Security Policy headers in next.config.js (FR-048)
 - [x] T205 [P] Add HSTS headers in next.config.js
 - [x] T206 [P] Verify all API endpoints validate inputs with Zod schemas (FR-034)
