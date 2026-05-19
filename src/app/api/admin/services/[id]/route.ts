@@ -10,6 +10,11 @@ type RouteParams = {
   params: Promise<{ id: string }>;
 };
 
+const durationPriceOptionSchema = z.object({
+  durationMin: z.number().int().positive(),
+  priceCents: z.number().int().nonnegative(),
+});
+
 const updateServiceSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   description: z.string().max(5000).nullable().optional(),
@@ -17,6 +22,7 @@ const updateServiceSchema = z.object({
   durationMin: z.number().int().positive().optional(),
   priceCents: z.number().int().nonnegative().optional(),
   downpaymentCents: z.number().int().nonnegative().optional(),
+  durationPriceOptions: z.array(durationPriceOptionSchema).max(10).optional().nullable(),
   isActive: z.boolean().optional(),
 });
 
@@ -35,6 +41,23 @@ export const PATCH = async (request: Request, { params }: RouteParams): Promise<
 
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
+
+  if (parsed.data.durationPriceOptions) {
+    const uniqueDurations = new Set(
+      parsed.data.durationPriceOptions.map((option) => option.durationMin),
+    );
+
+    if (uniqueDurations.size !== parsed.data.durationPriceOptions.length) {
+      return NextResponse.json({ error: "Duration options must be unique" }, { status: 400 });
+    }
+
+    if (parsed.data.durationPriceOptions.length === 0) {
+      return NextResponse.json(
+        { error: "At least one duration option is required" },
+        { status: 400 },
+      );
+    }
   }
 
   const existing = await prisma.service.findUnique({
@@ -61,6 +84,9 @@ export const PATCH = async (request: Request, { params }: RouteParams): Promise<
       durationMin: parsed.data.durationMin ?? existing.durationMin,
       priceCents: nextPriceCents,
       downpaymentCents: nextDownpayment,
+      ...(parsed.data.durationPriceOptions === undefined
+        ? {}
+        : { durationPriceOptions: parsed.data.durationPriceOptions }),
       isActive: parsed.data.isActive ?? existing.isActive,
     },
   });

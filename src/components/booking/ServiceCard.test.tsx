@@ -52,6 +52,37 @@ describe("ServiceCard", () => {
     expect(screen.getByTestId("service-price")).toHaveTextContent("$88.00");
   });
 
+  it("renders custom duration badges configured by admins", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <ServiceCard
+        service={{
+          id: "service-4",
+          name: "Custom Session",
+          description: "Custom badge pricing",
+          offeringType: "SESSION",
+          durationMin: 60,
+          priceCents: 8000,
+          downpaymentCents: 2000,
+          durationPriceOptions: [
+            { durationMin: 45, priceCents: 6500 },
+            { durationMin: 70, priceCents: 9500 },
+          ],
+          isActive: true,
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "45 min" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("service-price")).toHaveTextContent("$65.00");
+
+    await user.click(screen.getByRole("button", { name: "70 min" }));
+
+    expect(screen.getByRole("button", { name: "70 min" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("service-price")).toHaveTextContent("$95.00");
+  });
+
   it("uses the 50/65 fixed pricing rule for 50-minute sessions", async () => {
     const user = userEvent.setup();
 

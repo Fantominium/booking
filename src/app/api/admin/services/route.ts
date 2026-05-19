@@ -6,6 +6,11 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+const durationPriceOptionSchema = z.object({
+  durationMin: z.number().int().positive(),
+  priceCents: z.number().int().nonnegative(),
+});
+
 const serviceInputSchema = z
   .object({
     name: z.string().min(1).max(255),
@@ -14,12 +19,33 @@ const serviceInputSchema = z
     durationMin: z.number().int().positive(),
     priceCents: z.number().int().nonnegative(),
     downpaymentCents: z.number().int().nonnegative(),
+    durationPriceOptions: z.array(durationPriceOptionSchema).max(10).optional().nullable(),
     isActive: z.boolean().optional(),
   })
   .refine((value) => value.downpaymentCents <= value.priceCents, {
     message: "Downpayment cannot exceed price",
     path: ["downpaymentCents"],
-  });
+  })
+  .refine(
+    (value) => {
+      const options = value.durationPriceOptions ?? [];
+      return new Set(options.map((option) => option.durationMin)).size === options.length;
+    },
+    {
+      message: "Duration options must be unique",
+      path: ["durationPriceOptions"],
+    },
+  )
+  .refine(
+    (value) => {
+      const options = value.durationPriceOptions ?? [];
+      return options.length > 0;
+    },
+    {
+      message: "At least one duration option is required",
+      path: ["durationPriceOptions"],
+    },
+  );
 
 export const GET = async (): Promise<NextResponse> => {
   if (!(await getAdminSession())) {
@@ -53,6 +79,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
       durationMin: parsed.data.durationMin,
       priceCents: parsed.data.priceCents,
       downpaymentCents: parsed.data.downpaymentCents,
+      durationPriceOptions: parsed.data.durationPriceOptions,
       isActive: parsed.data.isActive ?? true,
     },
   });

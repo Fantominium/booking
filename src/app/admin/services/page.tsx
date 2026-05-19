@@ -12,6 +12,7 @@ const emptyService: ServiceFormValues = {
   durationMin: 60,
   priceCents: 0,
   downpaymentCents: 0,
+  durationPriceOptions: [{ durationMin: 60, priceCents: 0 }],
   isActive: true,
 };
 
@@ -21,7 +22,7 @@ const ServiceConfigurationPage = (): JSX.Element => {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const modalClassName = useMemo(() => {
-    return "fixed inset-0 z-50 flex items-center justify-center bg-black/40";
+    return "fixed inset-0 z-50 flex flex-col items-center justify-center overflow-y-auto bg-black/40 p-4 sm:p-6";
   }, []);
 
   const handleOpenModal = useCallback(() => {
@@ -75,8 +76,8 @@ const ServiceConfigurationPage = (): JSX.Element => {
 
       {isModalOpen ? (
         <dialog open className={modalClassName}>
-          <div className="dark:bg-surface-elevated w-full max-w-xl rounded-xl bg-white p-6">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="dark:bg-surface-elevated flex max-h-[calc(100vh-2rem)] w-full max-w-xl flex-col rounded-xl bg-white p-6">
+            <div className="mb-4 flex shrink-0 items-center justify-between">
               <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Add service</h2>
               <button
                 type="button"
@@ -86,12 +87,14 @@ const ServiceConfigurationPage = (): JSX.Element => {
                 Close
               </button>
             </div>
-            <ServiceForm
-              initialValues={emptyService}
-              onSubmit={handleCreateService}
-              onCancel={handleCloseModal}
-              submitLabel="Create service"
-            />
+            <div className="flex-1 overflow-y-auto">
+              <ServiceForm
+                initialValues={emptyService}
+                onSubmit={handleCreateService}
+                onCancel={handleCloseModal}
+                submitLabel="Create service"
+              />
+            </div>
           </div>
         </dialog>
       ) : null}

@@ -19,6 +19,10 @@ const mapServiceToForm = (service: Service): ServiceFormValues => ({
   durationMin: service.durationMin,
   priceCents: service.priceCents,
   downpaymentCents: service.downpaymentCents,
+  durationPriceOptions:
+    service.durationPriceOptions && service.durationPriceOptions.length > 0
+      ? service.durationPriceOptions
+      : [{ durationMin: service.durationMin, priceCents: service.priceCents }],
   isActive: service.isActive,
 });
 

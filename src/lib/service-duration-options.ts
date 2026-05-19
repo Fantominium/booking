@@ -5,6 +5,7 @@ export type ServiceDurationContext = {
   durationMin: number;
   priceCents: number;
   downpaymentCents: number;
+  durationPriceOptions?: unknown;
 };
 
 export type ServiceDurationOption = {
@@ -13,8 +14,30 @@ export type ServiceDurationOption = {
   downpaymentCents: number;
 };
 
+type ServiceDurationPriceOption = {
+  durationMin: number;
+  priceCents: number;
+};
+
 const CUSTOM_SHORT_SESSION_PRICE_CENTS = 15000;
 const CUSTOM_EXTENDED_SHORT_SESSION_PRICE_CENTS = 16500;
+
+const isValidServiceDurationPriceOption = (value: unknown): value is ServiceDurationPriceOption => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const option = value as Record<string, unknown>;
+  const durationMin = option.durationMin;
+  const priceCents = option.priceCents;
+
+  return (
+    Number.isInteger(durationMin) &&
+    Number.isInteger(priceCents) &&
+    Number(durationMin) > 0 &&
+    Number(priceCents) >= 0
+  );
+};
 
 const roundToNearestDollarCents = (amountCents: number): number => {
   return Math.round(amountCents / 100) * 100;
@@ -41,9 +64,35 @@ const toOptionWithRatio = (
   };
 };
 
+const getCustomDurationOptions = (service: ServiceDurationContext): ServiceDurationOption[] => {
+  if (!Array.isArray(service.durationPriceOptions)) {
+    return [];
+  }
+
+  const uniqueByDuration = new Map<number, ServiceDurationPriceOption>();
+  for (const option of service.durationPriceOptions) {
+    if (!isValidServiceDurationPriceOption(option)) {
+      continue;
+    }
+
+    if (!uniqueByDuration.has(option.durationMin)) {
+      uniqueByDuration.set(option.durationMin, option);
+    }
+  }
+
+  return [...uniqueByDuration.values()].map((option) =>
+    toOptionWithRatio(service, option.durationMin, option.priceCents),
+  );
+};
+
 export const getServiceDurationOptions = (
   service: ServiceDurationContext,
 ): ServiceDurationOption[] => {
+  const customOptions = getCustomDurationOptions(service);
+  if (customOptions.length > 0) {
+    return customOptions;
+  }
+
   if (service.offeringType !== "SESSION") {
     return [
       {

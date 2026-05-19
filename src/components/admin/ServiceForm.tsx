@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { z } from "zod";
 
 import { getServiceDurationOptions } from "@/lib/service-duration-options";
+import type { ServiceDurationPriceOption } from "@/types/service";
 
 export type ServiceFormValues = {
   name: string;
@@ -13,6 +14,7 @@ export type ServiceFormValues = {
   durationMin: number;
   priceCents: number;
   downpaymentCents: number;
+  durationPriceOptions: ServiceDurationPriceOption[];
   isActive: boolean;
 };
 
@@ -32,12 +34,29 @@ const serviceSchema: z.ZodTypeAny = z
     durationMin: z.number().int().positive("Duration must be greater than 0"),
     priceCents: z.number().int().nonnegative("Price is required"),
     downpaymentCents: z.number().int().nonnegative("Downpayment is required"),
+    durationPriceOptions: z
+      .array(
+        z.object({
+          durationMin: z.number().int().positive("Badge duration must be greater than 0"),
+          priceCents: z.number().int().nonnegative("Badge price is required"),
+        }),
+      )
+      .min(1, "Add at least one badge option"),
     isActive: z.boolean(),
   })
   .refine((value) => value.downpaymentCents <= value.priceCents, {
     message: "Downpayment cannot exceed price",
     path: ["downpaymentCents"],
-  });
+  })
+  .refine(
+    (value) =>
+      new Set(value.durationPriceOptions.map((option) => option.durationMin)).size ===
+      value.durationPriceOptions.length,
+    {
+      message: "Badge durations must be unique",
+      path: ["durationPriceOptions"],
+    },
+  );
 
 export const ServiceForm = ({
   initialValues,
@@ -94,6 +113,7 @@ export const ServiceForm = ({
         durationMin: values.durationMin,
         priceCents: values.priceCents,
         downpaymentCents: values.downpaymentCents,
+        durationPriceOptions: values.durationPriceOptions,
         isActive: values.isActive,
       };
 
@@ -121,6 +141,80 @@ export const ServiceForm = ({
   const handleCancel = useCallback(() => {
     onCancel?.();
   }, [onCancel]);
+
+  const handleDurationPriceOptionChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
+      const index = Number.parseInt(event.currentTarget.dataset.optionIndex ?? "", 10);
+      const field = event.currentTarget.dataset.optionField;
+      const rawValue = Number(event.currentTarget.value);
+
+      if (Number.isNaN(index) || index < 0) {
+        return;
+      }
+
+      if (field !== "durationMin" && field !== "priceCents") {
+        return;
+      }
+
+      setValues((prev) => ({
+        ...prev,
+        durationPriceOptions: prev.durationPriceOptions.map((option, optionIndex) => {
+          if (optionIndex !== index) {
+            return option;
+          }
+
+          if (field === "durationMin") {
+            return {
+              ...option,
+              durationMin: rawValue,
+            };
+          }
+
+          return {
+            ...option,
+            priceCents: rawValue,
+          };
+        }),
+      }));
+    },
+    [],
+  );
+
+  const handleAddDurationPriceOption = useCallback((): void => {
+    setValues((prev) => ({
+      ...prev,
+      durationPriceOptions: [
+        ...prev.durationPriceOptions,
+        {
+          durationMin: prev.durationMin,
+          priceCents: prev.priceCents,
+        },
+      ],
+    }));
+  }, []);
+
+  const handleRemoveDurationPriceOption = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      const index = Number.parseInt(event.currentTarget.dataset.optionIndex ?? "", 10);
+      if (Number.isNaN(index) || index < 0) {
+        return;
+      }
+
+      setValues((prev) => {
+        if (prev.durationPriceOptions.length <= 1) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          durationPriceOptions: prev.durationPriceOptions.filter(
+            (_option, optionIndex) => optionIndex !== index,
+          ),
+        };
+      });
+    },
+    [],
+  );
 
   return (
     <form className={formClassName} onSubmit={handleSubmit}>
@@ -196,7 +290,61 @@ export const ServiceForm = ({
         <p className="text-xs font-semibold tracking-[0.08em] text-slate-700 uppercase dark:text-slate-200">
           Customer-facing duration badges
         </p>
-        <div className="mt-2 flex flex-wrap gap-2">
+        <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+          Edit each badge duration and price shown on product cards.
+        </p>
+        <div className="mt-3 grid gap-2">
+          {values.durationPriceOptions.map((option, index) => (
+            <div
+              key={`duration-price-option-${option.durationMin}-${option.priceCents}`}
+              className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]"
+            >
+              <label className="flex flex-col gap-1 text-xs text-slate-700 dark:text-slate-200">
+                <span>Duration (min)</span>
+                <input
+                  type="number"
+                  min={1}
+                  value={option.durationMin}
+                  data-option-index={index}
+                  data-option-field="durationMin"
+                  onChange={handleDurationPriceOptionChange}
+                  className="rounded-md border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-slate-700 dark:text-slate-200">
+                <span>Price (cents)</span>
+                <input
+                  type="number"
+                  min={0}
+                  value={option.priceCents}
+                  data-option-index={index}
+                  data-option-field="priceCents"
+                  onChange={handleDurationPriceOptionChange}
+                  className="rounded-md border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
+                />
+              </label>
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  data-option-index={index}
+                  className="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  onClick={handleRemoveDurationPriceOption}
+                  disabled={values.durationPriceOptions.length <= 1}
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          className="mt-3 rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          onClick={handleAddDurationPriceOption}
+        >
+          Add badge
+        </button>
+        <div className="mt-3 flex flex-wrap gap-2">
           {durationOptions.map((option) => (
             <span
               key={`preview-${option.durationMin}`}

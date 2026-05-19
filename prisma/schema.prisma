@@ -78,6 +78,7 @@ model Service {
   durationMin      Int
   priceCents       Int
   downpaymentCents Int
+  durationPriceOptions Json? @map("duration_price_options")
   isActive         Boolean   @default(true)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
