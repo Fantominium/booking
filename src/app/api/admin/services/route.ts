@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
@@ -71,17 +72,25 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
+  const data: Prisma.ServiceCreateInput = {
+    name: parsed.data.name,
+    description: parsed.data.description ?? null,
+    offeringType: parsed.data.offeringType,
+    durationMin: parsed.data.durationMin,
+    priceCents: parsed.data.priceCents,
+    downpaymentCents: parsed.data.downpaymentCents,
+    isActive: parsed.data.isActive ?? true,
+  };
+
+  if (parsed.data.durationPriceOptions !== undefined) {
+    data.durationPriceOptions =
+      parsed.data.durationPriceOptions === null
+        ? Prisma.DbNull
+        : (parsed.data.durationPriceOptions as Prisma.InputJsonValue);
+  }
+
   const service = await prisma.service.create({
-    data: {
-      name: parsed.data.name,
-      description: parsed.data.description ?? null,
-      offeringType: parsed.data.offeringType,
-      durationMin: parsed.data.durationMin,
-      priceCents: parsed.data.priceCents,
-      downpaymentCents: parsed.data.downpaymentCents,
-      durationPriceOptions: parsed.data.durationPriceOptions,
-      isActive: parsed.data.isActive ?? true,
-    },
+    data,
   });
 
   return NextResponse.json({ service }, { status: 201 });

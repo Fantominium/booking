@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
@@ -75,20 +76,28 @@ export const PATCH = async (request: Request, { params }: RouteParams): Promise<
     return NextResponse.json({ error: "Downpayment cannot exceed price" }, { status: 400 });
   }
 
+  const data: Prisma.ServiceUpdateInput = {
+    ...(parsed.data.name !== undefined ? { name: parsed.data.name } : {}),
+    ...(parsed.data.description !== undefined ? { description: parsed.data.description } : {}),
+    ...(parsed.data.offeringType !== undefined ? { offeringType: parsed.data.offeringType } : {}),
+    ...(parsed.data.durationMin !== undefined ? { durationMin: parsed.data.durationMin } : {}),
+    ...(parsed.data.priceCents !== undefined ? { priceCents: parsed.data.priceCents } : {}),
+    ...(parsed.data.downpaymentCents !== undefined
+      ? { downpaymentCents: parsed.data.downpaymentCents }
+      : {}),
+    ...(parsed.data.isActive !== undefined ? { isActive: parsed.data.isActive } : {}),
+  };
+
+  if (parsed.data.durationPriceOptions !== undefined) {
+    data.durationPriceOptions =
+      parsed.data.durationPriceOptions === null
+        ? Prisma.DbNull
+        : (parsed.data.durationPriceOptions as Prisma.InputJsonValue);
+  }
+
   const service = await prisma.service.update({
     where: { id },
-    data: {
-      name: parsed.data.name ?? existing.name,
-      ...(parsed.data.description === undefined ? {} : { description: parsed.data.description }),
-      offeringType: parsed.data.offeringType ?? existing.offeringType,
-      durationMin: parsed.data.durationMin ?? existing.durationMin,
-      priceCents: nextPriceCents,
-      downpaymentCents: nextDownpayment,
-      ...(parsed.data.durationPriceOptions === undefined
-        ? {}
-        : { durationPriceOptions: parsed.data.durationPriceOptions }),
-      isActive: parsed.data.isActive ?? existing.isActive,
-    },
+    data,
   });
 
   return NextResponse.json({ service });

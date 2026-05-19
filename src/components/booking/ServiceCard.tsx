@@ -7,12 +7,21 @@ import { OFFERING_LABELS } from "@/lib/offerings";
 import {
   getDefaultServiceDurationOption,
   getServiceDurationOptions,
+  type ServiceDurationContext,
   type ServiceDurationOption,
 } from "@/lib/service-duration-options";
-import type { Service } from "@/types/service";
+import type { OfferingType } from "@/types/service";
+
+type ServiceCardService = ServiceDurationContext & {
+  id: string;
+  name: string;
+  description: string | null;
+  offeringType: OfferingType;
+  isActive: boolean;
+};
 
 type ServiceCardProps = {
-  service: Service;
+  service: ServiceCardService;
 };
 
 export const ServiceCard = ({ service }: ServiceCardProps): JSX.Element => {
