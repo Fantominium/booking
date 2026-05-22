@@ -9,7 +9,12 @@ const dateTimeSchema = z
   .refine((value) => !Number.isNaN(Date.parse(value)), "Invalid datetime");
 const offeringTypeSchema = z.enum(["SESSION", "EVENT", "RENTAL"]);
 const paymentMethodSchema = z.enum(["CARD", "BANK_TRANSFER"]);
-const paymentStateSchema = z.enum(["UNPAID", "PENDING_BANK_TRANSFER", "DEPOSIT_PAID", "PAID_IN_FULL"]);
+const paymentStateSchema = z.enum([
+  "UNPAID",
+  "PENDING_BANK_TRANSFER",
+  "DEPOSIT_PAID",
+  "PAID_IN_FULL",
+]);
 
 export const serviceSchema = z.object({
   id: uuidSchema,
@@ -51,11 +56,22 @@ export const businessHoursSchema = z.object({
   openingTime: z.union([z.string(), z.date()]).nullable().optional(),
   closingTime: z.union([z.string(), z.date()]).nullable().optional(),
   isOpen: z.boolean(),
+  blockedRanges: z
+    .array(
+      z.object({
+        id: uuidSchema,
+        startTime: z.union([z.string(), z.date()]),
+        endTime: z.union([z.string(), z.date()]),
+        reason: z.string().nullable().optional(),
+      }),
+    )
+    .default([]),
 });
 
 export const dateOverrideSchema = z.object({
   id: uuidSchema,
-  date: z.union([z.string(), z.date()]),
+  startDate: z.union([z.string(), z.date()]),
+  endDate: z.union([z.string(), z.date()]),
   isBlocked: z.boolean(),
   customOpenTime: z.union([z.string(), z.date()]).nullable().optional(),
   customCloseTime: z.union([z.string(), z.date()]).nullable().optional(),

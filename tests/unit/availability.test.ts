@@ -11,6 +11,7 @@ describe("availability calculation", () => {
       openingTime: new Date("1970-01-01T09:00:00Z"),
       closingTime: new Date("1970-01-01T12:00:00Z"),
       isOpen: true,
+      blockedRanges: [],
     },
   ];
 
@@ -38,7 +39,8 @@ describe("availability calculation", () => {
       businessHours,
       overrides: [
         {
-          date: baseDate,
+          startDate: baseDate,
+          endDate: baseDate,
           isBlocked: true,
           customOpenTime: null,
           customCloseTime: null,
@@ -61,6 +63,50 @@ describe("availability calculation", () => {
     });
 
     expect(slots[0].end.getTime() - slots[0].start.getTime()).toBe(90 * 60 * 1000);
+  });
+
+  it("respects unavailable business-hour ranges", () => {
+    const slots = calculateAvailableSlotsForDate({
+      date: baseDate,
+      service,
+      bookings: [],
+      businessHours: [
+        {
+          ...businessHours[0],
+          blockedRanges: [
+            {
+              startTime: new Date("1970-01-01T10:00:00Z"),
+              endTime: new Date("1970-01-01T10:45:00Z"),
+            },
+          ],
+        },
+      ],
+      overrides: [],
+      settings,
+    });
+
+    expect(slots.some((slot) => slot.start.toISOString().includes("T10:00"))).toBe(false);
+  });
+
+  it("respects date override ranges", () => {
+    const slots = calculateAvailableSlotsForDate({
+      date: baseDate,
+      service,
+      bookings: [],
+      businessHours,
+      overrides: [
+        {
+          startDate: new Date(Date.UTC(2026, 1, 9)),
+          endDate: new Date(Date.UTC(2026, 1, 11)),
+          isBlocked: true,
+          customOpenTime: null,
+          customCloseTime: null,
+        },
+      ],
+      settings,
+    });
+
+    expect(slots).toHaveLength(0);
   });
 
   it("respects daily booking cap", () => {

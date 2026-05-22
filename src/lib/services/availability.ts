@@ -22,10 +22,15 @@ type BusinessHoursInput = {
   openingTime: Date | null;
   closingTime: Date | null;
   isOpen: boolean;
+  blockedRanges: Array<{
+    startTime: Date;
+    endTime: Date;
+  }>;
 };
 
 type DateOverrideInput = {
-  date: Date;
+  startDate: Date;
+  endDate: Date;
   isBlocked: boolean;
   customOpenTime: Date | null;
   customCloseTime: Date | null;
@@ -52,6 +57,13 @@ const buildDateWithTime = (date: Date, time: Date): Date => {
   );
 };
 
+const isDateWithinRange = (date: Date, startDate: Date, endDate: Date): boolean => {
+  const dateKey = date.toISOString().slice(0, 10);
+  return (
+    dateKey >= startDate.toISOString().slice(0, 10) && dateKey <= endDate.toISOString().slice(0, 10)
+  );
+};
+
 const isOverlapping = (a: AvailabilitySlot, b: AvailabilitySlot): boolean => {
   return a.start < b.end && a.end > b.start;
 };
@@ -74,8 +86,8 @@ export const calculateAvailableSlotsForDate = (params: {
     return [];
   }
 
-  const override = overrides.find(
-    (entry) => entry.date.toISOString().slice(0, 10) === date.toISOString().slice(0, 10),
+  const override = overrides.find((entry) =>
+    isDateWithinRange(date, entry.startDate, entry.endDate),
   );
 
   if (override?.isBlocked) {
@@ -110,6 +122,15 @@ export const calculateAvailableSlotsForDate = (params: {
       start,
       end: addMinutes(start, slotDuration),
     }))
+    .filter(
+      (slot) =>
+        !dayConfig?.blockedRanges.some((blockedRange) =>
+          isOverlapping(slot, {
+            start: buildDateWithTime(date, blockedRange.startTime),
+            end: buildDateWithTime(date, blockedRange.endTime),
+          }),
+        ),
+    )
     .filter(
       (slot) =>
         !bookings.some((booking: (typeof bookings)[number]) =>

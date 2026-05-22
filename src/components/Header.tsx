@@ -30,6 +30,14 @@ const GUEST_NAV_ITEMS = [
 
 const MENU_MODAL_ID = "navigation-menu-modal";
 
+const isAdminSectionActive = (pathname: string | null, href: string): boolean => {
+  if (href === "/admin") {
+    return pathname === "/admin";
+  }
+
+  return pathname === href || (pathname?.startsWith(`${href}/`) ?? false);
+};
+
 type MenuAnchorStyle = {
   top: number;
   left: number;
@@ -66,7 +74,7 @@ export function Header(): React.ReactElement {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const canUseDOM = typeof globalThis.window !== "undefined";
+  const canUseDOM = globalThis.window !== undefined;
   const isAdmin = status === "authenticated" && session?.user?.role === "admin";
   const isAdminRoute = pathname?.startsWith("/admin") ?? false;
   const isBookingFlow = pathname?.startsWith("/book") ?? false;
@@ -79,11 +87,7 @@ export function Header(): React.ReactElement {
 
   const activeAdminLabel = useMemo(() => {
     const matchedItem = ADMIN_NAV_ITEMS.find((item) => {
-      if (item.href === "/admin") {
-        return pathname === "/admin";
-      }
-
-      return pathname?.startsWith(item.href);
+      return isAdminSectionActive(pathname ?? null, item.href);
     });
 
     return matchedItem?.label ?? "Navigation";
@@ -273,19 +277,21 @@ export function Header(): React.ReactElement {
                 <nav className="flex flex-col gap-2" aria-label="Menu navigation">
                   {visibleNavItems.map(({ href, label }) => {
                     const [baseHref, queryString] = href.split("?");
-                    const isCurrent = (() => {
-                      if (queryString) {
-                        const itemParams = new URLSearchParams(queryString);
-                        return (
-                          pathname === baseHref &&
-                          [...itemParams.entries()].every(([k, v]) => searchParams.get(k) === v)
-                        );
-                      }
-                      if (baseHref === "/") return pathname === "/";
-                      return (
-                        pathname === baseHref || (pathname?.startsWith(baseHref + "/") ?? false)
-                      );
-                    })();
+                    let isCurrent = false;
+
+                    if (queryString) {
+                      const itemParams = new URLSearchParams(queryString);
+                      isCurrent =
+                        pathname === baseHref &&
+                        [...itemParams.entries()].every(([k, v]) => searchParams.get(k) === v);
+                    } else if (baseHref === "/") {
+                      isCurrent = pathname === "/";
+                    } else if (isAdminRoute) {
+                      isCurrent = isAdminSectionActive(pathname ?? null, baseHref);
+                    } else {
+                      isCurrent =
+                        pathname === baseHref || (pathname?.startsWith(baseHref + "/") ?? false);
+                    }
 
                     return (
                       <Link

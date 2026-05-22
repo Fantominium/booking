@@ -7,11 +7,22 @@ const businessHoursSchema = z.object({
   openingTime: z.union([z.string(), z.date()]).nullable().optional(),
   closingTime: z.union([z.string(), z.date()]).nullable().optional(),
   isOpen: z.boolean(),
+  blockedRanges: z
+    .array(
+      z.object({
+        id: z.string(),
+        startTime: z.union([z.string(), z.date()]),
+        endTime: z.union([z.string(), z.date()]),
+        reason: z.string().nullable().optional(),
+      }),
+    )
+    .default([]),
 });
 
 const dateOverrideSchema = z.object({
   id: z.string(),
-  date: z.union([z.string(), z.date()]),
+  startDate: z.union([z.string(), z.date()]),
+  endDate: z.union([z.string(), z.date()]),
   isBlocked: z.boolean(),
   customOpenTime: z.union([z.string(), z.date()]).nullable().optional(),
   customCloseTime: z.union([z.string(), z.date()]).nullable().optional(),
@@ -32,6 +43,7 @@ describe("admin availability contract", () => {
           openingTime: "09:00",
           closingTime: "17:00",
           isOpen: true,
+          blockedRanges: [],
         },
       ],
     };
@@ -49,6 +61,7 @@ describe("admin availability contract", () => {
           openingTime: "10:00",
           closingTime: "18:00",
           isOpen: true,
+          blockedRanges: [],
         },
       ],
     };
@@ -60,7 +73,8 @@ describe("admin availability contract", () => {
   it("POST /api/admin/date-overrides returns date override payload", () => {
     const payload = {
       id: "b5f8f618-8b62-4a2e-a723-7b2a35d7e3f4",
-      date: "2026-12-25",
+      startDate: "2026-12-25",
+      endDate: "2026-12-31",
       isBlocked: true,
       customOpenTime: null,
       customCloseTime: null,

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { formatTime12Hour } from "@/lib/date-time";
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +46,7 @@ const SuccessPage = async ({
           <div className="dark:bg-surface-elevated rounded-2xl border border-slate-300 bg-white p-6 text-slate-800 shadow-sm dark:border-slate-700 dark:text-slate-100">
             <p className="font-semibold">{booking.service.name}</p>
             <p>{booking.customerName}</p>
-            <p>{booking.startTime.toISOString()}</p>
+            <p>Booked time: {formatTime12Hour(booking.startTime)}</p>
             <p>Status: {booking.status}</p>
             <p>
               Payment state:{" "}

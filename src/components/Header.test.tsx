@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Header } from "@/components/Header";
@@ -9,7 +9,7 @@ const mockSignOut = vi.fn();
 
 let mockPathname = "/";
 let mockSessionStatus: "loading" | "authenticated" | "unauthenticated" = "unauthenticated";
-let mockSessionUser: { email: string } | null = null;
+let mockSessionUser: { email: string; role: "admin" } | null = null;
 
 vi.mock("next/image", () => ({
   default: () => <span>Logo</span>,
@@ -17,6 +17,7 @@ vi.mock("next/image", () => ({
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
+  useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({
     push: mockPush,
     refresh: mockRefresh,
@@ -59,34 +60,67 @@ describe("Header", () => {
     expect(screen.getByText("Home")).toBeInTheDocument();
   });
 
-  it("shows admin functions in hamburger menu for admin users", () => {
+  it("shows admin functions in hamburger menu for admin users", async () => {
     mockPathname = "/admin/services";
     mockSessionStatus = "authenticated";
-    mockSessionUser = { email: "admin@truflow.test" };
+    mockSessionUser = { email: "admin@truflow.test", role: "admin" };
 
     render(<Header />);
 
-    fireEvent.click(screen.getAllByTestId("hamburger-button")[0]);
+    fireEvent.click(screen.getByTestId("hamburger-button"));
 
-    expect(screen.getByText("Admin")).toBeInTheDocument();
-    expect(screen.getByText("Dashboard")).toBeInTheDocument();
-    expect(screen.getByText("Bookings")).toBeInTheDocument();
-    expect(screen.getByText("Services")).toBeInTheDocument();
-    expect(screen.getByText("Availability")).toBeInTheDocument();
-    expect(screen.getByText("Sign out")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId("mobile-menu")).toBeInTheDocument();
+    });
+
+    const menu = screen.getByTestId("mobile-menu");
+    expect(within(menu).getByRole("link", { name: "Dashboard" })).toBeInTheDocument();
+    expect(within(menu).getByRole("link", { name: "Bookings" })).toBeInTheDocument();
+    expect(within(menu).getByRole("link", { name: "Services" })).toBeInTheDocument();
+    expect(within(menu).getByRole("link", { name: "Availability" })).toBeInTheDocument();
+    expect(within(menu).getByRole("button", { name: /sign out/i })).toBeInTheDocument();
+  });
+
+  it("highlights only the current admin section", async () => {
+    mockPathname = "/admin/bookings";
+    mockSessionStatus = "authenticated";
+    mockSessionUser = { email: "admin@truflow.test", role: "admin" };
+
+    render(<Header />);
+
+    fireEvent.click(screen.getByTestId("hamburger-button"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("mobile-menu")).toBeInTheDocument();
+    });
+
+    const menu = screen.getByTestId("mobile-menu");
+    expect(within(menu).getByRole("link", { name: "Bookings" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(within(menu).getByRole("link", { name: "Dashboard" })).not.toHaveAttribute(
+      "aria-current",
+      "page",
+    );
   });
 
   it("signs admin out from hamburger menu", async () => {
     mockPathname = "/admin";
     mockSessionStatus = "authenticated";
-    mockSessionUser = { email: "admin@truflow.test" };
+    mockSessionUser = { email: "admin@truflow.test", role: "admin" };
     mockSignOut.mockResolvedValue(undefined);
 
     render(<Header />);
 
-    fireEvent.click(screen.getAllByTestId("hamburger-button")[0]);
+    fireEvent.click(screen.getByTestId("hamburger-button"));
+    await waitFor(() => {
+      expect(screen.getByTestId("mobile-menu")).toBeInTheDocument();
+    });
     await act(async () => {
-      fireEvent.click(screen.getByText("Sign out"));
+      fireEvent.click(
+        within(screen.getByTestId("mobile-menu")).getByRole("button", { name: /sign out/i }),
+      );
     });
 
     await vi.waitFor(() => {

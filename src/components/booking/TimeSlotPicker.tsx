@@ -3,6 +3,8 @@
 import type React from "react";
 import { useCallback } from "react";
 
+import { formatTime12Hour } from "@/lib/date-time";
+
 export type TimeSlot = {
   start: string;
   end: string;
@@ -37,7 +39,7 @@ export const TimeSlotPicker = ({
           type="button"
           data-start={slot.start}
           data-testid="time-slot"
-          aria-label={`Select time ${new Date(slot.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+          aria-label={`Select time ${formatTime12Hour(slot.start)}`}
           onClick={handleSelect}
           className={`rounded-md border px-3 py-2 text-sm ${
             selectedStart === slot.start
@@ -45,7 +47,7 @@ export const TimeSlotPicker = ({
               : "border-slate-200 bg-white text-slate-700"
           }`}
         >
-          {new Date(slot.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          {formatTime12Hour(slot.start)}
         </button>
       ))}
     </div>

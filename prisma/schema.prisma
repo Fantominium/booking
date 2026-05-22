@@ -127,16 +127,34 @@ model BusinessHours {
   closingTime DateTime? @db.Time @map("closing_time")
   isOpen      Boolean   @default(true) @map("is_open")
 
+  blackoutRanges BusinessHoursBlock[]
+
   @@map("business_hours")
+}
+
+model BusinessHoursBlock {
+  id             String   @id @default(uuid())
+  businessHoursId String   @map("business_hours_id")
+  startTime      DateTime @db.Time @map("start_time")
+  endTime        DateTime @db.Time @map("end_time")
+  reason         String?
+
+  businessHours BusinessHours @relation(fields: [businessHoursId], references: [id], onDelete: Cascade)
+
+  @@index([businessHoursId])
+  @@map("business_hours_blocks")
 }
 
 model DateOverride {
   id              String    @id @default(uuid())
-  date            DateTime  @unique @db.Date
+  startDate       DateTime  @db.Date @map("start_date")
+  endDate         DateTime  @db.Date @map("end_date")
   isBlocked       Boolean   @map("is_blocked")
   customOpenTime  DateTime? @db.Time @map("custom_open_time")
   customCloseTime DateTime? @db.Time @map("custom_close_time")
   reason          String?
+
+  @@index([startDate, endDate])
 
   @@map("date_overrides")
 }

@@ -34,11 +34,18 @@ type BusinessHours = {
   openingTime: Date | null;
   closingTime: Date | null;
   isOpen: boolean;
+  blackoutRanges: Array<{
+    id: string;
+    startTime: Date;
+    endTime: Date;
+    reason: string | null;
+  }>;
 };
 
 type DateOverride = {
   id: string;
-  date: Date;
+  startDate: Date;
+  endDate: Date;
   isBlocked: boolean;
   customOpenTime: Date | null;
   customCloseTime: Date | null;
@@ -90,12 +97,14 @@ export const buildBusinessHours = (overrides: Partial<BusinessHours> = {}): Busi
   openingTime: new Date("1970-01-01T09:00:00Z"),
   closingTime: new Date("1970-01-01T17:00:00Z"),
   isOpen: true,
+  blackoutRanges: [],
   ...overrides,
 });
 
 export const buildDateOverride = (overrides: Partial<DateOverride> = {}): DateOverride => ({
   id: "override-1",
-  date: new Date("2026-12-25"),
+  startDate: new Date("2026-12-25"),
+  endDate: new Date("2026-12-25"),
   isBlocked: true,
   customOpenTime: null,
   customCloseTime: null,

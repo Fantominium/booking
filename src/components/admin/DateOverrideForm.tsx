@@ -10,7 +10,8 @@ type DateOverrideFormProps = {
 };
 
 type OverrideDraft = {
-  date: string;
+  startDate: string;
+  endDate: string;
   isBlocked: boolean;
   customOpenTime: string;
   customCloseTime: string;
@@ -18,7 +19,8 @@ type OverrideDraft = {
 };
 
 const createEmptyDraft = (): OverrideDraft => ({
-  date: "",
+  startDate: "",
+  endDate: "",
   isBlocked: false,
   customOpenTime: "",
   customCloseTime: "",
@@ -26,7 +28,9 @@ const createEmptyDraft = (): OverrideDraft => ({
 });
 
 const sortOverrides = (items: DateOverride[]): DateOverride[] => {
-  return [...items].sort((a, b) => a.date.localeCompare(b.date));
+  return [...items].sort(
+    (a, b) => a.startDate.localeCompare(b.startDate) || a.endDate.localeCompare(b.endDate),
+  );
 };
 
 export const DateOverrideForm = ({ initialOverrides }: DateOverrideFormProps): JSX.Element => {
@@ -64,7 +68,8 @@ export const DateOverrideForm = ({ initialOverrides }: DateOverrideFormProps): J
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            date: draft.date,
+            startDate: draft.startDate,
+            endDate: draft.endDate,
             isBlocked: draft.isBlocked,
             customOpenTime: draft.customOpenTime || null,
             customCloseTime: draft.customCloseTime || null,
@@ -124,13 +129,24 @@ export const DateOverrideForm = ({ initialOverrides }: DateOverrideFormProps): J
         </p>
       </div>
 
-      <form className="grid gap-4 md:grid-cols-5" onSubmit={handleSubmit}>
+      <form className="grid gap-4 md:grid-cols-6" onSubmit={handleSubmit}>
         <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
-          <span>Date</span>
+          <span>Start date</span>
           <input
             type="date"
-            value={draft.date}
-            data-field="date"
+            value={draft.startDate}
+            data-field="startDate"
+            onChange={handleDraftChange}
+            className="rounded-md border border-slate-300 px-2 py-1 dark:border-slate-700"
+            required
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
+          <span>End date</span>
+          <input
+            type="date"
+            value={draft.endDate}
+            data-field="endDate"
             onChange={handleDraftChange}
             className="rounded-md border border-slate-300 px-2 py-1 dark:border-slate-700"
             required
@@ -175,9 +191,9 @@ export const DateOverrideForm = ({ initialOverrides }: DateOverrideFormProps): J
             onChange={handleBlockedChange}
             aria-label="Mark date as fully blocked"
           />
-          Blocked
+          <span>Blocked</span>
         </label>
-        <div className="flex items-center justify-between md:col-span-5">
+        <div className="flex items-center justify-between md:col-span-6">
           <span className="text-sm text-slate-600 dark:text-slate-300">{status}</span>
           <button
             type="submit"
@@ -197,7 +213,11 @@ export const DateOverrideForm = ({ initialOverrides }: DateOverrideFormProps): J
             className="dark:bg-surface flex flex-col gap-2 rounded-lg border border-slate-100 p-3 md:flex-row md:items-center md:justify-between dark:border-slate-700"
           >
             <div className="flex flex-col text-sm text-slate-700 dark:text-slate-200">
-              <span className="font-semibold text-slate-900 dark:text-white">{entry.date}</span>
+              <span className="font-semibold text-slate-900 dark:text-white">
+                {entry.startDate === entry.endDate
+                  ? entry.startDate
+                  : `${entry.startDate} - ${entry.endDate}`}
+              </span>
               <span>
                 {entry.isBlocked
                   ? "Blocked"
@@ -212,7 +232,7 @@ export const DateOverrideForm = ({ initialOverrides }: DateOverrideFormProps): J
               className="rounded-md border border-slate-300 px-3 py-1 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               data-id={entry.id}
               onClick={handleDelete}
-              aria-label={`Delete override for ${entry.date}`}
+              aria-label={`Delete override for ${entry.startDate}`}
             >
               Delete
             </button>

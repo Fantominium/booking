@@ -23,24 +23,38 @@ const mapBusinessHours = (entry: {
   openingTime: Date | null;
   closingTime: Date | null;
   isOpen: boolean;
+  blackoutRanges?: Array<{
+    id: string;
+    startTime: Date;
+    endTime: Date;
+    reason: string | null;
+  }>;
 }): BusinessHours => ({
   id: entry.id,
   dayOfWeek: entry.dayOfWeek,
   openingTime: formatTime(entry.openingTime),
   closingTime: formatTime(entry.closingTime),
   isOpen: entry.isOpen,
+  blockedRanges: (entry.blackoutRanges ?? []).map((range) => ({
+    id: range.id,
+    startTime: formatTime(range.startTime) ?? "",
+    endTime: formatTime(range.endTime) ?? "",
+    reason: range.reason,
+  })),
 });
 
 const mapDateOverride = (entry: {
   id: string;
-  date: Date;
+  startDate: Date;
+  endDate: Date;
   isBlocked: boolean;
   customOpenTime: Date | null;
   customCloseTime: Date | null;
   reason: string | null;
 }): DateOverride => ({
   id: entry.id,
-  date: entry.date.toISOString().slice(0, 10),
+  startDate: entry.startDate.toISOString().slice(0, 10),
+  endDate: entry.endDate.toISOString().slice(0, 10),
   isBlocked: entry.isBlocked,
   customOpenTime: formatTime(entry.customOpenTime),
   customCloseTime: formatTime(entry.customCloseTime),
@@ -52,9 +66,10 @@ const AvailabilityPage = async (): Promise<JSX.Element> => {
 
   const businessHours = await prisma.businessHours.findMany({
     orderBy: { dayOfWeek: "asc" },
+    include: { blackoutRanges: { orderBy: { startTime: "asc" } } },
   });
   const dateOverrides = await prisma.dateOverride.findMany({
-    orderBy: { date: "asc" },
+    orderBy: [{ startDate: "asc" }, { endDate: "asc" }],
   });
   const existingSettings = await prisma.systemSettings.findFirst();
   const settings =

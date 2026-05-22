@@ -11,7 +11,8 @@ const timeSchema = z.string().regex(/^\d{2}:\d{2}$/);
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 const createDateOverrideSchema = z.object({
-  date: dateSchema,
+  startDate: dateSchema,
+  endDate: dateSchema,
   isBlocked: z.boolean(),
   customOpenTime: z.union([timeSchema, z.null()]).optional(),
   customCloseTime: z.union([timeSchema, z.null()]).optional(),
@@ -52,12 +53,13 @@ export const GET = async (): Promise<NextResponse> => {
   }
 
   const overrides = await prisma.dateOverride.findMany({
-    orderBy: { date: "asc" },
+    orderBy: [{ startDate: "asc" }, { endDate: "asc" }],
   });
 
   const payload = overrides.map((entry: (typeof overrides)[number]) => ({
     id: entry.id,
-    date: entry.date.toISOString().slice(0, 10),
+    startDate: entry.startDate.toISOString().slice(0, 10),
+    endDate: entry.endDate.toISOString().slice(0, 10),
     isBlocked: entry.isBlocked,
     customOpenTime: toTimeString(entry.customOpenTime),
     customCloseTime: toTimeString(entry.customCloseTime),
@@ -81,7 +83,8 @@ export const POST = async (request: Request): Promise<NextResponse> => {
 
   const entry = await prisma.dateOverride.create({
     data: {
-      date: parseDateString(parsed.data.date),
+      startDate: parseDateString(parsed.data.startDate),
+      endDate: parseDateString(parsed.data.endDate),
       isBlocked: parsed.data.isBlocked,
       customOpenTime: parseTimeString(parsed.data.customOpenTime ?? null),
       customCloseTime: parseTimeString(parsed.data.customCloseTime ?? null),
@@ -94,7 +97,8 @@ export const POST = async (request: Request): Promise<NextResponse> => {
   return NextResponse.json(
     {
       id: entry.id,
-      date: entry.date.toISOString().slice(0, 10),
+      startDate: entry.startDate.toISOString().slice(0, 10),
+      endDate: entry.endDate.toISOString().slice(0, 10),
       isBlocked: entry.isBlocked,
       customOpenTime: toTimeString(entry.customOpenTime),
       customCloseTime: toTimeString(entry.customCloseTime),
