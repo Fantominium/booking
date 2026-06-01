@@ -1,0 +1,279 @@
+openapi: 3.1.0
+info:
+  title: TruFlow Multimedia Booking Feature Contract
+  version: 0.1.0
+  description: |
+    Feature-local API contract additions for multimedia booking support.
+    This contract focuses on service media metadata written via admin APIs and
+    read through existing service payloads.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/services:
+    get:
+      summary: List active services for booking
+      tags: [Services]
+      responses:
+        '200':
+          description: Active services with optional media metadata
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+
+  /api/admin/services:
+    post:
+      summary: Create a service with optional media metadata
+      tags: [Admin Services]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminServiceCreateRequest'
+      responses:
+        '201':
+          description: Service created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [service]
+                properties:
+                  service:
+                    $ref: '#/components/schemas/Service'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/admin/services/{id}:
+    patch:
+      summary: Update a service with optional media metadata
+      tags: [Admin Services]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminServiceUpdateRequest'
+      responses:
+        '200':
+          description: Service updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [service]
+                properties:
+                  service:
+                    $ref: '#/components/schemas/Service'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Service not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    Service:
+      type: object
+      required:
+        - id
+        - name
+        - offeringType
+        - durationMin
+        - priceCents
+        - downpaymentCents
+        - isActive
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          nullable: true
+        offeringType:
+          type: string
+          enum: [SESSION, EVENT, RENTAL]
+        durationMin:
+          type: integer
+          minimum: 1
+        priceCents:
+          type: integer
+          minimum: 0
+        downpaymentCents:
+          type: integer
+          minimum: 0
+        durationPriceOptions:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/ServiceDurationPriceOption'
+        isActive:
+          type: boolean
+        heroMediaType:
+          type: string
+          nullable: true
+          enum: [IMAGE, VIDEO]
+        heroMediaUrl:
+          type: string
+          nullable: true
+          format: uri
+        heroMediaAltText:
+          type: string
+          nullable: true
+        heroPosterUrl:
+          type: string
+          nullable: true
+          format: uri
+        cardMediaType:
+          type: string
+          nullable: true
+          enum: [IMAGE, GIF]
+        cardMediaUrl:
+          type: string
+          nullable: true
+          format: uri
+        cardMediaAltText:
+          type: string
+          nullable: true
+        isDecorative:
+          type: boolean
+          nullable: true
+
+    ServiceDurationPriceOption:
+      type: object
+      required: [durationMin, priceCents]
+      properties:
+        durationMin:
+          type: integer
+          minimum: 1
+        priceCents:
+          type: integer
+          minimum: 0
+
+    ServiceMediaMetadata:
+      type: object
+      description: Upload-derived media references persisted on service records.
+      properties:
+        heroMediaType:
+          type: string
+          nullable: true
+          enum: [IMAGE, VIDEO]
+        heroMediaUrl:
+          type: string
+          nullable: true
+          format: uri
+        heroMediaAltText:
+          type: string
+          nullable: true
+        heroPosterUrl:
+          type: string
+          nullable: true
+          format: uri
+        cardMediaType:
+          type: string
+          nullable: true
+          enum: [IMAGE, GIF]
+        cardMediaUrl:
+          type: string
+          nullable: true
+          format: uri
+        cardMediaAltText:
+          type: string
+          nullable: true
+        isDecorative:
+          type: boolean
+          nullable: true
+
+    AdminServiceCreateRequest:
+      type: object
+      required:
+        - name
+        - offeringType
+        - durationMin
+        - priceCents
+        - downpaymentCents
+      allOf:
+        - $ref: '#/components/schemas/AdminServiceBase'
+
+    AdminServiceUpdateRequest:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/AdminServiceBase'
+
+    AdminServiceBase:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          nullable: true
+          maxLength: 5000
+        offeringType:
+          type: string
+          enum: [SESSION, EVENT, RENTAL]
+        durationMin:
+          type: integer
+          minimum: 1
+        priceCents:
+          type: integer
+          minimum: 0
+        downpaymentCents:
+          type: integer
+          minimum: 0
+        durationPriceOptions:
+          type: array
+          nullable: true
+          minItems: 1
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/ServiceDurationPriceOption'
+        isActive:
+          type: boolean
+        media:
+          $ref: '#/components/schemas/ServiceMediaMetadata'
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
