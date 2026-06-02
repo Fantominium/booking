@@ -4,8 +4,21 @@ import type React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { z } from "zod";
 
+import {
+  MAX_GIF_UPLOAD_BYTES,
+  MAX_IMAGE_UPLOAD_BYTES,
+  MAX_MEDIA_HEIGHT,
+  MAX_MEDIA_WIDTH,
+  MAX_VIDEO_DURATION_SECONDS,
+  MAX_VIDEO_UPLOAD_BYTES,
+} from "@/lib/media-limits";
 import { getServiceDurationOptions } from "@/lib/service-duration-options";
 import type { ServiceDurationPriceOption } from "@/types/service";
+
+type HeroMediaType = "IMAGE" | "VIDEO";
+type CardMediaType = "IMAGE" | "GIF";
+
+type UploadSlot = "hero" | "heroPoster" | "card";
 
 export type ServiceFormValues = {
   name: string;
@@ -15,6 +28,14 @@ export type ServiceFormValues = {
   priceCents: number;
   downpaymentCents: number;
   durationPriceOptions: ServiceDurationPriceOption[];
+  heroMediaType: HeroMediaType | null;
+  heroMediaUrl: string | null;
+  heroMediaAltText: string;
+  heroPosterUrl: string | null;
+  cardMediaType: CardMediaType | null;
+  cardMediaUrl: string | null;
+  cardMediaAltText: string;
+  isDecorative: boolean;
   isActive: boolean;
 };
 
@@ -42,6 +63,14 @@ const serviceSchema: z.ZodTypeAny = z
         }),
       )
       .min(1, "Add at least one badge option"),
+    heroMediaType: z.enum(["IMAGE", "VIDEO"]).nullable(),
+    heroMediaUrl: z.string().nullable(),
+    heroMediaAltText: z.string().max(255),
+    heroPosterUrl: z.string().nullable(),
+    cardMediaType: z.enum(["IMAGE", "GIF"]).nullable(),
+    cardMediaUrl: z.string().nullable(),
+    cardMediaAltText: z.string().max(255),
+    isDecorative: z.boolean(),
     isActive: z.boolean(),
   })
   .refine((value) => value.downpaymentCents <= value.priceCents, {
@@ -56,7 +85,136 @@ const serviceSchema: z.ZodTypeAny = z
       message: "Badge durations must be unique",
       path: ["durationPriceOptions"],
     },
-  );
+  )
+  .superRefine((value, context) => {
+    if (value.heroMediaUrl && !value.heroMediaType) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["heroMediaType"],
+        message: "Hero media type is required",
+      });
+    }
+
+    if (value.cardMediaUrl && !value.cardMediaType) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["cardMediaType"],
+        message: "Card media type is required",
+      });
+    }
+
+    if (value.heroMediaType === "VIDEO" && value.heroMediaUrl && !value.heroPosterUrl) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["heroPosterUrl"],
+        message: "Hero video requires a poster image",
+      });
+    }
+
+    if (value.heroMediaUrl && !value.isDecorative && value.heroMediaAltText.trim().length === 0) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["heroMediaAltText"],
+        message: "Hero alt text is required unless decorative",
+      });
+    }
+
+    if (value.cardMediaUrl && !value.isDecorative && value.cardMediaAltText.trim().length === 0) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["cardMediaAltText"],
+        message: "Card alt text is required unless decorative",
+      });
+    }
+  });
+
+type UploadMetadata = {
+  width: number;
+  height: number;
+  durationSeconds?: number;
+};
+
+type UploadMetadataHandlers = {
+  onSuccess: (metadata: UploadMetadata) => void;
+  onError: (message: string) => void;
+};
+
+const extractMetadata = (file: File, handlers: UploadMetadataHandlers): void => {
+  if (file.type.startsWith("video/")) {
+    const url = URL.createObjectURL(file);
+    const video = document.createElement("video");
+    const cleanup = (): void => {
+      video.removeAttribute("src");
+      video.load();
+      URL.revokeObjectURL(url);
+    };
+
+    const handleLoadedMetadata = (): void => {
+      handlers.onSuccess({
+        width: video.videoWidth,
+        height: video.videoHeight,
+        durationSeconds: video.duration,
+      });
+      cleanup();
+    };
+
+    const handleVideoError = (): void => {
+      handlers.onError("Unable to read video metadata");
+      cleanup();
+    };
+
+    video.preload = "metadata";
+    video.addEventListener("loadedmetadata", handleLoadedMetadata, { once: true });
+    video.addEventListener("error", handleVideoError, { once: true });
+    video.src = url;
+
+    return;
+  }
+
+  void createImageBitmap(file)
+    .then((bitmap) => {
+      handlers.onSuccess({ width: bitmap.width, height: bitmap.height });
+      bitmap.close();
+    })
+    .catch(() => {
+      handlers.onError("Unable to read image metadata");
+    });
+};
+
+const validateClientMediaLimits = (file: File, metadata: UploadMetadata): string | null => {
+  if (metadata.width <= 0 || metadata.height <= 0) {
+    return "Media resolution metadata is missing.";
+  }
+
+  if (metadata.width > MAX_MEDIA_WIDTH || metadata.height > MAX_MEDIA_HEIGHT) {
+    return `Resolution exceeds ${MAX_MEDIA_WIDTH}x${MAX_MEDIA_HEIGHT}.`;
+  }
+
+  if (file.type.startsWith("video/")) {
+    if (file.size > MAX_VIDEO_UPLOAD_BYTES) {
+      return `Video exceeds ${Math.round(MAX_VIDEO_UPLOAD_BYTES / (1024 * 1024))}MB.`;
+    }
+
+    if (!metadata.durationSeconds || metadata.durationSeconds > MAX_VIDEO_DURATION_SECONDS) {
+      return `Video duration must be <= ${MAX_VIDEO_DURATION_SECONDS} seconds.`;
+    }
+
+    return null;
+  }
+
+  if (file.type === "image/gif") {
+    if (file.size > MAX_GIF_UPLOAD_BYTES) {
+      return `GIF exceeds ${Math.round(MAX_GIF_UPLOAD_BYTES / (1024 * 1024))}MB.`;
+    }
+    return null;
+  }
+
+  if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
+    return `Image exceeds ${Math.round(MAX_IMAGE_UPLOAD_BYTES / (1024 * 1024))}MB.`;
+  }
+
+  return null;
+};
 
 export const ServiceForm = ({
   initialValues,
@@ -67,6 +225,8 @@ export const ServiceForm = ({
 }: ServiceFormProps): JSX.Element => {
   const [values, setValues] = useState<ServiceFormValues>(initialValues);
   const [error, setError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadingSlot, setUploadingSlot] = useState<UploadSlot | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const formClassName = useMemo(() => {
@@ -114,6 +274,14 @@ export const ServiceForm = ({
         priceCents: values.priceCents,
         downpaymentCents: values.downpaymentCents,
         durationPriceOptions: values.durationPriceOptions,
+        heroMediaType: values.heroMediaType,
+        heroMediaUrl: values.heroMediaUrl,
+        heroMediaAltText: values.heroMediaAltText,
+        heroPosterUrl: values.heroPosterUrl,
+        cardMediaType: values.cardMediaType,
+        cardMediaUrl: values.cardMediaUrl,
+        cardMediaAltText: values.cardMediaAltText,
+        isDecorative: values.isDecorative,
         isActive: values.isActive,
       };
 
@@ -192,6 +360,147 @@ export const ServiceForm = ({
       ],
     }));
   }, []);
+
+  const uploadWithMetadata = useCallback(
+    async (slot: UploadSlot, file: File, metadata: UploadMetadata): Promise<void> => {
+      const limitError = validateClientMediaLimits(file, metadata);
+      if (limitError) {
+        setUploadError(limitError);
+        setUploadingSlot(null);
+        return;
+      }
+
+      // eslint-disable-next-line no-restricted-syntax
+      const formData = new FormData();
+      formData.set("slot", slot);
+      formData.set("file", file);
+      formData.set("width", String(metadata.width));
+      formData.set("height", String(metadata.height));
+      if (metadata.durationSeconds) {
+        formData.set("durationSeconds", String(metadata.durationSeconds));
+      }
+
+      const response = await fetch("/api/admin/services/media", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const data = (await response.json()) as { error?: string };
+        setUploadError(data.error ?? "Unable to upload media.");
+        setUploadingSlot(null);
+        return;
+      }
+
+      const data = (await response.json()) as {
+        url: string;
+        mediaType: HeroMediaType | CardMediaType;
+      };
+
+      setValues((prev) => {
+        if (slot === "hero") {
+          return {
+            ...prev,
+            heroMediaUrl: data.url,
+            heroMediaType: data.mediaType as HeroMediaType,
+          };
+        }
+
+        if (slot === "heroPoster") {
+          return {
+            ...prev,
+            heroPosterUrl: data.url,
+          };
+        }
+
+        return {
+          ...prev,
+          cardMediaUrl: data.url,
+          cardMediaType: data.mediaType as CardMediaType,
+        };
+      });
+      setUploadingSlot(null);
+    },
+    [],
+  );
+
+  const uploadFileForSlot = useCallback(
+    (slot: UploadSlot, file: File): void => {
+      setUploadError(null);
+      setUploadingSlot(slot);
+
+      extractMetadata(file, {
+        onSuccess: (metadata) => {
+          void uploadWithMetadata(slot, file, metadata).catch((uploadFailure) => {
+            console.error(uploadFailure);
+            setUploadError("Unable to upload media.");
+            setUploadingSlot(null);
+          });
+        },
+        onError: (message) => {
+          setUploadError(message);
+          setUploadingSlot(null);
+        },
+      });
+    },
+    [uploadWithMetadata],
+  );
+
+  const handleFileInput = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
+      const inputElement = event.currentTarget;
+      const file = inputElement.files?.[0];
+      const slot = inputElement.dataset.slot as UploadSlot | undefined;
+
+      if (!file || !slot) {
+        return;
+      }
+
+      uploadFileForSlot(slot, file);
+      inputElement.value = "";
+    },
+    [uploadFileForSlot],
+  );
+
+  const clearMedia = useCallback((slot: UploadSlot): void => {
+    setValues((prev) => {
+      if (slot === "hero") {
+        return {
+          ...prev,
+          heroMediaType: null,
+          heroMediaUrl: null,
+          heroMediaAltText: "",
+          heroPosterUrl: null,
+        };
+      }
+
+      if (slot === "heroPoster") {
+        return {
+          ...prev,
+          heroPosterUrl: null,
+        };
+      }
+
+      return {
+        ...prev,
+        cardMediaType: null,
+        cardMediaUrl: null,
+        cardMediaAltText: "",
+      };
+    });
+  }, []);
+
+  const handleClearMediaClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      const slot = event.currentTarget.dataset.slot as UploadSlot | undefined;
+      if (!slot) {
+        return;
+      }
+
+      clearMedia(slot);
+    },
+    [clearMedia],
+  );
 
   const handleRemoveDurationPriceOption = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -364,6 +673,130 @@ export const ServiceForm = ({
         />
         <span>Active</span>
       </label>
+      <div className="dark:bg-surface rounded-md border border-slate-200 bg-slate-50 px-3 py-3 dark:border-slate-700">
+        <p className="text-xs font-semibold tracking-[0.08em] text-slate-700 uppercase dark:text-slate-200">
+          Media authoring (upload only)
+        </p>
+        <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+          Upload hero and card media files. Direct URL entry is intentionally disabled for v1.
+        </p>
+
+        <label className="mt-3 flex items-center gap-2 text-xs text-slate-700 dark:text-slate-200">
+          <input
+            type="checkbox"
+            checked={values.isDecorative}
+            data-field="isDecorative"
+            onChange={handleChange}
+          />
+          <span>Media is decorative (alt text optional)</span>
+        </label>
+
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
+          <div className="grid gap-2 rounded-md border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
+            <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">Hero media</p>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm"
+              data-slot="hero"
+              onChange={handleFileInput}
+              disabled={uploadingSlot === "hero"}
+              className="text-xs"
+            />
+            {values.heroMediaUrl ? (
+              <button
+                type="button"
+                className="w-fit rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-100"
+                data-slot="hero"
+                onClick={handleClearMediaClick}
+              >
+                Remove hero media
+              </button>
+            ) : null}
+            <label className="grid gap-1 text-xs text-slate-700 dark:text-slate-200">
+              <span>Hero alt text</span>
+              <input
+                type="text"
+                value={values.heroMediaAltText}
+                data-field="heroMediaAltText"
+                onChange={handleChange}
+                disabled={values.isDecorative}
+                className="rounded-md border border-slate-200 px-3 py-2 dark:border-slate-700"
+              />
+            </label>
+            {values.heroMediaType === "VIDEO" ? (
+              <>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/avif"
+                  data-slot="heroPoster"
+                  onChange={handleFileInput}
+                  disabled={uploadingSlot === "heroPoster"}
+                  className="text-xs"
+                />
+                {values.heroPosterUrl ? (
+                  <button
+                    type="button"
+                    className="w-fit rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-100"
+                    data-slot="heroPoster"
+                    onClick={handleClearMediaClick}
+                  >
+                    Remove poster
+                  </button>
+                ) : null}
+              </>
+            ) : null}
+          </div>
+
+          <div className="grid gap-2 rounded-md border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
+            <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">Card media</p>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+              data-slot="card"
+              onChange={handleFileInput}
+              disabled={uploadingSlot === "card"}
+              className="text-xs"
+            />
+            {values.cardMediaUrl ? (
+              <button
+                type="button"
+                className="w-fit rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-100"
+                data-slot="card"
+                onClick={handleClearMediaClick}
+              >
+                Remove card media
+              </button>
+            ) : null}
+            <label className="grid gap-1 text-xs text-slate-700 dark:text-slate-200">
+              <span>Card alt text</span>
+              <input
+                type="text"
+                value={values.cardMediaAltText}
+                data-field="cardMediaAltText"
+                onChange={handleChange}
+                disabled={values.isDecorative}
+                className="rounded-md border border-slate-200 px-3 py-2 dark:border-slate-700"
+              />
+            </label>
+          </div>
+        </div>
+
+        <div className="mt-3 grid gap-2 text-xs text-slate-600 dark:text-slate-300">
+          <p>
+            Limits: images up to {Math.round(MAX_IMAGE_UPLOAD_BYTES / (1024 * 1024))}MB, GIFs up to{" "}
+            {Math.round(MAX_GIF_UPLOAD_BYTES / (1024 * 1024))}MB, videos up to{" "}
+            {Math.round(MAX_VIDEO_UPLOAD_BYTES / (1024 * 1024))}MB and {MAX_VIDEO_DURATION_SECONDS}
+            s.
+          </p>
+          <p>
+            Resolution must be {MAX_MEDIA_WIDTH}x{MAX_MEDIA_HEIGHT} or smaller.
+          </p>
+          {values.heroMediaUrl ? <p>Hero: {values.heroMediaUrl}</p> : null}
+          {values.heroPosterUrl ? <p>Hero poster: {values.heroPosterUrl}</p> : null}
+          {values.cardMediaUrl ? <p>Card: {values.cardMediaUrl}</p> : null}
+        </div>
+      </div>
+      {uploadError ? <p className="text-sm text-rose-600">{uploadError}</p> : null}
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
       <div className="flex items-center gap-2">
         <button

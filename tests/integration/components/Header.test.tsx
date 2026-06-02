@@ -20,6 +20,7 @@ vi.mock("next/image", () => ({
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
+  useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({
     push: mockPush,
     refresh: mockRefresh,
@@ -81,7 +82,9 @@ describe("Header", () => {
 
     render(<Header />);
 
-    expect(screen.getByText("Dashboard")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("hamburger-button-desktop"));
+
+    expect(screen.getByRole("link", { name: "Dashboard" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sign out" })).toBeInTheDocument();
   });
 });

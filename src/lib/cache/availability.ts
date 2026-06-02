@@ -118,8 +118,12 @@ async function calculateAvailabilityDirect(
   const businessHours = await getBusinessHoursWithCache();
 
   // Get date overrides (check if specific date has custom hours)
-  const dateOverride = await prisma.dateOverride.findUnique({
-    where: { date: parseISO(date) },
+  const targetDate = parseISO(date);
+  const dateOverride = await prisma.dateOverride.findFirst({
+    where: {
+      startDate: { lte: targetDate },
+      endDate: { gte: targetDate },
+    },
   });
 
   // If date is blocked or no business hours available
@@ -135,7 +139,6 @@ async function calculateAvailabilityDirect(
   const bookings = await getBookingConflictsWithCache(serviceId, date);
 
   // Determine operating hours for the day
-  const targetDate = parseISO(date);
   const dayOfWeek = targetDate.getDay();
 
   // If we have a date override, use it; otherwise use business hours

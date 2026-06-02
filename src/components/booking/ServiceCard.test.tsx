@@ -109,4 +109,64 @@ describe("ServiceCard", () => {
     expect(screen.getByRole("button", { name: "65 min" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("service-price")).toHaveTextContent("$165.00");
   });
+
+  it("renders card media when configured", () => {
+    render(
+      <ServiceCard
+        service={{
+          id: "service-6",
+          name: "Aromatherapy",
+          description: "Relaxing essential oils",
+          offeringType: "SESSION",
+          durationMin: 60,
+          priceCents: 9000,
+          downpaymentCents: 2000,
+          cardMediaType: "IMAGE",
+          cardMediaUrl: "/uploads/service-media/aroma.jpg",
+          cardMediaAltText: "Essential oils and massage stones",
+          isDecorative: false,
+          isActive: true,
+        }}
+      />,
+    );
+
+    const media = screen.getByTestId("service-card-media");
+    expect(media.tagName).toBe("IMG");
+    expect(media).toHaveAttribute("alt", "Essential oils and massage stones");
+  });
+
+  it("uses static fallback for gif media when reduced motion is preferred", () => {
+    globalThis.matchMedia = (query: string) => ({
+      matches: query === "(prefers-reduced-motion: reduce)",
+      media: query,
+      onchange: null,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      dispatchEvent: () => false,
+    });
+
+    render(
+      <ServiceCard
+        service={{
+          id: "service-7",
+          name: "Recovery Flow",
+          description: "Guided recovery session",
+          offeringType: "SESSION",
+          durationMin: 60,
+          priceCents: 9200,
+          downpaymentCents: 2300,
+          cardMediaType: "GIF",
+          cardMediaUrl: "/uploads/service-media/recovery.gif",
+          cardMediaAltText: "Animated guided recovery sequence",
+          isDecorative: false,
+          isActive: true,
+        }}
+      />,
+    );
+
+    const media = screen.getByTestId("service-card-media");
+    expect(media.tagName).toBe("DIV");
+  });
 });

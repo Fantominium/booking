@@ -36,7 +36,7 @@ test.describe("Mobile Navigation Dialog", () => {
     await expect(trigger).toHaveAttribute("aria-label", "Close menu");
     await expect(page.getByRole("dialog", { name: /navigation menu/i })).toBeVisible();
 
-    const closeTrigger = page.getByRole("button", { name: /close menu/i }).first();
+    const closeTrigger = page.getByTestId("hamburger-button-close");
     await closeTrigger.click();
 
     await expect(trigger).toHaveAttribute("aria-expanded", "false");

@@ -9,6 +9,8 @@ const dateTimeSchema = z
   .refine((value) => !Number.isNaN(Date.parse(value)), "Invalid datetime");
 const offeringTypeSchema = z.enum(["SESSION", "EVENT", "RENTAL"]);
 const paymentMethodSchema = z.enum(["CARD", "BANK_TRANSFER"]);
+const heroMediaTypeSchema = z.enum(["IMAGE", "VIDEO"]);
+const cardMediaTypeSchema = z.enum(["IMAGE", "GIF"]);
 const paymentStateSchema = z.enum([
   "UNPAID",
   "PENDING_BANK_TRANSFER",
@@ -16,18 +18,66 @@ const paymentStateSchema = z.enum([
   "PAID_IN_FULL",
 ]);
 
-export const serviceSchema = z.object({
-  id: uuidSchema,
-  name: z.string().min(1).max(255),
-  description: z.string().max(5000).nullable().optional(),
-  offeringType: offeringTypeSchema,
+const serviceDurationPriceOptionSchema = z.object({
   durationMin: z.number().int().positive(),
   priceCents: z.number().int().nonnegative(),
-  downpaymentCents: z.number().int().nonnegative(),
-  isActive: z.boolean(),
-  createdAt: z.union([dateTimeSchema, z.date()]),
-  updatedAt: z.union([dateTimeSchema, z.date()]),
 });
+
+const mediaUrlSchema = z
+  .string()
+  .trim()
+  .refine(
+    (value) => value.startsWith("/uploads/service-media/") || /^https?:\/\//i.test(value),
+    "Invalid media URL",
+  );
+
+export const serviceSchema = z
+  .object({
+    id: uuidSchema,
+    name: z.string().min(1).max(255),
+    description: z.string().max(5000).nullable().optional(),
+    offeringType: offeringTypeSchema,
+    durationMin: z.number().int().positive(),
+    priceCents: z.number().int().nonnegative(),
+    downpaymentCents: z.number().int().nonnegative(),
+    durationPriceOptions: z.array(serviceDurationPriceOptionSchema).nullable().optional(),
+    heroMediaType: heroMediaTypeSchema.nullable().optional(),
+    heroMediaUrl: mediaUrlSchema.nullable().optional(),
+    heroMediaAltText: z.string().max(255).nullable().optional(),
+    heroPosterUrl: mediaUrlSchema.nullable().optional(),
+    cardMediaType: cardMediaTypeSchema.nullable().optional(),
+    cardMediaUrl: mediaUrlSchema.nullable().optional(),
+    cardMediaAltText: z.string().max(255).nullable().optional(),
+    isDecorative: z.boolean().nullable().optional(),
+    isActive: z.boolean(),
+    createdAt: z.union([dateTimeSchema, z.date()]),
+    updatedAt: z.union([dateTimeSchema, z.date()]),
+  })
+  .superRefine((value, context) => {
+    if (value.heroMediaUrl && value.heroMediaType === "VIDEO" && !value.heroPosterUrl) {
+      context.addIssue({
+        code: "custom",
+        path: ["heroPosterUrl"],
+        message: "Poster is required for hero video",
+      });
+    }
+
+    if (value.heroMediaUrl && value.isDecorative !== true && !value.heroMediaAltText) {
+      context.addIssue({
+        code: "custom",
+        path: ["heroMediaAltText"],
+        message: "Alt text is required for hero media",
+      });
+    }
+
+    if (value.cardMediaUrl && value.isDecorative !== true && !value.cardMediaAltText) {
+      context.addIssue({
+        code: "custom",
+        path: ["cardMediaAltText"],
+        message: "Alt text is required for card media",
+      });
+    }
+  });
 
 export const bookingSchema = z.object({
   id: uuidSchema,

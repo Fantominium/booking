@@ -1,5 +1,6 @@
 "use client";
 
+import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import {
   DataGrid,
   type GridColDef,
@@ -12,6 +13,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { CancelBookingButton } from "@/components/admin/CancelBookingButton";
 import { MarkPaidButton } from "@/components/admin/MarkPaidButton";
+import { createAccessibleMuiTheme } from "@/components/muiTheme";
+import { useTheme } from "@/components/ThemeProvider";
 import type { AdminBooking } from "@/types/booking";
 
 const formatMoney = (amountCents: number): string => {
@@ -40,6 +43,7 @@ const defaultFilters: BookingFilters = {
 };
 
 export const BookingList = ({ onSelectBooking }: BookingListProps): JSX.Element => {
+  const { resolvedTheme } = useTheme();
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [filters, setFilters] = useState<BookingFilters>(defaultFilters);
   const [searchInput, setSearchInput] = useState("");
@@ -195,6 +199,8 @@ export const BookingList = ({ onSelectBooking }: BookingListProps): JSX.Element 
     [renderActions],
   );
 
+  const muiTheme = useMemo(() => createAccessibleMuiTheme(resolvedTheme), [resolvedTheme]);
+
   const getRowId = useCallback((row: AdminBooking) => row.id, []);
 
   return (
@@ -252,14 +258,16 @@ export const BookingList = ({ onSelectBooking }: BookingListProps): JSX.Element 
       </div>
 
       <div className="h-130">
-        <DataGrid
-          rows={bookings}
-          columns={columns}
-          getRowId={getRowId}
-          loading={isLoading}
-          pageSizeOptions={[10, 25, 50]}
-          onRowSelectionModelChange={handleSelectionChange}
-        />
+        <MuiThemeProvider theme={muiTheme}>
+          <DataGrid
+            rows={bookings}
+            columns={columns}
+            getRowId={getRowId}
+            loading={isLoading}
+            pageSizeOptions={[10, 25, 50]}
+            onRowSelectionModelChange={handleSelectionChange}
+          />
+        </MuiThemeProvider>
       </div>
 
       {statusMessage ? <p className="text-sm text-rose-600">{statusMessage}</p> : null}

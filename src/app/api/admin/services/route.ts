@@ -4,49 +4,9 @@ import { z } from "zod";
 
 import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
+import { createAdminServiceRequestSchema } from "@/lib/schemas/api";
 
 export const dynamic = "force-dynamic";
-
-const durationPriceOptionSchema = z.object({
-  durationMin: z.number().int().positive(),
-  priceCents: z.number().int().nonnegative(),
-});
-
-const serviceInputSchema = z
-  .object({
-    name: z.string().min(1).max(255),
-    description: z.string().max(5000).nullable().optional(),
-    offeringType: z.enum(["SESSION", "EVENT", "RENTAL"]),
-    durationMin: z.number().int().positive(),
-    priceCents: z.number().int().nonnegative(),
-    downpaymentCents: z.number().int().nonnegative(),
-    durationPriceOptions: z.array(durationPriceOptionSchema).max(10).optional().nullable(),
-    isActive: z.boolean().optional(),
-  })
-  .refine((value) => value.downpaymentCents <= value.priceCents, {
-    message: "Downpayment cannot exceed price",
-    path: ["downpaymentCents"],
-  })
-  .refine(
-    (value) => {
-      const options = value.durationPriceOptions ?? [];
-      return new Set(options.map((option) => option.durationMin)).size === options.length;
-    },
-    {
-      message: "Duration options must be unique",
-      path: ["durationPriceOptions"],
-    },
-  )
-  .refine(
-    (value) => {
-      const options = value.durationPriceOptions ?? [];
-      return options.length > 0;
-    },
-    {
-      message: "At least one duration option is required",
-      path: ["durationPriceOptions"],
-    },
-  );
 
 export const GET = async (): Promise<NextResponse> => {
   if (!(await getAdminSession())) {
@@ -66,10 +26,13 @@ export const POST = async (request: Request): Promise<NextResponse> => {
   }
 
   const body = await request.json();
-  const parsed = serviceInputSchema.safeParse(body);
+  const parsed = createAdminServiceRequestSchema.safeParse(body);
 
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid request", issues: z.flattenError(parsed.error) },
+      { status: 400 },
+    );
   }
 
   const data: Prisma.ServiceCreateInput = {
@@ -79,6 +42,14 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     durationMin: parsed.data.durationMin,
     priceCents: parsed.data.priceCents,
     downpaymentCents: parsed.data.downpaymentCents,
+    heroMediaType: parsed.data.heroMediaType ?? null,
+    heroMediaUrl: parsed.data.heroMediaUrl ?? null,
+    heroMediaAltText: parsed.data.heroMediaAltText ?? null,
+    heroPosterUrl: parsed.data.heroPosterUrl ?? null,
+    cardMediaType: parsed.data.cardMediaType ?? null,
+    cardMediaUrl: parsed.data.cardMediaUrl ?? null,
+    cardMediaAltText: parsed.data.cardMediaAltText ?? null,
+    isDecorative: parsed.data.isDecorative ?? null,
     isActive: parsed.data.isActive ?? true,
   };
 

@@ -423,3 +423,30 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+.media-placeholder-gradient {
+  background:
+    radial-gradient(circle at 18% 24%, rgba(203, 213, 225, 0.85), transparent 56%),
+    radial-gradient(circle at 80% 15%, rgba(148, 163, 184, 0.35), transparent 62%),
+    linear-gradient(180deg, #e2e8f0 0%, #f8fafc 55%, #ffffff 100%);
+}
+
+[data-theme="dark"] .media-placeholder-gradient {
+  background:
+    radial-gradient(circle at 18% 24%, rgba(71, 85, 105, 0.65), transparent 56%),
+    radial-gradient(circle at 80% 15%, rgba(100, 116, 139, 0.3), transparent 62%),
+    linear-gradient(180deg, #334155 0%, #0f172a 60%, #020617 100%);
+}
+
+.hero-media-shell .hero-media-fade {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 96%);
+}
+
+.card-media-fade {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 96%);
+}
+
+[data-theme="dark"] .hero-media-shell .hero-media-fade,
+[data-theme="dark"] .card-media-fade {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, #0f172a 96%);
+}

@@ -17,49 +17,49 @@
 
 ## Phase 2 - Contracts and Persistence
 
-- [ ] T006 [P] Add contract tests for media fields in [../../tests/contract/services.test.ts](../../tests/contract/services.test.ts).
-- [ ] T007 Extend service schema with optional media fields in [../../prisma/schema.prisma](../../prisma/schema.prisma).
-- [ ] T008 Create migration for media fields in [../../prisma/migrations](../../prisma/migrations).
-- [ ] T009 [P] Add optional media fixture data in [../../prisma/seed.ts](../../prisma/seed.ts).
-- [ ] T010 Extend Zod entity and API schemas in [../../src/lib/schemas/entities.ts](../../src/lib/schemas/entities.ts) and [../../src/lib/schemas/api.ts](../../src/lib/schemas/api.ts).
-- [ ] T011 Update admin service create and update endpoints in [../../src/app/api/admin/services/route.ts](../../src/app/api/admin/services/route.ts) and [../../src/app/api/admin/services/[id]/route.ts](../../src/app/api/admin/services/[id]/route.ts).
-- [ ] T011a Add upload handling path for admin media authoring and store resolved media URLs in service records.
+- [x] T006 [P] Add contract tests for media fields in [../../tests/contract/services.test.ts](../../tests/contract/services.test.ts).
+- [x] T007 Extend service schema with optional media fields in [../../prisma/schema.prisma](../../prisma/schema.prisma).
+- [x] T008 Create migration for media fields in [../../prisma/migrations](../../prisma/migrations).
+- [x] T009 [P] Add optional media fixture data in [../../prisma/seed.ts](../../prisma/seed.ts).
+- [x] T010 Extend Zod entity and API schemas in [../../src/lib/schemas/entities.ts](../../src/lib/schemas/entities.ts) and [../../src/lib/schemas/api.ts](../../src/lib/schemas/api.ts).
+- [x] T011 Update admin service create and update endpoints in [../../src/app/api/admin/services/route.ts](../../src/app/api/admin/services/route.ts) and [../../src/app/api/admin/services/[id]/route.ts](../../src/app/api/admin/services/[id]/route.ts).
+- [x] T011a Add upload handling path for admin media authoring and store resolved media URLs in service records.
 
 ## Phase 3 - Admin Authoring
 
-- [ ] T012 Add media metadata fields and validation UI in [../../src/components/admin/ServiceForm.tsx](../../src/components/admin/ServiceForm.tsx).
-- [ ] T013 Verify list and edit flow consistency in [../../src/components/admin/ServiceList.tsx](../../src/components/admin/ServiceList.tsx) and [../../src/app/admin/services/page.tsx](../../src/app/admin/services/page.tsx).
-- [ ] T014 Add admin integration coverage for valid/invalid media payloads in tests under [../../tests/integration](../../tests/integration).
-- [ ] T014a Ensure admin UX is upload-only for v1 (no direct URL entry mode).
+- [x] T012 Add media metadata fields and validation UI in [../../src/components/admin/ServiceForm.tsx](../../src/components/admin/ServiceForm.tsx).
+- [x] T013 Verify list and edit flow consistency in [../../src/components/admin/ServiceList.tsx](../../src/components/admin/ServiceList.tsx) and [../../src/app/admin/services/page.tsx](../../src/app/admin/services/page.tsx).
+- [x] T014 Add admin integration coverage for valid/invalid media payloads in tests under [../../tests/integration](../../tests/integration).
+- [x] T014a Ensure admin UX is upload-only for v1 (no direct URL entry mode).
 
 ## Phase 4 - Hero Media Rendering
 
-- [ ] T015 Add hero media rendering path on booking surfaces in [../../src/app/book/page.tsx](../../src/app/book/page.tsx) and/or [../../src/app/book/[serviceId]/page.tsx](../../src/app/book/[serviceId]/page.tsx).
-- [ ] T015a Limit hero media to per-service rendering for v1.
-- [ ] T016 Implement reusable fade-to-white styling below hero text in [../../src/app/globals.css](../../src/app/globals.css).
-- [ ] T017 Add fallback behavior for missing/failed hero media and reduced-motion behavior.
-- [ ] T017a Use neutral placeholder gradient fallback and disable autoplay/animation under reduced-motion.
+- [x] T015 Add hero media rendering path on booking surfaces in [../../src/app/book/page.tsx](../../src/app/book/page.tsx) and/or [../../src/app/book/[serviceId]/page.tsx](../../src/app/book/[serviceId]/page.tsx).
+- [x] T015a Limit hero media to per-service rendering for v1.
+- [x] T016 Implement reusable fade-to-white styling below hero text in [../../src/app/globals.css](../../src/app/globals.css).
+- [x] T017 Add fallback behavior for missing/failed hero media and reduced-motion behavior.
+- [x] T017a Use neutral placeholder gradient fallback and disable autoplay/animation under reduced-motion.
 
 ## Phase 5 - Card Banner Rendering
 
-- [ ] T018 Extend card media rendering in [../../src/components/booking/ServiceCard.tsx](../../src/components/booking/ServiceCard.tsx).
-- [ ] T019 Implement fade-to-white below service title and above details content.
-- [ ] T020 Preserve existing duration badges, pricing, and CTA behavior.
+- [x] T018 Extend card media rendering in [../../src/components/booking/ServiceCard.tsx](../../src/components/booking/ServiceCard.tsx).
+- [x] T019 Implement fade-to-white below service title and above details content.
+- [x] T020 Preserve existing duration badges, pricing, and CTA behavior.
 
 ## Phase 6 - Tests and Visual Coverage
 
-- [ ] T021 Extend component tests in [../../src/components/booking/ServiceCard.test.tsx](../../src/components/booking/ServiceCard.test.tsx).
-- [ ] T022 Add or extend booking-flow e2e assertions in [../../tests/e2e/booking-flow.spec.ts](../../tests/e2e/booking-flow.spec.ts).
-- [ ] T023 Add Storybook states (no-media, image, gif, video, reduced-motion) in [../../src/components/booking/ServiceCard.stories.tsx](../../src/components/booking/ServiceCard.stories.tsx) and related stories under [../../src/stories](../../src/stories).
-- [ ] T024 Document verification results in [quickstart.md](quickstart.md).
-- [ ] T024a Add strict media-limit validation tests for size, resolution, and video duration.
+- [x] T021 Extend component tests in [../../src/components/booking/ServiceCard.test.tsx](../../src/components/booking/ServiceCard.test.tsx).
+- [x] T022 Add or extend booking-flow e2e assertions in [../../tests/e2e/booking-flow.spec.ts](../../tests/e2e/booking-flow.spec.ts).
+- [x] T023 Add Storybook states (no-media, image, gif, video, reduced-motion) in [../../src/components/booking/ServiceCard.stories.tsx](../../src/components/booking/ServiceCard.stories.tsx) and related stories under [../../src/stories](../../src/stories).
+- [x] T024 Document verification results in [quickstart.md](quickstart.md).
+- [x] T024a Add strict media-limit validation tests for size, resolution, and video duration.
 
 ## Phase 7 - Quality Gates and Handoff
 
-- [ ] T025 Run lint/type/unit/contract/e2e/build gates.
-- [ ] T026 Capture rollout and regression evidence in [quickstart.md](quickstart.md).
-- [ ] T027 Prepare merge summary and release notes.
-- [ ] T028 Record Lighthouse baseline and verify booking-route regression is no more than 2 points.
+- [x] T025 Run lint/type/unit/contract/e2e/build gates.
+- [x] T026 Capture rollout and regression evidence in [quickstart.md](quickstart.md).
+- [x] T027 Prepare merge summary and release notes.
+- [x] T028 Record Lighthouse baseline and verify booking-route regression is no more than 2 points.
 
 ## Suggested Parallel Workstreams
 
