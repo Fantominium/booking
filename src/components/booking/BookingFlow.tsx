@@ -160,7 +160,7 @@ export const BookingFlow = ({
           <h2 className="text-lg font-semibold text-slate-950">Your details and payment choice</h2>
           <p className="text-sm text-slate-700">
             Selected treatment length: {selectedDurationMin} minutes. Session price: $
-            {(selectedPriceCents / 100).toFixed(2)}.
+            {(selectedPriceCents / 100).toFixed(0)} Bds.
           </p>
           <CheckoutForm onSubmit={handleCheckoutSubmit} />
         </section>

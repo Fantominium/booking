@@ -59,7 +59,7 @@ const ServiceBookingPage = async ({
               {service.description ?? ""}
             </p>
             <div className="text-sm font-medium text-slate-900 dark:text-slate-100">
-              {selectedOption.durationMin} minutes · ${(selectedOption.priceCents / 100).toFixed(2)}
+              {selectedOption.durationMin} minutes · ${(selectedOption.priceCents / 100).toFixed(0)} Bds
             </div>
           </div>
         </header>

@@ -44,12 +44,12 @@ describe("ServiceCard", () => {
     );
 
     expect(screen.getByRole("button", { name: "60 min" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByTestId("service-price")).toHaveTextContent("$80.00");
+    expect(screen.getByTestId("service-price")).toHaveTextContent("$80 Bds");
 
     await user.click(screen.getByRole("button", { name: "75 min" }));
 
     expect(screen.getByRole("button", { name: "75 min" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByTestId("service-price")).toHaveTextContent("$88.00");
+    expect(screen.getByTestId("service-price")).toHaveTextContent("$88 Bds");
   });
 
   it("renders custom duration badges configured by admins", async () => {
@@ -75,12 +75,12 @@ describe("ServiceCard", () => {
     );
 
     expect(screen.getByRole("button", { name: "45 min" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByTestId("service-price")).toHaveTextContent("$65.00");
+    expect(screen.getByTestId("service-price")).toHaveTextContent("$65 Bds");
 
     await user.click(screen.getByRole("button", { name: "70 min" }));
 
     expect(screen.getByRole("button", { name: "70 min" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByTestId("service-price")).toHaveTextContent("$95.00");
+    expect(screen.getByTestId("service-price")).toHaveTextContent("$95 Bds");
   });
 
   it("uses the 50/65 fixed pricing rule for 50-minute sessions", async () => {
@@ -102,12 +102,12 @@ describe("ServiceCard", () => {
     );
 
     expect(screen.getByRole("button", { name: "50 min" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByTestId("service-price")).toHaveTextContent("$150.00");
+    expect(screen.getByTestId("service-price")).toHaveTextContent("$150 Bds");
 
     await user.click(screen.getByRole("button", { name: "65 min" }));
 
     expect(screen.getByRole("button", { name: "65 min" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByTestId("service-price")).toHaveTextContent("$165.00");
+    expect(screen.getByTestId("service-price")).toHaveTextContent("$165 Bds");
   });
 
   it("renders card media when configured", () => {

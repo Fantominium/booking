@@ -93,7 +93,7 @@ export const ServiceCardOptionSelector = ({
         </div>
 
         <div className="flex items-center justify-end text-sm font-medium text-slate-800 dark:text-slate-100">
-          <span data-testid="service-price">${(selectedOption.priceCents / 100).toFixed(2)}</span>
+          <span data-testid="service-price">${(selectedOption.priceCents / 100).toFixed(0)} Bds</span>
         </div>
       </div>
 
