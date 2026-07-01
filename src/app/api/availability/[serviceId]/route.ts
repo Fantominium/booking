@@ -51,7 +51,13 @@ export const GET = async (
     return NextResponse.json({ error: "System settings missing" }, { status: 500 });
   }
 
-  const businessHours = await prisma.businessHours.findMany();
+  const businessHoursRaw = await prisma.businessHours.findMany({
+    include: { blackoutRanges: true },
+  });
+  const businessHours = businessHoursRaw.map((entry) => ({
+    ...entry,
+    blockedRanges: entry.blackoutRanges,
+  }));
   const overrides = await prisma.dateOverride.findMany();
   const requestedDuration = Number.parseInt(durationMinParam ?? "", 10);
   const selectedOption = resolveServiceDurationOption(

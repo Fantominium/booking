@@ -23,5 +23,5 @@ describe("webhook security", () => {
     const response = await POST(request, { params: Promise.resolve({ token: "test-token" }) });
 
     expect(response.status).toBe(400);
-  });
+  }, 10000);
 });

@@ -13,6 +13,14 @@ const emptyService: ServiceFormValues = {
   priceCents: 0,
   downpaymentCents: 0,
   durationPriceOptions: [{ durationMin: 60, priceCents: 0 }],
+  heroMediaType: null,
+  heroMediaUrl: null,
+  heroMediaAltText: "",
+  heroPosterUrl: null,
+  cardMediaType: null,
+  cardMediaUrl: null,
+  cardMediaAltText: "",
+  isDecorative: false,
   isActive: true,
 };
 

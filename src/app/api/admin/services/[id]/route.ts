@@ -4,28 +4,13 @@ import { z } from "zod";
 
 import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
+import { updateAdminServiceRequestSchema } from "@/lib/schemas/api";
 
 export const dynamic = "force-dynamic";
 
 type RouteParams = {
   params: Promise<{ id: string }>;
 };
-
-const durationPriceOptionSchema = z.object({
-  durationMin: z.number().int().positive(),
-  priceCents: z.number().int().nonnegative(),
-});
-
-const updateServiceSchema = z.object({
-  name: z.string().min(1).max(255).optional(),
-  description: z.string().max(5000).nullable().optional(),
-  offeringType: z.enum(["SESSION", "EVENT", "RENTAL"]).optional(),
-  durationMin: z.number().int().positive().optional(),
-  priceCents: z.number().int().nonnegative().optional(),
-  downpaymentCents: z.number().int().nonnegative().optional(),
-  durationPriceOptions: z.array(durationPriceOptionSchema).max(10).optional().nullable(),
-  isActive: z.boolean().optional(),
-});
 
 const validatePricing = (params: { priceCents: number; downpaymentCents: number }): boolean => {
   return params.downpaymentCents <= params.priceCents;
@@ -38,27 +23,13 @@ export const PATCH = async (request: Request, { params }: RouteParams): Promise<
 
   const { id } = await params;
   const body = await request.json();
-  const parsed = updateServiceSchema.safeParse(body);
+  const parsed = updateAdminServiceRequestSchema.safeParse(body);
 
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
-  }
-
-  if (parsed.data.durationPriceOptions) {
-    const uniqueDurations = new Set(
-      parsed.data.durationPriceOptions.map((option) => option.durationMin),
+    return NextResponse.json(
+      { error: "Invalid request", issues: z.flattenError(parsed.error) },
+      { status: 400 },
     );
-
-    if (uniqueDurations.size !== parsed.data.durationPriceOptions.length) {
-      return NextResponse.json({ error: "Duration options must be unique" }, { status: 400 });
-    }
-
-    if (parsed.data.durationPriceOptions.length === 0) {
-      return NextResponse.json(
-        { error: "At least one duration option is required" },
-        { status: 400 },
-      );
-    }
   }
 
   const existing = await prisma.service.findUnique({
@@ -76,17 +47,53 @@ export const PATCH = async (request: Request, { params }: RouteParams): Promise<
     return NextResponse.json({ error: "Downpayment cannot exceed price" }, { status: 400 });
   }
 
-  const data: Prisma.ServiceUpdateInput = {
-    ...(parsed.data.name !== undefined ? { name: parsed.data.name } : {}),
-    ...(parsed.data.description !== undefined ? { description: parsed.data.description } : {}),
-    ...(parsed.data.offeringType !== undefined ? { offeringType: parsed.data.offeringType } : {}),
-    ...(parsed.data.durationMin !== undefined ? { durationMin: parsed.data.durationMin } : {}),
-    ...(parsed.data.priceCents !== undefined ? { priceCents: parsed.data.priceCents } : {}),
-    ...(parsed.data.downpaymentCents !== undefined
-      ? { downpaymentCents: parsed.data.downpaymentCents }
-      : {}),
-    ...(parsed.data.isActive !== undefined ? { isActive: parsed.data.isActive } : {}),
-  };
+  const data: Prisma.ServiceUpdateInput = {};
+
+  if (parsed.data.name !== undefined) {
+    data.name = parsed.data.name;
+  }
+  if (parsed.data.description !== undefined) {
+    data.description = parsed.data.description;
+  }
+  if (parsed.data.offeringType !== undefined) {
+    data.offeringType = parsed.data.offeringType;
+  }
+  if (parsed.data.durationMin !== undefined) {
+    data.durationMin = parsed.data.durationMin;
+  }
+  if (parsed.data.priceCents !== undefined) {
+    data.priceCents = parsed.data.priceCents;
+  }
+  if (parsed.data.downpaymentCents !== undefined) {
+    data.downpaymentCents = parsed.data.downpaymentCents;
+  }
+  if (parsed.data.heroMediaType !== undefined) {
+    data.heroMediaType = parsed.data.heroMediaType;
+  }
+  if (parsed.data.heroMediaUrl !== undefined) {
+    data.heroMediaUrl = parsed.data.heroMediaUrl;
+  }
+  if (parsed.data.heroMediaAltText !== undefined) {
+    data.heroMediaAltText = parsed.data.heroMediaAltText;
+  }
+  if (parsed.data.heroPosterUrl !== undefined) {
+    data.heroPosterUrl = parsed.data.heroPosterUrl;
+  }
+  if (parsed.data.cardMediaType !== undefined) {
+    data.cardMediaType = parsed.data.cardMediaType;
+  }
+  if (parsed.data.cardMediaUrl !== undefined) {
+    data.cardMediaUrl = parsed.data.cardMediaUrl;
+  }
+  if (parsed.data.cardMediaAltText !== undefined) {
+    data.cardMediaAltText = parsed.data.cardMediaAltText;
+  }
+  if (parsed.data.isDecorative !== undefined) {
+    data.isDecorative = parsed.data.isDecorative;
+  }
+  if (parsed.data.isActive !== undefined) {
+    data.isActive = parsed.data.isActive;
+  }
 
   if (parsed.data.durationPriceOptions !== undefined) {
     data.durationPriceOptions =

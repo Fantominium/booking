@@ -18,7 +18,14 @@ test.describe("Customer Booking Flow", () => {
     await page.locator("[data-testid='service-card'] a").first().click();
     await expect(page.getByText("Select a date")).toBeVisible();
 
-    await page.locator("[data-testid='available-date']").first().click();
+    const dateInput = page.locator("[data-testid='date-input']");
+    await expect(dateInput).toBeEnabled();
+    const firstAvailableDate = await dateInput.getAttribute("min");
+    if (!firstAvailableDate) {
+      throw new Error("Expected at least one available booking date");
+    }
+    await dateInput.fill(firstAvailableDate);
+
     await page.locator("[data-testid='time-slot']").first().click();
 
     await page.fill("input[name='customerName']", "Jordan Doe");
@@ -30,5 +37,36 @@ test.describe("Customer Booking Flow", () => {
     await expect(page).toHaveURL(/\/book\/success/);
     await expect(page.getByText(/bank transfer instructions/i)).toBeVisible();
     await expect(page.getByText(/pending payment state/i)).toBeVisible();
+  });
+
+  test("service booking page renders hero media container and fade", async ({ page }) => {
+    await page.goto("/book?type=SESSION");
+
+    const deepTissueCard = page
+      .locator("[data-testid='service-card']")
+      .filter({ hasText: "Deep Tissue Massage" });
+    await deepTissueCard.locator("a").click();
+
+    await expect(page.locator("[data-testid='service-hero-media']")).toBeVisible();
+    await expect(page.locator(".hero-media-fade")).toBeVisible();
+  });
+
+  test("reduced motion disables animated media rendering", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/book?type=SESSION");
+
+    const deepTissueCard = page
+      .locator("[data-testid='service-card']")
+      .filter({ hasText: "Deep Tissue Massage" });
+
+    const cardMediaTag = await deepTissueCard
+      .locator("[data-testid='service-card-media']")
+      .evaluate((node) => node.tagName);
+    expect(cardMediaTag).toBe("DIV");
+
+    await deepTissueCard.locator("a").click();
+
+    await expect(page.locator("video[data-testid='service-hero-media']")).toHaveCount(0);
+    await expect(page.locator("[data-testid='service-hero-media']")).toBeVisible();
   });
 });

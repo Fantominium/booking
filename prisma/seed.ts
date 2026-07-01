@@ -6,100 +6,153 @@ const prisma = new PrismaClient();
 const buildTime = (time: string): Date => new Date(`1970-01-01T${time}:00.000Z`);
 
 const seed = async (): Promise<void> => {
+  // Clear all existing services (no bookings in dev/seed environment)
+  // Clear dependent records first, then services
+  await prisma.paymentAuditLog.deleteMany({});
+  await prisma.booking.deleteMany({});
+  await prisma.service.deleteMany({});
+
+  // Studio Rates
+  // Swedish Massage – Studio: 60 min $150 Bds, 90 min $180 Bds
+  // Deep Tissue Massage – Studio: 60 min $160 Bds, 90 min $190 Bds
+  // Sports Massage – Studio: 60 min $180 Bds, 90 min $210 Bds
+  // Thai Massage – Studio: 60 min $180 Bds, 90 min $210 Bds
+  // Back, Neck & Shoulder Massage – Studio: 45 min $100 Bds
+  //
+  // Mobile Massage Rates (House Calls)
+  // Swedish Massage – Mobile: 60 min $200 Bds, 90 min $230 Bds
+  // Deep Tissue Massage – Mobile: 60 min $210 Bds, 90 min $240 Bds
+  // Sports Massage – Mobile: 60 min $230 Bds, 90 min $260 Bds
+  // Thai Massage – Mobile: 60 min $230 Bds, 90 min $260 Bds
+  // Back, Neck & Shoulder Massage – Mobile: 45 min $150 Bds
+
   await prisma.service.createMany({
     data: [
-      // Popular Massage Therapies (Top 8)
+      // ── Studio Rates ──────────────────────────────────────────
       {
-        name: "Swedish Massage",
+        name: "Swedish Massage – Studio",
         description:
           "Classic relaxation massage using long gliding strokes to improve circulation and reduce muscle tension.",
         offeringType: "SESSION",
         durationMin: 60,
-        priceCents: 7500,
-        downpaymentCents: 1875,
+        priceCents: 15000,
+        downpaymentCents: 3750,
+        durationPriceOptions: [
+          { durationMin: 60, priceCents: 15000 },
+          { durationMin: 90, priceCents: 18000 },
+        ],
       },
       {
-        name: "Deep Tissue Massage",
+        name: "Deep Tissue Massage – Studio",
         description:
-          "Focused bodywork session targeting deeper muscle layers for intense relief and recovery.",
+          "Focused bodywork targeting deeper muscle layers for intense relief and recovery.",
         offeringType: "SESSION",
         durationMin: 60,
-        priceCents: 8500,
-        downpaymentCents: 2125,
+        priceCents: 16000,
+        downpaymentCents: 4000,
+        durationPriceOptions: [
+          { durationMin: 60, priceCents: 16000 },
+          { durationMin: 90, priceCents: 19000 },
+        ],
       },
       {
-        name: "Hot Stone Massage",
-        description:
-          "Therapeutic massage using heated stones to relieve tension, improve circulation, and promote relaxation.",
-        offeringType: "SESSION",
-        durationMin: 60,
-        priceCents: 9500,
-        downpaymentCents: 2375,
-      },
-      {
-        name: "Thai Massage",
-        description:
-          "Ancient healing art combining acupressure, energy balancing, and guided stretching for deep restoration.",
-        offeringType: "SESSION",
-        durationMin: 90,
-        priceCents: 10000,
-        downpaymentCents: 2500,
-      },
-      {
-        name: "Reflexology",
-        description:
-          "Specialized foot therapy stimulating pressure points to enhance wellness and promote natural healing.",
-        offeringType: "SESSION",
-        durationMin: 45,
-        priceCents: 6000,
-        downpaymentCents: 1500,
-      },
-      {
-        name: "Sports Massage",
+        name: "Sports Massage – Studio",
         description:
           "Performance-focused therapy designed to enhance athletic recovery and prevent injuries.",
         offeringType: "SESSION",
         durationMin: 60,
-        priceCents: 8000,
-        downpaymentCents: 2000,
-      },
-      {
-        name: "Prenatal Massage",
-        description:
-          "Gentle, specialized massage designed for pregnancy comfort and relief of tension and discomfort.",
-        offeringType: "SESSION",
-        durationMin: 60,
-        priceCents: 8000,
-        downpaymentCents: 2000,
-      },
-      {
-        name: "Aromatherapy Relaxation Massage",
-        description:
-          "Soothing massage infused with essential oils to promote deep relaxation and emotional wellness.",
-        offeringType: "SESSION",
-        durationMin: 50,
-        priceCents: 7000,
-        downpaymentCents: 1750,
-      },
-      // Additional group and rental options
-      {
-        name: "Wellness Circle Event",
-        description: "Small-group guided recovery event for teams and communities.",
-        offeringType: "EVENT",
-        durationMin: 90,
         priceCents: 18000,
         downpaymentCents: 4500,
+        durationPriceOptions: [
+          { durationMin: 60, priceCents: 18000 },
+          { durationMin: 90, priceCents: 21000 },
+        ],
       },
       {
-        name: "Recovery Studio Rental",
-        description: "Private space rental for guided recovery, breathwork, or self-led sessions.",
-        offeringType: "RENTAL",
-        durationMin: 120,
-        priceCents: 14000,
-        downpaymentCents: 3500,
+        name: "Thai Massage – Studio",
+        description:
+          "Ancient healing art combining acupressure, energy balancing, and guided stretching for deep restoration.",
+        offeringType: "SESSION",
+        durationMin: 60,
+        priceCents: 18000,
+        downpaymentCents: 4500,
+        durationPriceOptions: [
+          { durationMin: 60, priceCents: 18000 },
+          { durationMin: 90, priceCents: 21000 },
+        ],
+      },
+      {
+        name: "Back, Neck & Shoulder Massage – Studio",
+        description:
+          "Targeted relief massage focusing on common tension areas in the back, neck, and shoulders.",
+        offeringType: "SESSION",
+        durationMin: 45,
+        priceCents: 10000,
+        downpaymentCents: 2500,
+      },
+      // ── Mobile Massage Rates (House Calls) ────────────────────
+      {
+        name: "Swedish Massage – Mobile",
+        description:
+          "Classic relaxation massage brought to you at home, using long gliding strokes to improve circulation and reduce muscle tension.",
+        offeringType: "SESSION",
+        durationMin: 60,
+        priceCents: 20000,
+        downpaymentCents: 5000,
+        durationPriceOptions: [
+          { durationMin: 60, priceCents: 20000 },
+          { durationMin: 90, priceCents: 23000 },
+        ],
+      },
+      {
+        name: "Deep Tissue Massage – Mobile",
+        description:
+          "Focused deep muscle bodywork delivered at your location for intense relief and recovery.",
+        offeringType: "SESSION",
+        durationMin: 60,
+        priceCents: 21000,
+        downpaymentCents: 5250,
+        durationPriceOptions: [
+          { durationMin: 60, priceCents: 21000 },
+          { durationMin: 90, priceCents: 24000 },
+        ],
+      },
+      {
+        name: "Sports Massage – Mobile",
+        description:
+          "Performance-focused athletic recovery therapy delivered at your location.",
+        offeringType: "SESSION",
+        durationMin: 60,
+        priceCents: 23000,
+        downpaymentCents: 5750,
+        durationPriceOptions: [
+          { durationMin: 60, priceCents: 23000 },
+          { durationMin: 90, priceCents: 26000 },
+        ],
+      },
+      {
+        name: "Thai Massage – Mobile",
+        description:
+          "Ancient acupressure, energy balancing, and guided stretching brought to your home.",
+        offeringType: "SESSION",
+        durationMin: 60,
+        priceCents: 23000,
+        downpaymentCents: 5750,
+        durationPriceOptions: [
+          { durationMin: 60, priceCents: 23000 },
+          { durationMin: 90, priceCents: 26000 },
+        ],
+      },
+      {
+        name: "Back, Neck & Shoulder Massage – Mobile",
+        description:
+          "Targeted relief massage focusing on common tension areas, delivered at your location.",
+        offeringType: "SESSION",
+        durationMin: 45,
+        priceCents: 15000,
+        downpaymentCents: 3750,
       },
     ],
-    skipDuplicates: true,
   });
 
   await prisma.businessHours.createMany({

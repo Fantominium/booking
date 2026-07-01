@@ -62,7 +62,7 @@ describe("useBreadcrumbs", () => {
     expect(result.current?.[2]).toMatchObject({
       label: "Session",
       current: true,
-      icon: "book",
+      icon: "calendar",
     });
   });
 
@@ -112,7 +112,7 @@ describe("useBreadcrumbs", () => {
 
     expect(result.current?.[0].icon).toBe("home");
     expect(result.current?.[1].icon).toBe("book");
-    expect(result.current?.[2].icon).toBe("book");
+    expect(result.current?.[2].icon).toBe("calendar");
   });
 
   it("uses checkmark icon for confirmation page", () => {

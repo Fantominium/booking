@@ -23,6 +23,14 @@ const mapServiceToForm = (service: Service): ServiceFormValues => ({
     service.durationPriceOptions && service.durationPriceOptions.length > 0
       ? service.durationPriceOptions
       : [{ durationMin: service.durationMin, priceCents: service.priceCents }],
+  heroMediaType: service.heroMediaType ?? null,
+  heroMediaUrl: service.heroMediaUrl ?? null,
+  heroMediaAltText: service.heroMediaAltText ?? "",
+  heroPosterUrl: service.heroPosterUrl ?? null,
+  cardMediaType: service.cardMediaType ?? null,
+  cardMediaUrl: service.cardMediaUrl ?? null,
+  cardMediaAltText: service.cardMediaAltText ?? "",
+  isDecorative: service.isDecorative ?? false,
   isActive: service.isActive,
 });
 

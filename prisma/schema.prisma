@@ -26,6 +26,16 @@ enum OfferingType {
   RENTAL
 }
 
+enum HeroMediaType {
+  IMAGE
+  VIDEO
+}
+
+enum CardMediaType {
+  IMAGE
+  GIF
+}
+
 enum PaymentMethod {
   CARD
   BANK_TRANSFER
@@ -71,17 +81,25 @@ enum EmailDeliveryStatus {
 }
 
 model Service {
-  id               String    @id @default(uuid())
-  name             String    @unique
-  description      String?
-  offeringType     OfferingType @default(SESSION) @map("offering_type")
-  durationMin      Int
-  priceCents       Int
-  downpaymentCents Int
-  durationPriceOptions Json? @map("duration_price_options")
-  isActive         Boolean   @default(true)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  id                   String        @id @default(uuid())
+  name                 String        @unique
+  description          String?
+  offeringType         OfferingType  @default(SESSION) @map("offering_type")
+  durationMin          Int
+  priceCents           Int
+  downpaymentCents     Int
+  durationPriceOptions Json?         @map("duration_price_options")
+  heroMediaType        HeroMediaType? @map("hero_media_type")
+  heroMediaUrl         String?       @map("hero_media_url")
+  heroMediaAltText     String?       @map("hero_media_alt_text")
+  heroPosterUrl        String?       @map("hero_poster_url")
+  cardMediaType        CardMediaType? @map("card_media_type")
+  cardMediaUrl         String?       @map("card_media_url")
+  cardMediaAltText     String?       @map("card_media_alt_text")
+  isDecorative         Boolean?      @map("is_decorative")
+  isActive             Boolean       @default(true)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
 
   bookings Booking[]
 
