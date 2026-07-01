@@ -17,7 +17,9 @@ const validatePricing = (params: { priceCents: number; downpaymentCents: number 
 };
 
 type ExistingService = Awaited<ReturnType<typeof prisma.service.findUniqueOrThrow>>;
-type ParsedUpdate = NonNullable<ReturnType<typeof updateAdminServiceRequestSchema.safeParse>["data"]>;
+type ParsedUpdate = NonNullable<
+  ReturnType<typeof updateAdminServiceRequestSchema.safeParse>["data"]
+>;
 
 /** Merge the request payload with the stored record and validate media invariants. */
 const validateMergedMedia = (
@@ -25,14 +27,26 @@ const validateMergedMedia = (
   incoming: ParsedUpdate,
 ): ReturnType<typeof serviceMediaMetadataSchema.safeParse> => {
   const merged = {
-    heroMediaType: incoming.heroMediaType !== undefined ? incoming.heroMediaType : existing.heroMediaType,
-    heroMediaUrl: incoming.heroMediaUrl !== undefined ? incoming.heroMediaUrl : existing.heroMediaUrl,
-    heroMediaAltText: incoming.heroMediaAltText !== undefined ? incoming.heroMediaAltText : existing.heroMediaAltText,
-    heroPosterUrl: incoming.heroPosterUrl !== undefined ? incoming.heroPosterUrl : existing.heroPosterUrl,
-    cardMediaType: incoming.cardMediaType !== undefined ? incoming.cardMediaType : existing.cardMediaType,
-    cardMediaUrl: incoming.cardMediaUrl !== undefined ? incoming.cardMediaUrl : existing.cardMediaUrl,
-    cardMediaAltText: incoming.cardMediaAltText !== undefined ? incoming.cardMediaAltText : existing.cardMediaAltText,
-    isDecorative: incoming.isDecorative !== undefined ? incoming.isDecorative : existing.isDecorative,
+    heroMediaType:
+      incoming.heroMediaType !== undefined ? incoming.heroMediaType : existing.heroMediaType,
+    heroMediaUrl:
+      incoming.heroMediaUrl !== undefined ? incoming.heroMediaUrl : existing.heroMediaUrl,
+    heroMediaAltText:
+      incoming.heroMediaAltText !== undefined
+        ? incoming.heroMediaAltText
+        : existing.heroMediaAltText,
+    heroPosterUrl:
+      incoming.heroPosterUrl !== undefined ? incoming.heroPosterUrl : existing.heroPosterUrl,
+    cardMediaType:
+      incoming.cardMediaType !== undefined ? incoming.cardMediaType : existing.cardMediaType,
+    cardMediaUrl:
+      incoming.cardMediaUrl !== undefined ? incoming.cardMediaUrl : existing.cardMediaUrl,
+    cardMediaAltText:
+      incoming.cardMediaAltText !== undefined
+        ? incoming.cardMediaAltText
+        : existing.cardMediaAltText,
+    isDecorative:
+      incoming.isDecorative !== undefined ? incoming.isDecorative : existing.isDecorative,
   };
   return serviceMediaMetadataSchema.safeParse(merged);
 };
