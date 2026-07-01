@@ -89,7 +89,7 @@ const serviceSchema: z.ZodTypeAny = z
   .superRefine((value, context) => {
     if (value.heroMediaUrl && !value.heroMediaType) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ["heroMediaType"],
         message: "Hero media type is required",
       });
@@ -97,7 +97,7 @@ const serviceSchema: z.ZodTypeAny = z
 
     if (value.cardMediaUrl && !value.cardMediaType) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ["cardMediaType"],
         message: "Card media type is required",
       });
@@ -105,7 +105,7 @@ const serviceSchema: z.ZodTypeAny = z
 
     if (value.heroMediaType === "VIDEO" && value.heroMediaUrl && !value.heroPosterUrl) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ["heroPosterUrl"],
         message: "Hero video requires a poster image",
       });
@@ -113,7 +113,7 @@ const serviceSchema: z.ZodTypeAny = z
 
     if (value.heroMediaUrl && !value.isDecorative && value.heroMediaAltText.trim().length === 0) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ["heroMediaAltText"],
         message: "Hero alt text is required unless decorative",
       });
@@ -121,7 +121,7 @@ const serviceSchema: z.ZodTypeAny = z
 
     if (value.cardMediaUrl && !value.isDecorative && value.cardMediaAltText.trim().length === 0) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ["cardMediaAltText"],
         message: "Card alt text is required unless decorative",
       });
@@ -431,8 +431,8 @@ export const ServiceForm = ({
 
       extractMetadata(file, {
         onSuccess: (metadata) => {
-          void uploadWithMetadata(slot, file, metadata).catch((uploadFailure) => {
-            console.error(uploadFailure);
+          void uploadWithMetadata(slot, file, metadata).catch((error_) => {
+            console.error(error_);
             setUploadError("Unable to upload media.");
             setUploadingSlot(null);
           });

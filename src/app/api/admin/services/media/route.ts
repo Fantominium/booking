@@ -1,6 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+
+import sharp from "sharp";
+
+import { mkdir, writeFile } from "@/lib/fs";
 
 import { NextResponse } from "next/server";
 
@@ -112,6 +115,27 @@ const getExtensionFromFile = (file: File): string => {
   return expectedExtension;
 };
 
+/**
+ * For images (non-video, non-GIF) we extract actual dimensions from the buffer
+ * using sharp so that client-provided metadata cannot be spoofed to bypass the
+ * resolution limits. For video uploads, server-side frame extraction requires an
+ * ffprobe binary that is out of scope for this deployment; the file-size limit
+ * acts as the primary server-enforced control there.
+ */
+const extractImageDimensions = async (
+  buffer: Buffer,
+): Promise<{ width: number; height: number } | null> => {
+  try {
+    const metadata = await sharp(buffer).metadata();
+    if (metadata.width && metadata.height) {
+      return { width: metadata.width, height: metadata.height };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
 export const POST = async (request: Request): Promise<NextResponse> => {
   if (!(await getAdminSession())) {
     return createAdminUnauthorizedResponse();
@@ -142,8 +166,8 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     );
   }
 
-  const width = parsePositiveNumber(formData.get("width"));
-  const height = parsePositiveNumber(formData.get("height"));
+  let width = parsePositiveNumber(formData.get("width"));
+  let height = parsePositiveNumber(formData.get("height"));
   const durationSeconds = parsePositiveNumber(formData.get("durationSeconds"));
 
   if (!width || !height) {
@@ -173,15 +197,38 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     }
   }
 
-  await mkdir(UPLOAD_DIRECTORY, { recursive: true });
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  // For image uploads, extract actual dimensions server-side so that
+  // client-provided metadata cannot bypass the resolution limits.
+  if (mediaType !== "VIDEO") {
+    const actual = await extractImageDimensions(buffer);
+    if (!actual) {
+      return NextResponse.json({ error: "Unable to read media dimensions" }, { status: 400 });
+    }
+    if (actual.width > MAX_MEDIA_WIDTH || actual.height > MAX_MEDIA_HEIGHT) {
+      return NextResponse.json(
+        { error: `Media resolution exceeds ${MAX_MEDIA_WIDTH}x${MAX_MEDIA_HEIGHT}` },
+        { status: 400 },
+      );
+    }
+    // Overwrite client-supplied values with server-extracted truth.
+    width = actual.width;
+    height = actual.height;
+  }
 
   const extension = getExtensionFromFile(file);
   const filename = `${slot}-${randomUUID()}.${extension}`;
   const fullPath = path.join(UPLOAD_DIRECTORY, filename);
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  // eslint-disable-next-line security/detect-non-literal-fs-filename
-  await writeFile(fullPath, buffer);
+  try {
+    await mkdir(UPLOAD_DIRECTORY, { recursive: true });
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    await writeFile(fullPath, buffer);
+  } catch (error_) {
+    console.error("Media file write failed", error_);
+    return NextResponse.json({ error: "Failed to store uploaded file" }, { status: 500 });
+  }
 
   const url = `/uploads/service-media/${filename}`;
 
