@@ -28,8 +28,8 @@ const Home = (): JSX.Element => {
                 Reserve the right TruFlow experience without broken journeys.
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-slate-100">
-                Start with a guided session, a hosted event, or a rental booking. Every route leads to
-                availability, customer details, and a final payment choice.
+                Start with a guided session, a hosted event, or a rental booking. Every route leads
+                to availability, customer details, and a final payment choice.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row">
                 <Link
@@ -78,41 +78,41 @@ const Home = (): JSX.Element => {
       </section>
 
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 py-12 md:grid-cols-3">
-          <div className="dark:bg-surface-elevated dark:ring-border rounded-2xl bg-blue-50 p-6 text-center dark:ring-1">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-200 dark:bg-blue-300">
-              <span className="text-2xl">📅</span>
-            </div>
-            <h3 className="dark:text-foreground mb-2 font-semibold text-blue-950">
-              Reachable journeys
-            </h3>
-            <p className="dark:text-foreground text-sm leading-6 text-blue-900">
-              Every public CTA takes you into a complete flow with valid next steps.
-            </p>
+        <div className="dark:bg-surface-elevated dark:ring-border rounded-2xl bg-blue-50 p-6 text-center dark:ring-1">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-200 dark:bg-blue-300">
+            <span className="text-2xl">📅</span>
           </div>
+          <h3 className="dark:text-foreground mb-2 font-semibold text-blue-950">
+            Reachable journeys
+          </h3>
+          <p className="dark:text-foreground text-sm leading-6 text-blue-900">
+            Every public CTA takes you into a complete flow with valid next steps.
+          </p>
+        </div>
 
-          <div className="bg-gold-50 dark:bg-surface-elevated dark:ring-border rounded-2xl p-6 text-center dark:ring-1">
-            <div className="bg-gold-200 dark:bg-gold-300 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg">
-              <span className="text-2xl">💳</span>
-            </div>
-            <h3 className="text-gold-900 dark:text-foreground mb-2 font-semibold">
-              Clear payment choices
-            </h3>
-            <p className="text-gold-900 dark:text-foreground text-sm leading-6">
-              Card deposits and bank transfer reservations are explained before you commit.
-            </p>
+        <div className="bg-gold-50 dark:bg-surface-elevated dark:ring-border rounded-2xl p-6 text-center dark:ring-1">
+          <div className="bg-gold-200 dark:bg-gold-300 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg">
+            <span className="text-2xl">💳</span>
           </div>
+          <h3 className="text-gold-900 dark:text-foreground mb-2 font-semibold">
+            Clear payment choices
+          </h3>
+          <p className="text-gold-900 dark:text-foreground text-sm leading-6">
+            Card deposits and bank transfer reservations are explained before you commit.
+          </p>
+        </div>
 
-          <div className="dark:bg-surface-elevated dark:ring-border rounded-2xl bg-green-50 p-6 text-center dark:ring-1">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-200 dark:bg-green-300">
-              <span className="text-2xl">✨</span>
-            </div>
-            <h3 className="dark:text-foreground mb-2 font-semibold text-green-950">
-              Operational admin tools
-            </h3>
-            <p className="dark:text-foreground text-sm leading-6 text-green-900">
-              Services, availability, emergency blocks, and payment states stay manageable.
-            </p>
+        <div className="dark:bg-surface-elevated dark:ring-border rounded-2xl bg-green-50 p-6 text-center dark:ring-1">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-200 dark:bg-green-300">
+            <span className="text-2xl">✨</span>
           </div>
+          <h3 className="dark:text-foreground mb-2 font-semibold text-green-950">
+            Operational admin tools
+          </h3>
+          <p className="dark:text-foreground text-sm leading-6 text-green-900">
+            Services, availability, emergency blocks, and payment states stay manageable.
+          </p>
+        </div>
       </div>
     </div>
   );
