@@ -2,71 +2,82 @@ import Link from "next/link";
 
 const Home = (): JSX.Element => {
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(186,230,253,0.28),transparent_45%),linear-gradient(180deg,#fdfefe_0%,#f5f7fb_100%)] dark:bg-[radial-gradient(circle_at_top,rgba(144,202,249,0.14),transparent_45%),linear-gradient(180deg,#121212_0%,#171717_100%)]">
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl flex-col justify-center gap-12 px-6 py-12">
-        <div className="grid gap-8 lg:grid-cols-[1.3fr_0.9fr] lg:items-end">
-          <div className="space-y-5">
-            <p className="text-sm font-semibold tracking-[0.2em] text-slate-600 uppercase dark:text-slate-300">
-              TruFlow booking platform
-            </p>
-            <h1 className="max-w-3xl text-5xl font-bold tracking-tight text-slate-950 sm:text-6xl dark:text-white">
-              Reserve the right TruFlow experience without broken journeys.
-            </h1>
-            <p className="max-w-2xl text-lg leading-8 text-slate-700 dark:text-slate-200">
-              Start with a guided session, a hosted event, or a rental booking. Every route leads to
-              availability, customer details, and a final payment choice.
-            </p>
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="/book"
-                className="flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:bg-slate-800 focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 focus:outline-none dark:bg-blue-300 dark:text-slate-950 dark:hover:bg-blue-200 dark:focus:ring-blue-300"
-              >
-                View all offerings
-              </Link>
+    <div className="min-h-screen bg-slate-950">
+      <section className="relative isolate overflow-hidden">
+        <video
+          className="hero-background-video absolute inset-0 -z-20 h-full w-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+          aria-hidden="true"
+        >
+          <source src="/uploads/hero-background.mp4" type="video/mp4" />
+        </video>
+        <div
+          className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(2,6,23,0.9)_0%,rgba(2,6,23,0.68)_48%,rgba(2,6,23,0.28)_100%)]"
+          aria-hidden="true"
+        />
+        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl flex-col justify-center px-6 py-16">
+          <div className="grid gap-8 lg:grid-cols-[1.3fr_0.9fr] lg:items-end">
+            <div className="space-y-5">
+              <p className="text-sm font-semibold tracking-[0.2em] text-slate-200 uppercase">
+                TruFlow booking platform
+              </p>
+              <h1 className="max-w-3xl text-5xl font-bold tracking-tight text-white sm:text-6xl">
+                Reserve the right TruFlow experience without broken journeys.
+              </h1>
+              <p className="max-w-2xl text-lg leading-8 text-slate-100">
+                Start with a guided session, a hosted event, or a rental booking. Every route leads to
+                availability, customer details, and a final payment choice.
+              </p>
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <Link
+                  href="/book"
+                  className="flex min-h-11 items-center justify-center rounded-xl bg-white px-8 py-4 text-lg font-semibold text-slate-950 shadow-lg transition hover:bg-slate-100 focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-950 focus:outline-none"
+                >
+                  View all offerings
+                </Link>
+              </div>
             </div>
-          </div>
 
-          <div className="rounded-4xl border border-slate-200 bg-white/90 p-6 shadow-xl backdrop-blur dark:border-slate-700 dark:bg-slate-900/90">
-            <h2 className="text-xl font-semibold text-slate-950 dark:text-white">Quick paths</h2>
-            <div className="mt-4 grid gap-3">
-              <Link
-                href="/book?type=SESSION"
-                className="rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
-              >
-                <span className="block text-sm font-semibold text-slate-950 dark:text-white">
-                  Book a session
-                </span>
-                <span className="mt-1 block text-sm leading-6 text-slate-700 dark:text-slate-200">
-                  One-to-one appointments with secure deposit or bank transfer.
-                </span>
-              </Link>
-              <Link
-                href="/book?type=EVENT"
-                className="rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
-              >
-                <span className="block text-sm font-semibold text-slate-950 dark:text-white">
-                  Reserve an event
-                </span>
-                <span className="mt-1 block text-sm leading-6 text-slate-700 dark:text-slate-200">
-                  Hosted group experiences with clear availability and payment steps.
-                </span>
-              </Link>
-              <Link
-                href="/book?type=RENTAL"
-                className="rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
-              >
-                <span className="block text-sm font-semibold text-slate-950 dark:text-white">
-                  Reserve a rental
-                </span>
-                <span className="mt-1 block text-sm leading-6 text-slate-700 dark:text-slate-200">
-                  Private space reservations with booking confirmation and transfer references.
-                </span>
-              </Link>
+            <div className="rounded-4xl border border-white/30 bg-slate-950/65 p-6 shadow-xl backdrop-blur-sm">
+              <h2 className="text-xl font-semibold text-white">Quick paths</h2>
+              <div className="mt-4 grid gap-3">
+                <Link
+                  href="/book?type=SESSION"
+                  className="rounded-2xl border border-white/25 px-4 py-4 text-left transition hover:bg-white/10 focus:ring-2 focus:ring-white focus:outline-none"
+                >
+                  <span className="block text-sm font-semibold text-white">Book a session</span>
+                  <span className="mt-1 block text-sm leading-6 text-slate-200">
+                    One-to-one appointments with secure deposit or bank transfer.
+                  </span>
+                </Link>
+                <Link
+                  href="/book?type=EVENT"
+                  className="rounded-2xl border border-white/25 px-4 py-4 text-left transition hover:bg-white/10 focus:ring-2 focus:ring-white focus:outline-none"
+                >
+                  <span className="block text-sm font-semibold text-white">Reserve an event</span>
+                  <span className="mt-1 block text-sm leading-6 text-slate-200">
+                    Hosted group experiences with clear availability and payment steps.
+                  </span>
+                </Link>
+                <Link
+                  href="/book?type=RENTAL"
+                  className="rounded-2xl border border-white/25 px-4 py-4 text-left transition hover:bg-white/10 focus:ring-2 focus:ring-white focus:outline-none"
+                >
+                  <span className="block text-sm font-semibold text-white">Reserve a rental</span>
+                  <span className="mt-1 block text-sm leading-6 text-slate-200">
+                    Private space reservations with booking confirmation and transfer references.
+                  </span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
+      </section>
 
-        <div className="grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 py-12 md:grid-cols-3">
           <div className="dark:bg-surface-elevated dark:ring-border rounded-2xl bg-blue-50 p-6 text-center dark:ring-1">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-200 dark:bg-blue-300">
               <span className="text-2xl">📅</span>
@@ -102,7 +113,6 @@ const Home = (): JSX.Element => {
               Services, availability, emergency blocks, and payment states stay manageable.
             </p>
           </div>
-        </div>
       </div>
     </div>
   );

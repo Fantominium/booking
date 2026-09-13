@@ -1,6 +1,6 @@
 # Technical Definition of Done (DoD)
 
-Derived from `bookings/.specify/memory/constitution.md` (v1.6.0).
+Derived from `bookings/.specify/memory/constitution.md` (v2.1.0).
 
 A work item is Done only when **all** gates below are satisfied.
 
@@ -52,6 +52,9 @@ A work item is Done only when **all** gates below are satisfied.
 - [ ] **Orchestration:** Liveness/Readiness probes and resource limits (CPU/Mem) are defined.
 - [ ] Containerised runtime verification confirms the web app, worker, and required backing services operate together for the relevant environment.
 - [ ] User-facing errors are sanitized, minimally informative, and free of secrets or sensitive operational detail.
+- [ ] Change-safety review identifies affected contracts and critical user journeys; targeted and risk-appropriate regression checks pass with no known change-introduced regressions or inaccessible application paths.
+- [ ] Secure-by-design review verifies secure defaults, least privilege, input validation, secret protection, sanitized errors, and required security checks at changed boundaries.
+- [ ] Every error introduced during implementation or validation is fixed, and the relevant check is rerun successfully before completion.
 
 ## 7) Documentation & Release Readiness
 

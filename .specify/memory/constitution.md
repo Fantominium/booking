@@ -1,15 +1,15 @@
 <!--
-SYNC IMPACT REPORT (Constitution v2.0.0)
+SYNC IMPACT REPORT (Constitution v2.1.0)
 ==========================================
 Integration: Expanded governance to support platform-overhaul delivery, GitHub Actions CI/CD, full-stack containerisation, graceful-failure UX, and release readiness for first live payments.
-- Version: 1.6.0 → 2.0.0 (MAJOR: broadened project scope and mandatory delivery controls)
+- Version: 2.0.0 → 2.1.0 (MINOR: added mandatory change-safety and secure-by-design controls)
 - Status: Platform overhaul governance baseline established
 - Ratified: 2026-02-01
-- Last Amended: 2026-03-19
+- Last Amended: 2026-09-12
 - New Sections: XII. Continuous Governance Feedback
-- Modified Principles: Project Vision, XI. Definition of Done (NON-NEGOTIABLE), Technology Standards, Deployment & Hosting, Data Model & Domain Rules, Security & Data
+- Modified Principles: Project Vision, XI. Definition of Done (NON-NEGOTIABLE), XIII. Change Safety & Secure-by-Design, Technology Standards, Deployment & Hosting, Data Model & Domain Rules, Security & Data
 - Templates aligned: Pending follow-up alignment for platform-overhaul artifacts
-- Breaking changes: Governance now explicitly requires GitHub Actions CI/CD, full-stack containerisation, additional release artifacts, and broader platform extensibility rules
+- Breaking changes: Governance now explicitly requires GitHub Actions CI/CD, full-stack containerisation, additional release artifacts, broader platform extensibility rules, and change-safety verification
 ==========================================
 -->
 
@@ -85,6 +85,10 @@ Work is only considered complete when it satisfies all Definition of Done gates:
 
 Major platform work must not only follow the standards, it must improve them when durable best practices are discovered. If an initiative establishes repeatable guidance for CI/CD, containerisation, accessibility, failure handling, documentation, release readiness, or operational support, the relevant governing documents, templates, and checklists MUST be updated before the work is considered fully complete.
 
+### XIII. Change Safety & Secure-by-Design (NON-NEGOTIABLE)
+
+Every code, configuration, dependency, schema, infrastructure, or documentation change MUST be designed and verified to preserve existing behavior unless an approved specification explicitly changes that behavior. Before merge, the author MUST identify affected contracts and critical user journeys, run the narrowest relevant checks, and run the broader regression suite required by the change's risk. Changes MUST NOT knowingly introduce regression bugs, unhandled errors, or application-breaking behavior that makes the service inaccessible to end users. Security and privacy requirements MUST be considered from the start of design and implementation: least privilege, secure defaults, validated inputs, protected secrets, safe error handling, and defense in depth are required at every applicable boundary. Any error or regression introduced by the change MUST be fixed and revalidated before the task is considered complete; known failures MUST NOT be deferred without explicit written approval and a tracked remediation task.
+
 ## Development Workflow
 
 - **Planning Phase**: Feature specification is created, reviewed, and approved with acceptance scenarios defined. Accessibility requirements are explicit.
@@ -106,6 +110,9 @@ All deliverables MUST satisfy the following before merge or release:
 - **CI/CD**: Required GitHub Actions workflows are implemented and passing.
 - **Containerisation**: Containerised runtime topology is verified for relevant delivery stages.
 - **Release Readiness**: Production-readiness and first-payments readiness artifacts are updated where relevant.
+- **Change safety**: Affected contracts and critical user journeys are identified; targeted checks and risk-appropriate regression checks pass; no known change-introduced errors, regressions, or inaccessible application paths remain.
+- **Secure by design**: Security impact is assessed for changed boundaries, with secure defaults, least privilege, input validation, secret protection, sanitized errors, and required security checks verified before merge.
+- **Error closure**: Every error introduced during implementation or validation is fixed and the relevant check is rerun successfully. Exceptions require explicit written approval and a tracked remediation task.
 
 ## Technology Standards
 
@@ -413,4 +420,4 @@ This constitution supersedes all other development practices. All pull requests 
 
 **Compliance Review**: Random feature audits verify constitution compliance quarterly. Non-compliance findings are escalated and resolved before next release.
 
-**Version**: 2.0.0 | **Ratified**: 2026-02-01 | **Last Amended**: 2026-03-19
+**Version**: 2.1.0 | **Ratified**: 2026-02-01 | **Last Amended**: 2026-09-12
