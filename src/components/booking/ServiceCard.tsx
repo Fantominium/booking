@@ -25,6 +25,12 @@ type ServiceCardProps = {
 };
 
 export const ServiceCard = ({ service }: ServiceCardProps): JSX.Element => {
+  const isDeepTissue = service.name.toLowerCase().includes("deep tissue");
+  const cardMediaType = isDeepTissue ? "VIDEO" : service.cardMediaType;
+  const cardMediaUrl = isDeepTissue
+    ? "/uploads/service-media/DeepTissue.mp4"
+    : service.cardMediaUrl;
+
   return (
     <div
       className="dark:bg-surface-elevated flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700"
@@ -32,8 +38,8 @@ export const ServiceCard = ({ service }: ServiceCardProps): JSX.Element => {
     >
       <div className="relative min-h-52">
         <MediaSurface
-          mediaType={service.cardMediaType}
-          mediaUrl={service.cardMediaUrl}
+          mediaType={cardMediaType}
+          mediaUrl={cardMediaUrl}
           altText={service.cardMediaAltText}
           isDecorative={service.isDecorative}
           className="h-52 w-full object-cover"

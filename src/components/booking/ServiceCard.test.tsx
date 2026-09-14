@@ -135,6 +135,30 @@ describe("ServiceCard", () => {
     expect(media).toHaveAttribute("alt", "Essential oils and massage stones");
   });
 
+  it("renders the Deep Tissue video in the card media area", () => {
+    render(
+      <ServiceCard
+        service={{
+          id: "service-deep-tissue",
+          name: "Deep Tissue Massage - Studio",
+          description: "Focused bodywork",
+          offeringType: "SESSION",
+          durationMin: 60,
+          priceCents: 16000,
+          downpaymentCents: 4000,
+          isActive: true,
+        }}
+      />,
+    );
+
+    const media = screen.getByTestId("service-card-media");
+    expect(media.tagName).toBe("VIDEO");
+    expect(media.querySelector("source")).toHaveAttribute(
+      "src",
+      "/uploads/service-media/DeepTissue.mp4",
+    );
+  });
+
   it("uses static fallback for gif media when reduced motion is preferred", () => {
     globalThis.matchMedia = (query: string) => ({
       matches: query === "(prefers-reduced-motion: reduce)",

@@ -22,14 +22,13 @@ const Home = (): JSX.Element => {
           <div className="grid gap-8 lg:grid-cols-[1.3fr_0.9fr] lg:items-end">
             <div className="space-y-5">
               <p className="text-sm font-semibold tracking-[0.2em] text-slate-200 uppercase">
-                TruFlow booking platform
+                TruFlow
               </p>
               <h1 className="max-w-3xl text-5xl font-bold tracking-tight text-white sm:text-6xl">
-                Reserve the right TruFlow experience without broken journeys.
+                The Truflow Experience
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-slate-100">
-                Start with a guided session, a hosted event, or a rental booking. Every route leads
-                to availability, customer details, and a final payment choice.
+                Uniquely catered treatments for your bespoke needs
               </p>
               <div className="flex flex-col gap-4 sm:flex-row">
                 <Link
@@ -42,7 +41,7 @@ const Home = (): JSX.Element => {
             </div>
 
             <div className="rounded-4xl border border-white/30 bg-slate-950/65 p-6 shadow-xl backdrop-blur-sm">
-              <h2 className="text-xl font-semibold text-white">Quick paths</h2>
+              <h2 className="text-xl font-semibold text-white">Frequently Booked Sessions</h2>
               <div className="mt-4 grid gap-3">
                 <Link
                   href="/book?type=SESSION"
