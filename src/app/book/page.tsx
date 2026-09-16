@@ -32,15 +32,15 @@ const BookPage = async ({ searchParams }: BookPageProps): Promise<JSX.Element> =
       <main className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-10">
         <header className="flex flex-col gap-4">
           <p className="text-sm font-semibold tracking-[0.18em] text-slate-600 uppercase dark:text-slate-300">
-            Booking journeys
+            Offerings
           </p>
           <div className="flex flex-col gap-3">
             <h1 className="text-4xl font-bold text-slate-950 dark:text-white">
-              Reserve a session, event, or rental
+              Our product offerings
             </h1>
             <p className="max-w-3xl text-lg leading-8 text-slate-700 dark:text-slate-200">
-              Every route below leads to a complete booking journey with availability, customer
-              details, and payment choice at the end.
+              Each route guides you through your chosen experience, further details and a complete
+              journey from start to finish.
             </p>
           </div>
         </header>
