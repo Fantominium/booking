@@ -1,6 +1,6 @@
 export type OfferingType = "SESSION" | "EVENT" | "RENTAL";
 export type HeroMediaType = "IMAGE" | "VIDEO";
-export type CardMediaType = "IMAGE" | "GIF";
+export type CardMediaType = "IMAGE" | "VIDEO" | "GIF";
 
 export type ServiceDurationPriceOption = {
   durationMin: number;

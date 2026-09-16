@@ -16,7 +16,7 @@ import { getServiceDurationOptions } from "@/lib/service-duration-options";
 import type { ServiceDurationPriceOption } from "@/types/service";
 
 type HeroMediaType = "IMAGE" | "VIDEO";
-type CardMediaType = "IMAGE" | "GIF";
+type CardMediaType = "IMAGE" | "VIDEO" | "GIF";
 
 type UploadSlot = "hero" | "heroPoster" | "card";
 
@@ -67,7 +67,7 @@ const serviceSchema: z.ZodTypeAny = z
     heroMediaUrl: z.string().nullable(),
     heroMediaAltText: z.string().max(255),
     heroPosterUrl: z.string().nullable(),
-    cardMediaType: z.enum(["IMAGE", "GIF"]).nullable(),
+    cardMediaType: z.enum(["IMAGE", "VIDEO", "GIF"]).nullable(),
     cardMediaUrl: z.string().nullable(),
     cardMediaAltText: z.string().max(255),
     isDecorative: z.boolean(),
@@ -751,7 +751,7 @@ export const ServiceForm = ({
             <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">Card media</p>
             <input
               type="file"
-              accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+              accept="image/jpeg,image/png,image/webp,image/avif,image/gif,video/mp4,video/webm"
               data-slot="card"
               onChange={handleFileInput}
               disabled={uploadingSlot === "card"}

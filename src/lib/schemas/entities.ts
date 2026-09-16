@@ -10,7 +10,7 @@ const dateTimeSchema = z
 const offeringTypeSchema = z.enum(["SESSION", "EVENT", "RENTAL"]);
 const paymentMethodSchema = z.enum(["CARD", "BANK_TRANSFER"]);
 const heroMediaTypeSchema = z.enum(["IMAGE", "VIDEO"]);
-const cardMediaTypeSchema = z.enum(["IMAGE", "GIF"]);
+const cardMediaTypeSchema = z.enum(["IMAGE", "VIDEO", "GIF"]);
 const paymentStateSchema = z.enum([
   "UNPAID",
   "PENDING_BANK_TRANSFER",

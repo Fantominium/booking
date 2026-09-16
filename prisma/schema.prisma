@@ -33,6 +33,7 @@ enum HeroMediaType {
 
 enum CardMediaType {
   IMAGE
+  VIDEO
   GIF
 }
 

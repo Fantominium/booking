@@ -26,10 +26,12 @@ type ServiceCardProps = {
 
 export const ServiceCard = ({ service }: ServiceCardProps): JSX.Element => {
   const isDeepTissue = service.name.toLowerCase().includes("deep tissue");
-  const cardMediaType = isDeepTissue ? "VIDEO" : service.cardMediaType;
-  const cardMediaUrl = isDeepTissue
-    ? "/uploads/service-media/DeepTissue.mp4"
-    : service.cardMediaUrl;
+  let cardMediaType = service.cardMediaUrl ? service.cardMediaType : null;
+  let cardMediaUrl = service.cardMediaUrl ?? null;
+  if (!cardMediaUrl && isDeepTissue) {
+    cardMediaType = "VIDEO";
+    cardMediaUrl = "/uploads/service-media/DeepTissue.mp4";
+  }
 
   return (
     <div

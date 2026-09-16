@@ -9,7 +9,7 @@ const dateTimeSchema = z
   .refine((value) => !Number.isNaN(Date.parse(value)), "Invalid datetime");
 const paymentMethodSchema = z.enum(["CARD", "BANK_TRANSFER"]);
 const heroMediaTypeSchema = z.enum(["IMAGE", "VIDEO"]);
-const cardMediaTypeSchema = z.enum(["IMAGE", "GIF"]);
+const cardMediaTypeSchema = z.enum(["IMAGE", "VIDEO", "GIF"]);
 
 const mediaUrlSchema = z
   .string()

@@ -12,4 +12,4 @@ export const VIDEO_MIME_TYPES = ["video/mp4", "video/webm"];
 
 export const HERO_MEDIA_MIME_TYPES = [...IMAGE_MIME_TYPES, ...VIDEO_MIME_TYPES];
 export const HERO_POSTER_MIME_TYPES = [...IMAGE_MIME_TYPES];
-export const CARD_MEDIA_MIME_TYPES = [...IMAGE_MIME_TYPES, ...GIF_MIME_TYPES];
+export const CARD_MEDIA_MIME_TYPES = [...IMAGE_MIME_TYPES, ...GIF_MIME_TYPES, ...VIDEO_MIME_TYPES];

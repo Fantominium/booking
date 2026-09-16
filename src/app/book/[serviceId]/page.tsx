@@ -31,16 +31,29 @@ const ServiceBookingPage = async ({
     service,
     Number.isNaN(requestedDuration) ? undefined : requestedDuration,
   );
+  const isDeepTissue = service.name.toLowerCase().includes("deep tissue");
+  let reservationMediaType = service.heroMediaType;
+  let reservationMediaUrl = service.heroMediaUrl;
+  let reservationAltText = service.heroMediaAltText;
+  if (!reservationMediaUrl) {
+    reservationMediaType = service.cardMediaType;
+    reservationMediaUrl = service.cardMediaUrl;
+    reservationAltText = service.cardMediaAltText;
+  }
+  if (!reservationMediaUrl && isDeepTissue) {
+    reservationMediaType = "VIDEO";
+    reservationMediaUrl = "/uploads/service-media/DeepTissue.mp4";
+  }
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(186,230,253,0.22),transparent_45%),linear-gradient(180deg,#fdfefe_0%,#f5f7fb_100%)] dark:bg-[radial-gradient(circle_at_top,rgba(144,202,249,0.14),transparent_45%),linear-gradient(180deg,#121212_0%,#171717_100%)]">
       <main className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-10">
         <header className="hero-media-shell relative overflow-hidden rounded-3xl border border-slate-200/70 dark:border-slate-700/70">
           <MediaSurface
-            mediaType={service.heroMediaType}
-            mediaUrl={service.heroMediaUrl}
+            mediaType={reservationMediaType}
+            mediaUrl={reservationMediaUrl}
             posterUrl={service.heroPosterUrl}
-            altText={service.heroMediaAltText}
+            altText={reservationAltText}
             isDecorative={service.isDecorative}
             className="h-90 w-full object-cover"
             testId="service-hero-media"
@@ -59,7 +72,8 @@ const ServiceBookingPage = async ({
               {service.description ?? ""}
             </p>
             <div className="text-sm font-medium text-slate-900 dark:text-slate-100">
-              {selectedOption.durationMin} minutes · ${(selectedOption.priceCents / 100).toFixed(0)} Bds
+              {selectedOption.durationMin} minutes · ${(selectedOption.priceCents / 100).toFixed(0)}{" "}
+              Bds
             </div>
           </div>
         </header>
