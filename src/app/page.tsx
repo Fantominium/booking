@@ -56,18 +56,22 @@ const Home = (): JSX.Element => {
                   href="/book?type=EVENT"
                   className="rounded-2xl border border-white/25 px-4 py-4 text-left transition hover:bg-white/10 focus:ring-2 focus:ring-white focus:outline-none"
                 >
-                  <span className="block text-sm font-semibold text-white">Reserve an event</span>
+                  <span className="block text-sm font-semibold text-white">
+                    Mobile or Studio Appointments
+                  </span>
                   <span className="mt-1 block text-sm leading-6 text-slate-200">
-                    Hosted group experiences with clear availability and payment steps.
+                    We book the studio or we come to you
                   </span>
                 </Link>
                 <Link
                   href="/book?type=RENTAL"
                   className="rounded-2xl border border-white/25 px-4 py-4 text-left transition hover:bg-white/10 focus:ring-2 focus:ring-white focus:outline-none"
                 >
-                  <span className="block text-sm font-semibold text-white">Reserve a rental</span>
+                  <span className="block text-sm font-semibold text-white">
+                    Couples Massages Available
+                  </span>
                   <span className="mt-1 block text-sm leading-6 text-slate-200">
-                    Private space reservations with booking confirmation and transfer references.
+                    Please ask the head therapist for details
                   </span>
                 </Link>
               </div>
@@ -82,10 +86,10 @@ const Home = (): JSX.Element => {
             <span className="text-2xl">📅</span>
           </div>
           <h3 className="dark:text-foreground mb-2 font-semibold text-blue-950">
-            Reachable journeys
+            On-Time Appointments
           </h3>
           <p className="dark:text-foreground text-sm leading-6 text-blue-900">
-            Every public CTA takes you into a complete flow with valid next steps.
+            Punctual professional pampering perfected for your individual needs
           </p>
         </div>
 
@@ -106,10 +110,10 @@ const Home = (): JSX.Element => {
             <span className="text-2xl">✨</span>
           </div>
           <h3 className="dark:text-foreground mb-2 font-semibold text-green-950">
-            Operational admin tools
+            Recent testimonial
           </h3>
           <p className="dark:text-foreground text-sm leading-6 text-green-900">
-            Services, availability, emergency blocks, and payment states stay manageable.
+            Testimonial testimonial
           </p>
         </div>
       </div>
