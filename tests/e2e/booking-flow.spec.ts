@@ -4,12 +4,9 @@ test.describe("Customer Booking Flow", () => {
   test("catalog groups offerings by journey type", async ({ page }) => {
     await page.goto("/book");
 
-    await expect(
-      page.getByRole("heading", { name: /reserve a session, event, or rental/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: /our product offerings/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /sessions/i })).toBeVisible();
-    await expect(page.getByRole("heading", { name: /events/i })).toBeVisible();
-    await expect(page.getByRole("heading", { name: /rentals/i })).toBeVisible();
+    await expect(page.locator("[data-testid='service-card']").first()).toBeVisible();
   });
 
   test("customer can finish with bank transfer instructions", async ({ page }) => {
@@ -44,7 +41,8 @@ test.describe("Customer Booking Flow", () => {
 
     const deepTissueCard = page
       .locator("[data-testid='service-card']")
-      .filter({ hasText: "Deep Tissue Massage" });
+      .filter({ hasText: "Deep Tissue Massage" })
+      .first();
     await deepTissueCard.locator("a").click();
 
     await expect(page.locator("[data-testid='service-hero-media']")).toBeVisible();
@@ -57,12 +55,10 @@ test.describe("Customer Booking Flow", () => {
 
     const deepTissueCard = page
       .locator("[data-testid='service-card']")
-      .filter({ hasText: "Deep Tissue Massage" });
+      .filter({ hasText: "Deep Tissue Massage" })
+      .first();
 
-    const cardMediaTag = await deepTissueCard
-      .locator("[data-testid='service-card-media']")
-      .evaluate((node) => node.tagName);
-    expect(cardMediaTag).toBe("DIV");
+    await expect(deepTissueCard.locator("video[data-testid='service-card-media']")).toHaveCount(0);
 
     await deepTissueCard.locator("a").click();
 

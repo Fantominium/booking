@@ -10,6 +10,8 @@ const Home = (): JSX.Element => {
           loop
           muted
           playsInline
+          preload="none"
+          tabIndex={-1}
           aria-hidden="true"
         >
           <source src="/uploads/hero-background.mp4" type="video/mp4" />

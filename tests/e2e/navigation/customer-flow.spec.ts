@@ -10,8 +10,8 @@ test.describe("Customer Journey - Navigation Flow", () => {
     await page.goto("/");
 
     await expect(page.getByRole("link", { name: /book a session/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /reserve an event/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /reserve a rental/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /mobile or studio appointments/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /couples massages available/i })).toBeVisible();
     await expect(page.locator('a[href^="/admin"]')).toHaveCount(0);
   });
 

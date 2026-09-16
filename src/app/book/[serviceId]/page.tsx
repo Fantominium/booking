@@ -5,6 +5,7 @@ import { MediaSurface } from "@/components/booking/MediaSurface";
 import { OFFERING_LABELS } from "@/lib/offerings";
 import { prisma } from "@/lib/prisma";
 import { resolveServiceDurationOption } from "@/lib/service-duration-options";
+import { getDefaultServiceMediaUrl } from "@/lib/service-media-defaults";
 
 export const dynamic = "force-dynamic";
 
@@ -31,8 +32,8 @@ const ServiceBookingPage = async ({
     service,
     Number.isNaN(requestedDuration) ? undefined : requestedDuration,
   );
-  const isDeepTissue = service.name.toLowerCase().includes("deep tissue");
-  let reservationMediaType = service.heroMediaType;
+  const defaultMediaUrl = getDefaultServiceMediaUrl(service.name);
+  let reservationMediaType: "IMAGE" | "VIDEO" | "GIF" | null = service.heroMediaType;
   let reservationMediaUrl = service.heroMediaUrl;
   let reservationAltText = service.heroMediaAltText;
   if (!reservationMediaUrl) {
@@ -40,9 +41,9 @@ const ServiceBookingPage = async ({
     reservationMediaUrl = service.cardMediaUrl;
     reservationAltText = service.cardMediaAltText;
   }
-  if (!reservationMediaUrl && isDeepTissue) {
+  if (!reservationMediaUrl && defaultMediaUrl) {
     reservationMediaType = "VIDEO";
-    reservationMediaUrl = "/uploads/service-media/DeepTissue.mp4";
+    reservationMediaUrl = defaultMediaUrl;
   }
 
   return (

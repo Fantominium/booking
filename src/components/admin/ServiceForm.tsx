@@ -695,13 +695,20 @@ export const ServiceForm = ({
           <div className="grid gap-2 rounded-md border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
             <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">Hero media</p>
             <input
+              id="hero-media-upload"
               type="file"
               accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm"
               data-slot="hero"
               onChange={handleFileInput}
               disabled={uploadingSlot === "hero"}
-              className="text-xs"
+              className="sr-only"
             />
+            <label
+              htmlFor="hero-media-upload"
+              className="inline-flex min-h-10 w-full cursor-pointer items-center justify-center rounded-md bg-slate-900 px-3 py-2 text-center text-sm font-semibold text-white transition focus-within:ring-2 focus-within:ring-slate-500 focus-within:ring-offset-2 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-300 dark:text-slate-950 dark:hover:bg-blue-200"
+            >
+              {uploadingSlot === "hero" ? "Uploading hero media..." : "Upload hero media"}
+            </label>
             {values.heroMediaUrl ? (
               <button
                 type="button"
@@ -726,13 +733,20 @@ export const ServiceForm = ({
             {values.heroMediaType === "VIDEO" ? (
               <>
                 <input
+                  id="hero-poster-upload"
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/avif"
                   data-slot="heroPoster"
                   onChange={handleFileInput}
                   disabled={uploadingSlot === "heroPoster"}
-                  className="text-xs"
+                  className="sr-only"
                 />
+                <label
+                  htmlFor="hero-poster-upload"
+                  className="inline-flex min-h-10 w-full cursor-pointer items-center justify-center rounded-md border border-slate-300 px-3 py-2 text-center text-sm font-semibold text-slate-700 transition focus-within:ring-2 focus-within:ring-slate-500 focus-within:ring-offset-2 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
+                >
+                  {uploadingSlot === "heroPoster" ? "Uploading poster..." : "Upload hero poster"}
+                </label>
                 {values.heroPosterUrl ? (
                   <button
                     type="button"
@@ -750,13 +764,20 @@ export const ServiceForm = ({
           <div className="grid gap-2 rounded-md border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
             <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">Card media</p>
             <input
+              id="card-media-upload"
               type="file"
               accept="image/jpeg,image/png,image/webp,image/avif,image/gif,video/mp4,video/webm"
               data-slot="card"
               onChange={handleFileInput}
               disabled={uploadingSlot === "card"}
-              className="text-xs"
+              className="sr-only"
             />
+            <label
+              htmlFor="card-media-upload"
+              className="inline-flex min-h-10 w-full cursor-pointer items-center justify-center rounded-md bg-slate-900 px-3 py-2 text-center text-sm font-semibold text-white transition focus-within:ring-2 focus-within:ring-slate-500 focus-within:ring-offset-2 hover:bg-slate-700 dark:bg-blue-300 dark:text-slate-950 dark:hover:bg-blue-200"
+            >
+              {uploadingSlot === "card" ? "Uploading card media..." : "Upload card media"}
+            </label>
             {values.cardMediaUrl ? (
               <button
                 type="button"

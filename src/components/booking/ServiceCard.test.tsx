@@ -1,10 +1,14 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ServiceCard } from "@/components/booking/ServiceCard";
 
 describe("ServiceCard", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("renders service details", () => {
     render(
       <ServiceCard
@@ -135,7 +139,26 @@ describe("ServiceCard", () => {
     expect(media).toHaveAttribute("alt", "Essential oils and massage stones");
   });
 
-  it("renders the Deep Tissue video in the card media area", () => {
+  it("renders the Deep Tissue video in the card media area", async () => {
+    vi.stubGlobal(
+      "IntersectionObserver",
+      vi.fn(function (callback: IntersectionObserverCallback) {
+        const observer = {
+          observe: () => {
+            queueMicrotask(() =>
+              callback(
+                [{ isIntersecting: true } as IntersectionObserverEntry],
+                observer as unknown as IntersectionObserver,
+              ),
+            );
+          },
+          unobserve: vi.fn(),
+          disconnect: vi.fn(),
+        };
+        return observer;
+      }),
+    );
+
     render(
       <ServiceCard
         service={{
@@ -153,9 +176,11 @@ describe("ServiceCard", () => {
 
     const media = screen.getByTestId("service-card-media");
     expect(media.tagName).toBe("VIDEO");
-    expect(media.querySelector("source")).toHaveAttribute(
-      "src",
-      "/uploads/service-media/DeepTissue.mp4",
+    await waitFor(() =>
+      expect(media.querySelector("source")).toHaveAttribute(
+        "src",
+        "/uploads/service-media/DeepTissue.mp4",
+      ),
     );
   });
 

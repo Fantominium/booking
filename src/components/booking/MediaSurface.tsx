@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type MediaType = "IMAGE" | "VIDEO" | "GIF";
 
@@ -28,6 +28,8 @@ export const MediaSurface = ({
 }: MediaSurfaceProps): JSX.Element => {
   const [failedMediaKey, setFailedMediaKey] = useState<string | null>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [isVideoInView, setIsVideoInView] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const mediaKey = `${mediaType ?? "none"}|${mediaUrl ?? "none"}|${posterUrl ?? "none"}`;
   const hasError = failedMediaKey === mediaKey;
 
@@ -44,6 +46,32 @@ export const MediaSurface = ({
       mediaQuery.removeEventListener("change", handleChange);
     };
   }, []);
+
+  useEffect(() => {
+    if (mediaType !== "VIDEO" || !mediaUrl) {
+      return;
+    }
+
+    const videoElement = videoRef.current;
+    if (!videoElement || !("IntersectionObserver" in globalThis)) {
+      return;
+    }
+
+    // IntersectionObserver is the browser API that controls deferred media loading.
+    // eslint-disable-next-line no-restricted-syntax
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setIsVideoInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(videoElement);
+
+    return () => observer.disconnect();
+  }, [mediaKey, mediaType, mediaUrl]);
 
   const fallbackAlt = useMemo(() => {
     if (isDecorative) {
@@ -92,18 +120,21 @@ export const MediaSurface = ({
   }
 
   if (mediaType === "VIDEO") {
+    const canObserveVideo = "IntersectionObserver" in globalThis;
     return (
       <video
+        ref={videoRef}
         className={className}
         autoPlay
         loop
         muted
         playsInline
+        preload="none"
         poster={posterUrl ?? undefined}
         onError={handleMediaError}
         data-testid={testId}
       >
-        <source src={mediaUrl} />
+        {isVideoInView || !canObserveVideo ? <source src={mediaUrl} /> : null}
       </video>
     );
   }

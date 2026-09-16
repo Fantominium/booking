@@ -2,6 +2,7 @@ import { MediaSurface } from "@/components/booking/MediaSurface";
 import { ServiceCardOptionSelector } from "@/components/booking/ServiceCardOptionSelector";
 import { OFFERING_LABELS } from "@/lib/offerings";
 import { type ServiceDurationContext } from "@/lib/service-duration-options";
+import { getDefaultServiceMediaUrl } from "@/lib/service-media-defaults";
 import type { CardMediaType, HeroMediaType, OfferingType } from "@/types/service";
 
 type ServiceCardService = ServiceDurationContext & {
@@ -25,12 +26,12 @@ type ServiceCardProps = {
 };
 
 export const ServiceCard = ({ service }: ServiceCardProps): JSX.Element => {
-  const isDeepTissue = service.name.toLowerCase().includes("deep tissue");
+  const defaultMediaUrl = getDefaultServiceMediaUrl(service.name);
   let cardMediaType = service.cardMediaUrl ? service.cardMediaType : null;
   let cardMediaUrl = service.cardMediaUrl ?? null;
-  if (!cardMediaUrl && isDeepTissue) {
+  if (!cardMediaUrl && defaultMediaUrl) {
     cardMediaType = "VIDEO";
-    cardMediaUrl = "/uploads/service-media/DeepTissue.mp4";
+    cardMediaUrl = defaultMediaUrl;
   }
 
   return (
