@@ -1,7 +1,7 @@
 // @vitest-environment node
 import Redis from "ioredis";
 import { randomUUID } from "node:crypto";
-import { afterAll, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 const redisUrl = process.env.INTEGRATION_REDIS_URL;
 
@@ -17,8 +17,13 @@ import { enforceDistributedRateLimit, publicRateLimitResponse } from "@/lib/midd
 
 // Uses unique random namespaces only; never flushes or touches other keys.
 describe.skipIf(!redisUrl)("Redis-backed distributed rate limits (two app instances)", () => {
-  const instanceA = new Redis(redisUrl ?? "", { maxRetriesPerRequest: 1 });
-  const instanceB = new Redis(redisUrl ?? "", { maxRetriesPerRequest: 1 });
+  let instanceA: Redis;
+  let instanceB: Redis;
+
+  beforeAll(() => {
+    instanceA = new Redis(redisUrl ?? "", { maxRetriesPerRequest: 1 });
+    instanceB = new Redis(redisUrl ?? "", { maxRetriesPerRequest: 1 });
+  });
 
   const request = (forwardedFor: string): Request =>
     new Request("http://localhost/api/auth/callback/credentials", {

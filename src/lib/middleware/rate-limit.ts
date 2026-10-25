@@ -1,3 +1,5 @@
+import { setTimeout as setTimeoutPromise } from "node:timers/promises";
+
 import { redisConnection } from "@/lib/queue/config";
 import { emitAlert } from "@/lib/ops/alerts";
 
@@ -34,8 +36,10 @@ export const getTrustedClientIp = (request: Request, trustedProxyHops: number): 
   }
 
   const forwardedFor = request.headers.get("x-forwarded-for");
+  // Dev servers run without an ingress; production stays fail-closed.
+  const developmentIdentity = process.env.NODE_ENV === "development" ? "development-local" : null;
   if (!forwardedFor) {
-    return null;
+    return developmentIdentity;
   }
 
   const chain = forwardedFor
@@ -43,7 +47,7 @@ export const getTrustedClientIp = (request: Request, trustedProxyHops: number): 
     .map((value) => value.trim())
     .filter(Boolean);
   if (chain.length <= trustedProxyHops) {
-    return null;
+    return developmentIdentity;
   }
 
   return chain[chain.length - trustedProxyHops - 1] ?? null;
@@ -79,6 +83,8 @@ export const enforceDistributedRateLimit = async (params: {
   };
 };
 
+const REDIS_DEADLINE_MS = 2000;
+
 export const checkPublicRateLimit = async (params: {
   request: Request;
   namespace: string;
@@ -86,11 +92,17 @@ export const checkPublicRateLimit = async (params: {
   windowSeconds: number;
 }): Promise<DistributedRateLimitResult> => {
   const trustedProxyHops = Number.parseInt(process.env.TRUSTED_PROXY_HOPS ?? "1", 10);
-  return enforceDistributedRateLimit({
-    ...params,
-    redis: redisConnection,
-    trustedProxyHops,
+  const deadline = setTimeoutPromise(REDIS_DEADLINE_MS, undefined, {
+    ref: false,
+  }).then(() => {
+    throw new Error("Rate limit store timed out");
   });
+  // Swallow the loser's rejection so a late timeout is never unhandled.
+  deadline.catch(() => undefined);
+  return Promise.race([
+    enforceDistributedRateLimit({ ...params, redis: redisConnection, trustedProxyHops }),
+    deadline,
+  ]);
 };
 
 export const publicRateLimitResponse = async (params: {

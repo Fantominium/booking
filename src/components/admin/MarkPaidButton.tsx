@@ -1,5 +1,6 @@
 "use client";
 
+import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { useCallback, useState } from "react";
 
 type MarkPaidButtonProps = {
@@ -56,66 +57,73 @@ export const MarkPaidButton = ({ bookingId, onComplete }: MarkPaidButtonProps): 
 
   return (
     <div className="flex flex-col items-start gap-2">
-      {!isOpen ? (
-        <button
-          type="button"
-          className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-          onClick={handleOpen}
-          aria-expanded={false}
-        >
-          Reconcile transfer
-        </button>
-      ) : (
-        <form className="grid gap-2" onSubmit={handleSubmit}>
-          <label className="grid gap-1 text-xs font-medium text-slate-700 dark:text-slate-200">
-            Verified amount (cents)
-            <input
-              aria-label="Verified amount"
-              type="number"
-              min="1"
-              step="1"
-              required
-              value={verifiedAmount}
-              onChange={handleAmountChange}
-              className="rounded border border-slate-300 px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-900"
-            />
-          </label>
-          <label className="grid gap-1 text-xs font-medium text-slate-700 dark:text-slate-200">
-            Bank reference
-            <input
-              aria-label="Bank reference"
-              type="text"
-              maxLength={100}
-              required
-              value={transferReference}
-              onChange={handleReferenceChange}
-              className="rounded border border-slate-300 px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-900"
-            />
-          </label>
-          {error ? (
-            <p role="alert" className="text-xs text-rose-600">
-              {error}
-            </p>
-          ) : null}
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              className="rounded-md bg-slate-900 px-3 py-1 text-xs font-semibold text-white"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Saving" : "Record transfer"}
-            </button>
-            <button
-              type="button"
-              className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-100"
-              onClick={handleCancel}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
+      <button
+        type="button"
+        className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+        onClick={handleOpen}
+        aria-haspopup="dialog"
+      >
+        Reconcile transfer
+      </button>
+      <Dialog
+        open={isOpen}
+        onClose={isSubmitting ? undefined : handleCancel}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Reconcile transfer</DialogTitle>
+        <DialogContent>
+          <form className="grid gap-2" onSubmit={handleSubmit}>
+            <label className="grid gap-1 text-xs font-medium text-slate-700 dark:text-slate-200">
+              Verified amount (cents)
+              <input
+                aria-label="Verified amount"
+                type="number"
+                min="1"
+                step="1"
+                required
+                value={verifiedAmount}
+                onChange={handleAmountChange}
+                className="rounded border border-slate-300 px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-900"
+              />
+            </label>
+            <label className="grid gap-1 text-xs font-medium text-slate-700 dark:text-slate-200">
+              Bank reference
+              <input
+                aria-label="Bank reference"
+                type="text"
+                maxLength={100}
+                required
+                value={transferReference}
+                onChange={handleReferenceChange}
+                className="rounded border border-slate-300 px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-900"
+              />
+            </label>
+            {error ? (
+              <p role="alert" className="text-xs text-rose-600">
+                {error}
+              </p>
+            ) : null}
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="rounded-md bg-slate-900 px-3 py-1 text-xs font-semibold text-white"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Saving" : "Record transfer"}
+              </button>
+              <button
+                type="button"
+                className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-100"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

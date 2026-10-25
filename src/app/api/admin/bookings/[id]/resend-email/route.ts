@@ -24,7 +24,12 @@ export const POST = async (
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   }
 
-  const emailType = booking.status === "CANCELLED" ? "CANCELLATION" : "CONFIRMATION";
+  const emailType =
+    booking.status === "CANCELLED"
+      ? "CANCELLATION"
+      : booking.status === "EXPIRED"
+        ? "EXPIRY_NOTICE"
+        : "CONFIRMATION";
 
   // A fixed job ID would be ignored while the original job is retained; the minute bucket still absorbs double-clicks.
   await queueEmailJob({

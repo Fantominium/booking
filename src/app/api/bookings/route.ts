@@ -15,6 +15,20 @@ export const dynamic = "force-dynamic";
 const MINIMUM_LEAD_TIME_MINUTES = 120;
 const BUSINESS_TIME_ZONE = "America/Barbados";
 
+const buildBookingResponse = (
+  id: string,
+  bankTransferReference: string | null,
+  bankTransferInstructions: string | null,
+): Record<string, unknown> => ({
+  id,
+  status: "PENDING",
+  paymentMethod: "BANK_TRANSFER",
+  paymentState: "PENDING_BANK_TRANSFER",
+  clientSecret: null,
+  bankTransferReference,
+  bankTransferInstructions,
+});
+
 export const POST = async (request: Request): Promise<NextResponse> => {
   const rateLimitResponse = await publicRateLimitResponse({
     request,
@@ -53,18 +67,53 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     return NextResponse.json({ error: "Booking service is unavailable" }, { status: 503 });
   }
 
+  // Fingerprint only the submitted request so replays survive later price/schedule changes.
+  const requestFingerprint = createHmac("sha256", fingerprintSecret)
+    .update(
+      JSON.stringify({
+        serviceId: parsed.data.serviceId,
+        startTime: startTime.toISOString(),
+        requestedDurationMin: parsed.data.selectedDurationMin ?? null,
+        customerName: parsed.data.customerName,
+        customerEmail: parsed.data.customerEmail,
+        customerPhone: parsed.data.customerPhone,
+        paymentMethod: "BANK_TRANSFER",
+      }),
+    )
+    .digest("hex");
+
+  const settings = await prisma.systemSettings.findFirst();
+
+  if (!settings) {
+    return NextResponse.json({ error: "System settings missing" }, { status: 500 });
+  }
+
+  const existingIdempotency = await prisma.bookingIdempotency.findUnique({
+    where: { idempotencyKey: idempotencyKey.data },
+    include: { booking: true },
+  });
+  if (existingIdempotency && existingIdempotency.expiresAt > new Date()) {
+    if (existingIdempotency.requestFingerprint !== requestFingerprint) {
+      return NextResponse.json(
+        { error: "Idempotency key was already used for a different request" },
+        { status: 409 },
+      );
+    }
+    return NextResponse.json(
+      buildBookingResponse(
+        existingIdempotency.booking.id,
+        existingIdempotency.booking.bankTransferReference,
+        settings.bankTransferInstructions,
+      ),
+    );
+  }
+
   const service = await prisma.service.findUnique({
     where: { id: parsed.data.serviceId },
   });
 
   if (!service?.isActive) {
     return NextResponse.json({ error: "Service not found" }, { status: 404 });
-  }
-
-  const settings = await prisma.systemSettings.findFirst();
-
-  if (!settings) {
-    return NextResponse.json({ error: "System settings missing" }, { status: 500 });
   }
 
   try {
@@ -78,23 +127,6 @@ export const POST = async (request: Request): Promise<NextResponse> => {
       bufferMinutes,
       timeZone: BUSINESS_TIME_ZONE,
     });
-    const requestFingerprint = createHmac("sha256", fingerprintSecret)
-      .update(
-        JSON.stringify({
-          serviceId: service.id,
-          startTime: startTime.toISOString(),
-          requestedDurationMin: parsed.data.selectedDurationMin ?? null,
-          resolvedDurationMin: selectedOption.durationMin,
-          customerName: parsed.data.customerName,
-          customerEmail: parsed.data.customerEmail,
-          customerPhone: parsed.data.customerPhone,
-          paymentMethod: "BANK_TRANSFER",
-          priceCents: selectedOption.priceCents,
-          downpaymentCents: selectedOption.downpaymentCents,
-        }),
-      )
-      .digest("hex");
-
     const booking = await createBookingWithLock({
       prisma,
       input: {
@@ -117,15 +149,13 @@ export const POST = async (request: Request): Promise<NextResponse> => {
       },
     });
 
-    return NextResponse.json({
-      id: booking.id,
-      status: "PENDING",
-      paymentMethod: "BANK_TRANSFER",
-      paymentState: "PENDING_BANK_TRANSFER",
-      clientSecret: null,
-      bankTransferReference: booking.bankTransferReference,
-      bankTransferInstructions: settings.bankTransferInstructions,
-    });
+    return NextResponse.json(
+      buildBookingResponse(
+        booking.id,
+        booking.bankTransferReference,
+        settings.bankTransferInstructions,
+      ),
+    );
   } catch (error) {
     if (isAppError(error)) {
       return NextResponse.json({ error: error.message }, { status: error.statusCode });

@@ -84,7 +84,11 @@ type AuthRouteContext = Parameters<typeof nextAuthHandler>[1];
 export const GET = nextAuthHandler;
 
 export const POST = async (request: Request, context: AuthRouteContext): Promise<Response> => {
-  if (new URL(request.url).pathname.endsWith("/callback/credentials")) {
+  const segments = new URL(request.url).pathname.split("/").filter(Boolean).slice(2);
+  if (segments[0] === "callback" && segments[1] === "credentials") {
+    if (segments.length > 2) {
+      return Response.json({ error: "Not found" }, { status: 404 });
+    }
     const limited = await publicRateLimitResponse({
       request,
       namespace: "login",

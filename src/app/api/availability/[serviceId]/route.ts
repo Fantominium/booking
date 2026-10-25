@@ -5,6 +5,8 @@ import {
   getAvailabilityCache,
   setAvailabilityCache,
 } from "@/lib/cache/availability";
+import { fromZonedTime } from "date-fns-tz";
+
 import { calculateAvailableSlotsForDate, getBusinessDayBounds } from "@/lib/services/availability";
 import { prisma } from "@/lib/prisma";
 import { resolveServiceDurationOption } from "@/lib/service-duration-options";
@@ -16,6 +18,12 @@ const parseDate = (value: string): Date => {
   const [year, month, day] = value.split("-").map(Number);
   return new Date(Date.UTC(year, month - 1, day));
 };
+
+const getDayBounds = (date: Date): ReturnType<typeof getBusinessDayBounds> =>
+  getBusinessDayBounds(
+    fromZonedTime(`${date.toISOString().slice(0, 10)}T00:00:00`, BUSINESS_TIME_ZONE),
+    BUSINESS_TIME_ZONE,
+  );
 
 const addDays = (date: Date, days: number): Date => {
   const next = new Date(date);
@@ -82,7 +90,7 @@ export const GET = async (
 
   if (dateParam) {
     const targetDate = parseDate(dateParam);
-    const dayBounds = getBusinessDayBounds(targetDate, BUSINESS_TIME_ZONE);
+    const dayBounds = getDayBounds(targetDate);
     const dayBookings = await prisma.booking.findMany({
       where: {
         startTime: {
@@ -125,7 +133,7 @@ export const GET = async (
   let cursor = startDate;
 
   while (cursor <= endDate) {
-    const dayBounds = getBusinessDayBounds(cursor, BUSINESS_TIME_ZONE);
+    const dayBounds = getDayBounds(cursor);
     const dayBookings = await prisma.booking.findMany({
       where: {
         startTime: {

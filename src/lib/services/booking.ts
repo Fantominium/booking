@@ -48,7 +48,7 @@ const lockExistingBooking = async (
     SELECT id FROM "bookings"
     WHERE "start_time" < ${params.endTime}
       AND "end_time" > ${params.startTime}
-      AND "status" != 'CANCELLED'
+      AND "status" NOT IN ('CANCELLED', 'EXPIRED')
     FOR UPDATE
   `;
 

@@ -27,6 +27,8 @@ services:
         "--appendonly",
         "yes",
       ]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?set REDIS_PASSWORD}
     volumes:
       - redis-data:/data
     networks: [data]
@@ -54,6 +56,8 @@ services:
       IDEMPOTENCY_HMAC_SECRET: ${IDEMPOTENCY_HMAC_SECRET:?set IDEMPOTENCY_HMAC_SECRET}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?set NEXT_PUBLIC_API_URL}
       TRUSTED_PROXY_HOPS: ${TRUSTED_PROXY_HOPS:-1}
+      PII_PURGE_LEGAL_HOLD: ${PII_PURGE_LEGAL_HOLD:-}
+      ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
     networks: [data, edge]
     ports:
       - "3000:3000"

@@ -1,7 +1,7 @@
 // @vitest-environment node
 import Redis from "ioredis";
 import { randomInt } from "node:crypto";
-import { afterAll, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 const redisUrl = process.env.INTEGRATION_REDIS_URL;
 
@@ -13,7 +13,10 @@ vi.mock("@/lib/queue/config", () => ({
   },
 }));
 vi.mock("@/lib/prisma", () => ({
-  prisma: { admin: { findUnique: vi.fn().mockResolvedValue(null) }, passwordResetToken: { findUnique: vi.fn().mockResolvedValue(null) } },
+  prisma: {
+    admin: { findUnique: vi.fn().mockResolvedValue(null) },
+    passwordResetToken: { findUnique: vi.fn().mockResolvedValue(null) },
+  },
 }));
 vi.mock("@/lib/services/data-deletion", () => ({
   createDeletionRequest: vi.fn().mockResolvedValue("token"),
@@ -30,8 +33,11 @@ type Route = (request: Request) => Promise<Response>;
 
 // Each run uses a random TEST-NET-3 address and deletes only its own keys.
 describe.skipIf(!redisUrl)("route-level rate limits against real Redis", () => {
-  const redis = new Redis(redisUrl ?? "", { maxRetriesPerRequest: 1 });
-  connection.current = redis;
+  let redis: Redis;
+  beforeAll(() => {
+    redis = new Redis(redisUrl ?? "", { maxRetriesPerRequest: 1 });
+    connection.current = redis;
+  });
   const clientIp = `203.0.113.${randomInt(1, 255)}`;
   const namespaces = [
     "password-reset-request",
@@ -55,20 +61,47 @@ describe.skipIf(!redisUrl)("route-level rate limits against real Redis", () => {
   });
 
   it.each([
-    ["password reset request", resetRequest, "/api/auth/password-reset/request", { email: "admin@example.com" }, 5],
-    ["password reset confirm", resetConfirm, "/api/auth/password-reset/confirm", { token: "x", newPassword: "password123" }, 5],
-    ["deletion request", deletionRequest, "/api/customer-data/request-deletion", { email: "customer@example.com" }, 3],
-    ["deletion confirm", deletionConfirm, "/api/customer-data/confirm-deletion", { token: "x".repeat(32) }, 5],
-  ] as const)("%s allows the approved limit then returns 429 with retry metadata", async (_name, route, path, body, limit) => {
-    const allowed: number[] = [];
-    for (let attempt = 0; attempt < limit; attempt += 1) {
-      allowed.push((await call(route, path, body)).status);
-    }
-    const limited = await call(route, path, body);
+    [
+      "password reset request",
+      resetRequest,
+      "/api/auth/password-reset/request",
+      { email: "admin@example.com" },
+      5,
+    ],
+    [
+      "password reset confirm",
+      resetConfirm,
+      "/api/auth/password-reset/confirm",
+      { token: "x", newPassword: "password123" },
+      5,
+    ],
+    [
+      "deletion request",
+      deletionRequest,
+      "/api/customer-data/request-deletion",
+      { email: "customer@example.com" },
+      3,
+    ],
+    [
+      "deletion confirm",
+      deletionConfirm,
+      "/api/customer-data/confirm-deletion",
+      { token: "x".repeat(32) },
+      5,
+    ],
+  ] as const)(
+    "%s allows the approved limit then returns 429 with retry metadata",
+    async (_name, route, path, body, limit) => {
+      const allowed: number[] = [];
+      for (let attempt = 0; attempt < limit; attempt += 1) {
+        allowed.push((await call(route, path, body)).status);
+      }
+      const limited = await call(route, path, body);
 
-    expect(allowed.every((status) => status !== 429 && status !== 503)).toBe(true);
-    expect(limited.status).toBe(429);
-    expect(Number(limited.headers.get("Retry-After"))).toBeGreaterThan(0);
-    expect(await limited.json()).toMatchObject({ error: { code: "RATE_LIMITED" } });
-  });
+      expect(allowed.every((status) => status !== 429 && status !== 503)).toBe(true);
+      expect(limited.status).toBe(429);
+      expect(Number(limited.headers.get("Retry-After"))).toBeGreaterThan(0);
+      expect(await limited.json()).toMatchObject({ error: { code: "RATE_LIMITED" } });
+    },
+  );
 });

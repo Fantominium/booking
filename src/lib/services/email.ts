@@ -20,7 +20,7 @@ export const queueEmailJob = async (payload: EmailJobPayload): Promise<void> => 
   });
 
   await emailQueue.add(payload.type, payload, {
-    jobId: payload.dedupeKey ?? `${payload.bookingId}:${payload.type}`,
+    jobId: encodeURIComponent(payload.dedupeKey ?? `${payload.bookingId}:${payload.type}`),
     attempts: 3,
     backoff: { type: "exponential", delay: 60_000 },
     removeOnComplete: { age: 30 * 24 * 60 * 60 },

@@ -29,7 +29,7 @@ The database URL must target a private PostgreSQL service. The default supported
 
 ## Worker Deployment
 
-BullMQ workers run outside the Next.js runtime. Deploy the non-root email worker; it starts the maintenance worker in the same process. A standalone `pnpm worker:maintenance` command is available if operations deploys the two worker roles separately. The maintenance worker registers a five-minute transfer-expiry scan and hourly privacy maintenance (expired idempotency/reset/deletion tokens and one-year audit cleanup). Booking/customer PII retention is deliberately not scheduled until the legal/business owner approves its retention duration.
+BullMQ workers run outside the Next.js runtime. Deploy the non-root email worker; it starts the maintenance worker in the same process. A standalone `pnpm worker:maintenance` command is available if operations deploys the two worker roles separately. The maintenance worker registers a five-minute transfer-expiry scan and hourly privacy maintenance (expired idempotency/reset/deletion tokens and one-year audit cleanup). The hourly job also anonymizes customer PII 24 months after the booking ends (approved retention, D9a); set `PII_PURGE_LEGAL_HOLD=true` to suspend this.
 
 ```bash
 pnpm worker:email

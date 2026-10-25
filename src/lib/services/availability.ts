@@ -127,7 +127,6 @@ export const calculateAvailableSlotsForDate = (params: {
   }
 
   const minimumBufferMinutes = Math.max(settings.bufferMinutes, 60);
-  const legacyBookingBufferMinutes = Math.max(60 - settings.bufferMinutes, 0);
   const slotDuration = service.durationMin + minimumBufferMinutes;
   const dayStart = buildDateWithTime(date, openingTime, timeZone);
   const dayEnd = buildDateWithTime(date, closingTime, timeZone);
@@ -166,7 +165,7 @@ export const calculateAvailableSlotsForDate = (params: {
             booking.status !== "EXPIRED" &&
             isOverlapping(slot, {
               start: booking.startTime,
-              end: addMinutes(booking.endTime, legacyBookingBufferMinutes),
+              end: booking.endTime,
             }),
         ),
     );

@@ -20,6 +20,7 @@ vi.mock("@/lib/prisma", () => ({
     systemSettings: { findFirst: settingsFindFirst },
     businessHours: { findMany: mockedBusinessHoursFindMany },
     dateOverride: { findMany: vi.fn().mockResolvedValue([]) },
+    bookingIdempotency: { findUnique: vi.fn().mockResolvedValue(null) },
   },
 }));
 

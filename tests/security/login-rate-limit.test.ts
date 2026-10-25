@@ -44,4 +44,14 @@ describe("admin login throttling (D8)", () => {
     expect(limiter).not.toHaveBeenCalled();
     expect(nextAuthHandler).toHaveBeenCalledOnce();
   });
+
+  it("rejects extra segments after callback/credentials instead of bypassing the limiter", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/auth/callback/credentials/extra", { method: "POST" }),
+      context,
+    );
+
+    expect(response.status).toBe(404);
+    expect(nextAuthHandler).not.toHaveBeenCalled();
+  });
 });

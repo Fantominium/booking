@@ -79,7 +79,7 @@ describe("availability calculation", () => {
       bookings: [
         {
           startTime: new Date(Date.UTC(2026, 1, 10, 10, 0, 0)),
-          endTime: new Date(Date.UTC(2026, 1, 10, 11, 15, 0)),
+          endTime: new Date(Date.UTC(2026, 1, 10, 12, 0, 0)),
           status: "CONFIRMED",
         },
       ],
