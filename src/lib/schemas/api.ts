@@ -3,11 +3,11 @@ import { z } from "zod";
 const uuidSchema = z
   .string()
   .regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
-const emailSchema = z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/i);
+const emailSchema = z.email();
 const dateTimeSchema = z
   .string()
   .refine((value) => !Number.isNaN(Date.parse(value)), "Invalid datetime");
-const paymentMethodSchema = z.enum(["CARD", "BANK_TRANSFER"]);
+const paymentMethodSchema = z.enum(["BANK_TRANSFER"]);
 const heroMediaTypeSchema = z.enum(["IMAGE", "VIDEO"]);
 const cardMediaTypeSchema = z.enum(["IMAGE", "GIF"]);
 
@@ -26,7 +26,7 @@ export const createBookingRequestSchema = z.object({
   customerName: z.string().min(1).max(255),
   customerEmail: emailSchema,
   customerPhone: z.string().min(5).max(20),
-  paymentMethod: paymentMethodSchema.default("CARD"),
+  paymentMethod: paymentMethodSchema.default("BANK_TRANSFER"),
 });
 
 export const createPaymentIntentRequestSchema = z.object({

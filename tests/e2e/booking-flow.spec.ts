@@ -31,8 +31,7 @@ test.describe("Customer Booking Flow", () => {
     await page.fill("input[name='customerName']", "Jordan Doe");
     await page.fill("input[name='customerEmail']", "jordan@example.com");
     await page.fill("input[name='customerPhone']", "+1234567890");
-    await page.getByLabel("Reserve with bank transfer").click();
-    await page.getByRole("button", { name: "Continue to payment" }).click();
+    await page.getByRole("button", { name: "Continue to bank transfer instructions" }).click();
 
     await expect(page).toHaveURL(/\/book\/success/);
     await expect(page.getByText(/bank transfer instructions/i)).toBeVisible();

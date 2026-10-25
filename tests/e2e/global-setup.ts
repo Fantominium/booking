@@ -2,8 +2,11 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth/password";
+import { assertE2EDatabaseIsolated } from "@/lib/config/production-safety";
 
 async function globalSetup(): Promise<void> {
+  assertE2EDatabaseIsolated(process.env.DATABASE_URL);
+
   // Create test admin if it doesn't exist
   const testAdminEmail = "admin@truflow.local";
   const testAdminPassword =
@@ -37,7 +40,9 @@ async function globalSetup(): Promise<void> {
     console.log(`✓ Created test admin: ${testAdminEmail}`);
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
-      console.warn("Skipping Playwright admin setup because the admins table is unavailable in the current database.");
+      console.warn(
+        "Skipping Playwright admin setup because the admins table is unavailable in the current database.",
+      );
       return;
     }
 

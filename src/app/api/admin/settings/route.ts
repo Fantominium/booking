@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 const updateSettingsSchema = z
   .object({
     maxBookingsPerDay: z.number().int().min(1).optional(),
-    bufferMinutes: z.number().int().min(0).optional(),
+    bufferMinutes: z.number().int().min(60).optional(),
     bankTransferInstructions: z.string().min(1).max(2000).nullable().optional(),
   })
   .refine(
@@ -80,7 +80,7 @@ export const PATCH = async (request: Request): Promise<NextResponse> => {
     : await prisma.systemSettings.create({
         data: {
           maxBookingsPerDay: parsed.data.maxBookingsPerDay ?? 8,
-          bufferMinutes: parsed.data.bufferMinutes ?? 15,
+          bufferMinutes: parsed.data.bufferMinutes ?? 60,
           bankTransferInstructions: parsed.data.bankTransferInstructions ?? null,
         },
       });

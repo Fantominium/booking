@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
+import { getAdminAttentionItems } from "@/lib/services/admin-attention";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,8 @@ export const GET = async (): Promise<NextResponse> => {
     orderBy: { startTime: "asc" },
   });
 
+  const attention = await getAdminAttentionItems(prisma);
+
   return NextResponse.json({
     unpaidBalances: unpaidBalances.map((booking: (typeof unpaidBalances)[number]) => ({
       id: booking.id,
@@ -34,6 +37,8 @@ export const GET = async (): Promise<NextResponse> => {
       startTime: booking.startTime.toISOString(),
       remainingBalanceCents: booking.remainingBalanceCents,
     })),
-    emailFailures: [],
+    emailFailures: attention.emailFailures,
+    transferReviews: attention.transferReviews,
+    expiredTransfers: attention.expiredTransfers,
   });
 };

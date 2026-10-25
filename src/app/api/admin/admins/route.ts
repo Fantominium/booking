@@ -1,21 +1,15 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth/password";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
 
 export const dynamic = "force-dynamic";
 
 const createAdminSchema = z.object({
-  email: z.string().email("Invalid email format"),
+  email: z.email("Invalid email format"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
-
-const checkAuthentication = async (): Promise<boolean> => {
-  const session = await getServerSession(authOptions);
-  return !!session?.user;
-};
 
 const listAdmins = async (): Promise<
   Array<{
@@ -63,10 +57,8 @@ const createAdmin = async (
 
 export const GET = async (): Promise<NextResponse> => {
   try {
-    const isAuthenticated = await checkAuthentication();
-
-    if (!isAuthenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!(await getAdminSession())) {
+      return createAdminUnauthorizedResponse();
     }
 
     const admins = await listAdmins();
@@ -80,10 +72,8 @@ export const GET = async (): Promise<NextResponse> => {
 
 export const POST = async (request: Request): Promise<NextResponse> => {
   try {
-    const isAuthenticated = await checkAuthentication();
-
-    if (!isAuthenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!(await getAdminSession())) {
+      return createAdminUnauthorizedResponse();
     }
 
     const body = await request.json();

@@ -77,7 +77,7 @@ const AvailabilityPage = async (): Promise<JSX.Element> => {
     (await prisma.systemSettings.create({
       data: {
         maxBookingsPerDay: 8,
-        bufferMinutes: 15,
+        bufferMinutes: 60,
       },
     }));
 

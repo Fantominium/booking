@@ -5,11 +5,12 @@ import {
   getAvailabilityCache,
   setAvailabilityCache,
 } from "@/lib/cache/availability";
-import { calculateAvailableSlotsForDate } from "@/lib/services/availability";
+import { calculateAvailableSlotsForDate, getBusinessDayBounds } from "@/lib/services/availability";
 import { prisma } from "@/lib/prisma";
 import { resolveServiceDurationOption } from "@/lib/service-duration-options";
 
 export const dynamic = "force-dynamic";
+const BUSINESS_TIME_ZONE = "America/Barbados";
 
 const parseDate = (value: string): Date => {
   const [year, month, day] = value.split("-").map(Number);
@@ -38,7 +39,7 @@ export const GET = async (
   }
 
   const service = await prisma.service.findUnique({
-    where: { id: serviceId },
+    where: { id: serviceId, isActive: true },
   });
 
   if (!service) {
@@ -59,6 +60,7 @@ export const GET = async (
     blockedRanges: entry.blackoutRanges,
   }));
   const overrides = await prisma.dateOverride.findMany();
+  const now = new Date();
   const requestedDuration = Number.parseInt(durationMinParam ?? "", 10);
   const selectedOption = resolveServiceDurationOption(
     service,
@@ -80,12 +82,12 @@ export const GET = async (
 
   if (dateParam) {
     const targetDate = parseDate(dateParam);
+    const dayBounds = getBusinessDayBounds(targetDate, BUSINESS_TIME_ZONE);
     const dayBookings = await prisma.booking.findMany({
       where: {
-        serviceId: service.id,
         startTime: {
-          gte: targetDate,
-          lt: addDays(targetDate, 1),
+          gte: dayBounds.start,
+          lt: dayBounds.end,
         },
       },
     });
@@ -100,6 +102,8 @@ export const GET = async (
       businessHours,
       overrides,
       settings,
+      timeZone: BUSINESS_TIME_ZONE,
+      now,
     });
 
     const payload = {
@@ -121,12 +125,12 @@ export const GET = async (
   let cursor = startDate;
 
   while (cursor <= endDate) {
+    const dayBounds = getBusinessDayBounds(cursor, BUSINESS_TIME_ZONE);
     const dayBookings = await prisma.booking.findMany({
       where: {
-        serviceId: service.id,
         startTime: {
-          gte: cursor,
-          lt: addDays(cursor, 1),
+          gte: dayBounds.start,
+          lt: dayBounds.end,
         },
       },
     });
@@ -141,6 +145,8 @@ export const GET = async (
       businessHours,
       overrides,
       settings,
+      timeZone: BUSINESS_TIME_ZONE,
+      now,
     });
 
     if (slots.length > 0) {

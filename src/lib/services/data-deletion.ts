@@ -1,7 +1,8 @@
-import { addHours, subYears } from "date-fns";
+import { addHours, subMonths } from "date-fns";
 import { createHash, randomBytes } from "crypto";
 
 import { prisma } from "@/lib/prisma";
+import { emitAlert } from "@/lib/ops/alerts";
 import { resend } from "@/lib/email/config";
 import { DeletionRequestEmail } from "@/lib/email/templates/deletion-request";
 
@@ -39,45 +40,38 @@ export const createDeletionRequest = async (params: {
   return token;
 };
 
-const logDeletion = async (params: {
-  email: string;
-  reason: "CUSTOMER_REQUEST" | "AUTO_PURGE_AGE" | "GDPR_RIGHT_TO_BE_FORGOTTEN";
-  requestedByIp?: string | null;
-  status: "SUCCESS" | "FAILED" | "PENDING";
-}): Promise<void> => {
-  await prisma.dataDeletionAuditLog.create({
-    data: {
-      originalEmailHash: hashEmail(params.email),
-      deletionReason: params.reason,
-      requestedByIp: params.requestedByIp ?? null,
-      status: params.status,
-    },
-  });
-};
-
 export const anonymizeCustomerData = async (params: {
   email: string;
   reason: "CUSTOMER_REQUEST" | "AUTO_PURGE_AGE" | "GDPR_RIGHT_TO_BE_FORGOTTEN";
   requestedByIp?: string | null;
+  // Age-based purges must leave a returning customer's recent or upcoming bookings intact.
+  endedBefore?: Date;
 }): Promise<void> => {
   const emailHash = hashEmail(params.email);
 
-  await prisma.booking.updateMany({
-    where: { customerEmail: params.email },
-    data: {
-      customerName: "Deleted Customer",
-      customerEmail: redactEmail(emailHash),
-      customerPhone: "REDACTED",
-      stripeCustomerId: null,
-    },
-  });
-
-  await logDeletion({
-    email: params.email,
-    reason: params.reason,
-    requestedByIp: params.requestedByIp,
-    status: "SUCCESS",
-  });
+  // One transaction per customer: the redaction and its audit record commit together or not at all.
+  await prisma.$transaction([
+    prisma.booking.updateMany({
+      where: {
+        customerEmail: params.email,
+        ...(params.endedBefore ? { endTime: { lt: params.endedBefore } } : {}),
+      },
+      data: {
+        customerName: "Deleted Customer",
+        customerEmail: redactEmail(emailHash),
+        customerPhone: "REDACTED",
+        stripeCustomerId: null,
+      },
+    }),
+    prisma.dataDeletionAuditLog.create({
+      data: {
+        originalEmailHash: emailHash,
+        deletionReason: params.reason,
+        requestedByIp: params.requestedByIp ?? null,
+        status: "SUCCESS",
+      },
+    }),
+  ]);
 };
 
 export const confirmDeletionRequest = async (token: string): Promise<void> => {
@@ -109,36 +103,45 @@ export const confirmDeletionRequest = async (token: string): Promise<void> => {
   });
 };
 
-export const purgeOldCustomerData = async (): Promise<number> => {
-  const threshold = subYears(new Date(), 2);
+export const purgeOldCustomerData = async (now: Date = new Date()): Promise<number> => {
+  // Legal hold suspends all age-based anonymization (D9a).
+  if (process.env.PII_PURGE_LEGAL_HOLD === "true") {
+    return 0;
+  }
+
+  const threshold = subMonths(now, 24);
   const bookings = await prisma.booking.findMany({
-    where: {
-      startTime: { lt: threshold },
-    },
+    where: { endTime: { lt: threshold } },
     select: { customerEmail: true },
+    distinct: ["customerEmail"],
   });
 
-  const emails: string[] = [];
+  const emails = bookings
+    .map((booking: (typeof bookings)[number]) => booking.customerEmail)
+    .filter(
+      (email: string | null): email is string => Boolean(email) && !email?.startsWith("redacted+"),
+    );
 
-  bookings.forEach((booking: (typeof bookings)[number]) => {
-    if (booking.customerEmail) {
-      emails.push(booking.customerEmail);
-    }
-  });
-
-  const uniqueEmails = Array.from(new Set(emails)).filter(
-    (email) => !email.startsWith("redacted+"),
-  );
-
-  await Promise.all(
-    uniqueEmails.map((email: (typeof uniqueEmails)[number]) =>
-      anonymizeCustomerData({
+  let anonymized = 0;
+  let failed = 0;
+  for (const email of emails) {
+    try {
+      await anonymizeCustomerData({
         email,
         reason: "AUTO_PURGE_AGE",
         requestedByIp: null,
-      }),
-    ),
-  );
+        endedBefore: threshold,
+      });
+      anonymized += 1;
+    } catch {
+      failed += 1;
+    }
+  }
 
-  return uniqueEmails.length;
+  if (failed > 0) {
+    await emitAlert("pii_purge_failed", { job: "privacy-maintenance", failed, anonymized });
+    throw new Error(`PII purge failed for ${failed} customer(s)`);
+  }
+
+  return anonymized;
 };

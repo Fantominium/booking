@@ -1,23 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { z } from "zod";
 
 describe("bookings contract", () => {
-  const bookingResponseSchema = z.object({
-    id: z.string(),
-    status: z.string(),
-    paymentIntentId: z.string().nullable(),
-    clientSecret: z.string().nullable(),
-  });
-
-  it("POST /api/bookings returns booking with payment intent", () => {
+  it("POST /api/bookings returns a pending bank-transfer booking", () => {
     const payload = {
       id: "booking-123",
       status: "PENDING",
-      paymentIntentId: "pi_test_123",
-      clientSecret: "secret",
+      paymentMethod: "BANK_TRANSFER",
+      paymentState: "PENDING_BANK_TRANSFER",
+      bankTransferReference: "TRU-BOOKING-123",
+      bankTransferInstructions: "Use the booking reference as the transfer memo.",
     };
 
-    const result = bookingResponseSchema.safeParse(payload);
-    expect(result.success).toBe(true);
+    expect(payload).toMatchObject({
+      status: "PENDING",
+      paymentMethod: "BANK_TRANSFER",
+      paymentState: "PENDING_BANK_TRANSFER",
+    });
+    expect(payload).not.toHaveProperty("paymentIntentId");
+    expect(payload).not.toHaveProperty("clientSecret");
   });
 });

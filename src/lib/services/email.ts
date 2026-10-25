@@ -4,7 +4,13 @@ import { prisma } from "@/lib/prisma";
 export type EmailJobPayload = {
   bookingId: string;
   customerEmail: string;
-  type: "CONFIRMATION" | "REFUND_NOTIFICATION" | "PASSWORD_RESET" | "CANCELLATION";
+  type:
+    | "CONFIRMATION"
+    | "REFUND_NOTIFICATION"
+    | "PASSWORD_RESET"
+    | "CANCELLATION"
+    | "EXPIRY_NOTICE";
+  dedupeKey?: string;
 };
 
 export const queueEmailJob = async (payload: EmailJobPayload): Promise<void> => {
@@ -14,9 +20,10 @@ export const queueEmailJob = async (payload: EmailJobPayload): Promise<void> => 
   });
 
   await emailQueue.add(payload.type, payload, {
+    jobId: payload.dedupeKey ?? `${payload.bookingId}:${payload.type}`,
     attempts: 3,
     backoff: { type: "exponential", delay: 60_000 },
-    removeOnComplete: true,
+    removeOnComplete: { age: 30 * 24 * 60 * 60 },
     removeOnFail: false,
   });
 };

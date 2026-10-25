@@ -1,16 +1,11 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { CheckoutForm } from "@/components/booking/CheckoutForm";
 import { DatePicker } from "@/components/booking/DatePicker";
 import { TimeSlotPicker, type TimeSlot } from "@/components/booking/TimeSlotPicker";
-import { StripePaymentForm } from "@/components/payment/StripePaymentForm";
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "");
 
 type BookingFlowProps = {
   serviceId: string;
@@ -20,9 +15,6 @@ type BookingFlowProps = {
 
 type BookingResponse = {
   id: string;
-  clientSecret: string | null;
-  paymentMethod: "CARD" | "BANK_TRANSFER";
-  paymentState: "UNPAID" | "PENDING_BANK_TRANSFER" | "DEPOSIT_PAID" | "PAID_IN_FULL";
 };
 
 export const BookingFlow = ({
@@ -32,9 +24,9 @@ export const BookingFlow = ({
 }: BookingFlowProps): React.JSX.Element => {
   const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
   const [selectedSlot, setSelectedSlot] = useState<string | undefined>(undefined);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [bookingId, setBookingId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const idempotencyKeyRef = useRef<string | null>(null);
+  const selectedSlotRef = useRef<string | undefined>(undefined);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const endDate = useMemo(() => {
@@ -72,11 +64,15 @@ export const BookingFlow = ({
   const handleDateSelect = useCallback((date: string): void => {
     setSelectedDate(date);
     setSelectedSlot(undefined);
-    setClientSecret(null);
-    setBookingId(null);
+    selectedSlotRef.current = undefined;
+    idempotencyKeyRef.current = null;
   }, []);
 
   const handleSlotSelect = useCallback((slotStart: string) => {
+    if (selectedSlotRef.current !== slotStart) {
+      idempotencyKeyRef.current = null;
+      selectedSlotRef.current = slotStart;
+    }
     setSelectedSlot(slotStart);
   }, []);
 
@@ -85,17 +81,22 @@ export const BookingFlow = ({
       customerName: string;
       customerEmail: string;
       customerPhone: string;
-      paymentMethod: "CARD" | "BANK_TRANSFER";
+      paymentMethod: "BANK_TRANSFER";
     }) => {
       if (!selectedSlot) {
         return;
       }
 
       setStatusMessage(null);
+      const idempotencyKey = idempotencyKeyRef.current ?? globalThis.crypto.randomUUID();
+      idempotencyKeyRef.current = idempotencyKey;
 
       const response = await fetch("/api/bookings", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
+        },
         body: JSON.stringify({
           serviceId,
           startTime: selectedSlot,
@@ -103,11 +104,14 @@ export const BookingFlow = ({
           customerName: data.customerName,
           customerEmail: data.customerEmail,
           customerPhone: data.customerPhone,
-          paymentMethod: data.paymentMethod,
+          paymentMethod: "BANK_TRANSFER",
         }),
       });
 
       if (!response.ok) {
+        if (response.status < 500) {
+          idempotencyKeyRef.current = null;
+        }
         setStatusMessage(
           "We could not create your booking. Please review your details and try again.",
         );
@@ -115,22 +119,11 @@ export const BookingFlow = ({
       }
 
       const booking = (await response.json()) as BookingResponse;
-
-      setClientSecret(booking.clientSecret ?? null);
-      setBookingId(booking.id);
-
-      if (booking.paymentMethod === "BANK_TRANSFER") {
-        globalThis.location.href = `/book/success?bookingId=${booking.id}`;
-      }
+      idempotencyKeyRef.current = null;
+      globalThis.location.href = `/book/success?bookingId=${booking.id}`;
     },
     [selectedDurationMin, selectedSlot, serviceId],
   );
-
-  const handlePaymentComplete = useCallback(() => {
-    if (bookingId) {
-      globalThis.location.href = `/book/success?bookingId=${bookingId}`;
-    }
-  }, [bookingId]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -163,18 +156,6 @@ export const BookingFlow = ({
             {(selectedPriceCents / 100).toFixed(0)} Bds.
           </p>
           <CheckoutForm onSubmit={handleCheckoutSubmit} />
-        </section>
-      ) : null}
-
-      {clientSecret ? (
-        <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-950">Card payment</h2>
-          <Elements stripe={stripePromise} options={{ clientSecret }}>
-            <StripePaymentForm
-              clientSecret={clientSecret}
-              onPaymentComplete={handlePaymentComplete}
-            />
-          </Elements>
         </section>
       ) : null}
     </div>

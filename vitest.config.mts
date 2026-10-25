@@ -10,6 +10,24 @@ export default defineConfig({
     setupFiles: ["./tests/setup/vitest.setup.ts"],
     globals: true,
     exclude: ["**/node_modules/**", "**/dist/**", "**/tests/e2e/**"],
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "unit",
+          exclude: ["**/node_modules/**", "**/dist/**", "**/tests/e2e/**", "**/tests/integration/db/**"],
+        },
+      },
+      {
+        // Real-PostgreSQL files share one database, so they must not run in parallel.
+        extends: true,
+        test: {
+          name: "db",
+          include: ["tests/integration/db/**/*.test.ts"],
+          fileParallelism: false,
+        },
+      },
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

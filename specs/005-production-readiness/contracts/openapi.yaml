@@ -1,0 +1,529 @@
+openapi: 3.1.0
+info:
+  title: TruFlow Booking API
+  version: 1.0.0-readiness
+  description: >-
+    Bank-transfer-only API contract for production-readiness spec 005. Card payments,
+    PaymentIntent creation, and Stripe webhooks are disabled and are not release capabilities.
+servers:
+  - url: https://{host}
+    variables:
+      host:
+        default: bookings.example.invalid
+paths:
+  /api/services:
+    get:
+      operationId: listActiveServices
+      responses:
+        "200":
+          description: Active services ordered by offering and name.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Service" }
+  /api/services/{serviceId}:
+    get:
+      operationId: getActiveService
+      parameters:
+        - $ref: "#/components/parameters/serviceId"
+      responses:
+        "200":
+          {
+            description: Active service,
+            content: { application/json: { schema: { $ref: "#/components/schemas/Service" } } },
+          }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /api/availability/{serviceId}:
+    get:
+      operationId: getAvailability
+      parameters:
+        - $ref: "#/components/parameters/serviceId"
+        - name: startDate
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: endDate
+          in: query
+          schema: { type: string, format: date }
+        - name: date
+          in: query
+          schema: { type: string, format: date }
+        - name: durationMin
+          in: query
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200": { description: Advisory available dates or slots. }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /api/bookings:
+    post:
+      operationId: createBankTransferBooking
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: Reserved for the approved idempotent booking contract; lifecycle approval remains pending.
+          schema: { type: string, minLength: 16, maxLength: 255 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BookingCreateRequest" }
+      responses:
+        "200":
+          description: Pending bank-transfer booking. Payment is not verified.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BookingPendingTransfer" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /api/bookings/{bookingId}/ics:
+    get:
+      operationId: downloadBookingCalendarEvent
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          { description: Calendar event, content: { text/calendar: { schema: { type: string } } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /api/payment-intents:
+    post:
+      operationId: disabledPaymentIntentCreation
+      deprecated: true
+      description: Disabled for this release; no request body is accepted and no Stripe call is made.
+      responses:
+        "503": { $ref: "#/components/responses/Unavailable" }
+  /api/webhooks/stripe/{token}:
+    post:
+      operationId: disabledStripeWebhook
+      deprecated: true
+      description: Disabled for this release; requests do not mutate booking or payment state.
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "503": { $ref: "#/components/responses/Unavailable" }
+  /api/customer-data/request-deletion:
+    post:
+      operationId: requestCustomerDataDeletion
+      requestBody:
+        {
+          required: true,
+          content:
+            { application/json: { schema: { $ref: "#/components/schemas/DeletionRequest" } } },
+        }
+      responses:
+        "200": { description: Generic confirmation response. }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /api/customer-data/confirm-deletion:
+    post:
+      operationId: confirmCustomerDataDeletion
+      requestBody:
+        {
+          required: true,
+          content:
+            { application/json: { schema: { $ref: "#/components/schemas/DeletionConfirmation" } } },
+        }
+      responses:
+        "200": { description: Deletion processed. }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /api/auth/password-reset/request:
+    post:
+      operationId: requestPasswordReset
+      requestBody:
+        {
+          required: true,
+          content:
+            { application/json: { schema: { $ref: "#/components/schemas/PasswordResetRequest" } } },
+        }
+      responses:
+        "200": { description: Enumeration-resistant reset response. }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /api/auth/password-reset/confirm:
+    post:
+      operationId: confirmPasswordReset
+      requestBody:
+        {
+          required: true,
+          content:
+            {
+              application/json:
+                { schema: { $ref: "#/components/schemas/PasswordResetConfirmation" } },
+            },
+        }
+      responses:
+        "200": { description: Password changed. }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /api/auth/{nextauth}:
+    get:
+      operationId: nextAuthGet
+      parameters: [{ name: nextauth, in: path, required: true, schema: { type: string } }]
+      responses: { "200": { description: NextAuth protocol response. } }
+    post:
+      operationId: nextAuthPost
+      parameters: [{ name: nextauth, in: path, required: true, schema: { type: string } }]
+      responses:
+        {
+          "200": { description: NextAuth protocol response. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+  /api/health:
+    get:
+      operationId: getReadiness
+      responses:
+        "200": { description: Application dependencies are ready. }
+        "503": { description: One or more required dependencies are degraded. }
+  /api/admin/admins:
+    get:
+      operationId: listAdmins
+      security: [{ AdminSession: [] }]
+      responses:
+        {
+          "200": { description: Admin accounts without password hashes. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+    post:
+      operationId: createAdmin
+      security: [{ AdminSession: [] }]
+      requestBody:
+        {
+          required: true,
+          content:
+            { application/json: { schema: { $ref: "#/components/schemas/AdminCreateRequest" } } },
+        }
+      responses:
+        {
+          "201": { description: Admin created. },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+  /api/admin/admins/{id}:
+    delete:
+      operationId: deleteAdmin
+      security: [{ AdminSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        {
+          "204": { description: Admin deleted. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        }
+  /api/admin/bookings:
+    get:
+      operationId: listAdminBookings
+      security: [{ AdminSession: [] }]
+      responses:
+        {
+          "200": { description: Filtered and paginated bookings. },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+  /api/admin/bookings/{id}:
+    get:
+      operationId: getAdminBooking
+      security: [{ AdminSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        {
+          "200": { description: Booking details. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        }
+  /api/admin/bookings/{id}/cancel:
+    post:
+      operationId: cancelAdminBooking
+      security: [{ AdminSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        {
+          "200": { description: Cancelled booking. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+  /api/admin/bookings/{id}/mark-paid:
+    post:
+      operationId: reconcileBankTransfer
+      security: [{ AdminSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        {
+          "200": { description: Reconciled booking. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+  /api/admin/bookings/{id}/resend-email:
+    post:
+      operationId: resendBookingEmail
+      security: [{ AdminSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        {
+          "200": { description: Email queued. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+  /api/admin/dashboard/today:
+    get:
+      operationId: getAdminTodayDashboard
+      security: [{ AdminSession: [] }]
+      responses:
+        {
+          "200": { description: Today's bookings. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+  /api/admin/dashboard/pending-actions:
+    get:
+      operationId: getAdminPendingActions
+      security: [{ AdminSession: [] }]
+      responses:
+        {
+          "200": { description: Pending reconciliation and email actions. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+  /api/admin/services:
+    get:
+      operationId: listAdminServices
+      security: [{ AdminSession: [] }]
+      responses:
+        {
+          "200": { description: All configured services. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+    post:
+      operationId: createAdminService
+      security: [{ AdminSession: [] }]
+      requestBody:
+        {
+          required: true,
+          content:
+            { application/json: { schema: { $ref: "#/components/schemas/ServiceMutation" } } },
+        }
+      responses:
+        {
+          "201": { description: Service created. },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+  /api/admin/services/{id}:
+    patch:
+      operationId: updateAdminService
+      security: [{ AdminSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      requestBody:
+        {
+          required: true,
+          content:
+            { application/json: { schema: { $ref: "#/components/schemas/ServiceMutation" } } },
+        }
+      responses:
+        {
+          "200": { description: Service updated. },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+    delete:
+      operationId: deleteAdminService
+      security: [{ AdminSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        {
+          "204": { description: Service deleted. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "409": { $ref: "#/components/responses/Conflict" },
+        }
+  /api/admin/services/media:
+    post:
+      operationId: uploadServiceMedia
+      security: [{ AdminSession: [] }]
+      requestBody:
+        {
+          required: true,
+          content:
+            {
+              multipart/form-data:
+                {
+                  schema:
+                    {
+                      type: object,
+                      required: [slot, file],
+                      properties:
+                        {
+                          slot: { type: string, enum: [hero, heroPoster, card] },
+                          file: { type: string, format: binary },
+                        },
+                    },
+                },
+            },
+        }
+      responses:
+        {
+          "200": { description: Media uploaded. },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+  /api/admin/business-hours:
+    get:
+      operationId: getBusinessHours
+      security: [{ AdminSession: [] }]
+      responses:
+        {
+          "200": { description: Business hours and blocked ranges. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+    put:
+      operationId: updateBusinessHours
+      security: [{ AdminSession: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses:
+        {
+          "200": { description: Updated business hours. },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+  /api/admin/date-overrides:
+    get:
+      operationId: listDateOverrides
+      security: [{ AdminSession: [] }]
+      responses:
+        {
+          "200": { description: Date overrides. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+    post:
+      operationId: createDateOverride
+      security: [{ AdminSession: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses:
+        {
+          "201": { description: Date override created. },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+  /api/admin/date-overrides/{id}:
+    delete:
+      operationId: deleteDateOverride
+      security: [{ AdminSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        {
+          "204": { description: Date override deleted. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+  /api/admin/settings:
+    get:
+      operationId: getAdminSettings
+      security: [{ AdminSession: [] }]
+      responses:
+        {
+          "200": { description: Current settings. },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+    patch:
+      operationId: updateAdminSettings
+      security: [{ AdminSession: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses:
+        {
+          "200": { description: Updated settings. },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        }
+components:
+  securitySchemes:
+    AdminSession:
+      type: apiKey
+      in: cookie
+      name: truflow.session-token
+  parameters:
+    serviceId:
+      name: serviceId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  responses:
+    BadRequest:
+      description: Invalid or malformed request.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Unauthorized:
+      description: Missing, invalid, expired, or wrong-role admin session.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    NotFound:
+      description: Resource does not exist or is not publicly bookable.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Conflict:
+      description: Booking or service conflicts with current state.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Unavailable:
+      description: Deferred payment provider route is intentionally disabled.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+    Service:
+      type: object
+      required: [id, name, offeringType, durationMin, priceCents, downpaymentCents, isActive]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        offeringType: { type: string, enum: [SESSION, EVENT, RENTAL] }
+        durationMin: { type: integer, minimum: 1 }
+        priceCents: { type: integer, minimum: 0 }
+        downpaymentCents: { type: integer, minimum: 0 }
+        isActive: { type: boolean }
+    BookingCreateRequest:
+      type: object
+      required: [serviceId, startTime, customerName, customerEmail, customerPhone, paymentMethod]
+      properties:
+        serviceId: { type: string, format: uuid }
+        startTime: { type: string, format: date-time }
+        selectedDurationMin: { type: integer, minimum: 1 }
+        customerName: { type: string, minLength: 1, maxLength: 255 }
+        customerEmail: { type: string, format: email }
+        customerPhone: { type: string, minLength: 5, maxLength: 20 }
+        paymentMethod: { type: string, const: BANK_TRANSFER }
+    BookingPendingTransfer:
+      type: object
+      required:
+        [id, status, paymentMethod, paymentState, bankTransferReference, bankTransferInstructions]
+      properties:
+        id: { type: string }
+        status: { type: string, const: PENDING }
+        paymentMethod: { type: string, const: BANK_TRANSFER }
+        paymentState: { type: string, const: PENDING_BANK_TRANSFER }
+        bankTransferReference: { type: [string, "null"] }
+        bankTransferInstructions: { type: [string, "null"] }
+        clientSecret: { type: "null" }
+    DeletionRequest:
+      type: object
+      required: [email]
+      properties: { email: { type: string, format: email } }
+    DeletionConfirmation:
+      type: object
+      required: [token]
+      properties: { token: { type: string, minLength: 20 } }
+    PasswordResetRequest:
+      type: object
+      required: [email]
+      properties: { email: { type: string, format: email } }
+    PasswordResetConfirmation:
+      type: object
+      required: [token, newPassword]
+      properties:
+        token: { type: string, minLength: 1 }
+        newPassword: { type: string, minLength: 8 }
+    AdminCreateRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+    ServiceMutation:
+      type: object
+      description: Validated service fields. See src/lib/schemas/api.ts for the complete Zod contract.

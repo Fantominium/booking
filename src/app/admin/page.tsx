@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdminPageSession } from "@/lib/auth/admin";
+import { getAdminAttentionItems } from "@/lib/services/admin-attention";
 import { AdminDashboardClient } from "@/components/admin/AdminDashboardClient";
 
 // Force dynamic rendering for admin pages that use database queries
@@ -42,6 +43,8 @@ const AdminDashboardPage = async (): Promise<JSX.Element> => {
     orderBy: { startTime: "asc" },
   });
 
+  const attention = await getAdminAttentionItems(prisma);
+
   // Format data for client component
   const bookingsData = bookings.map((booking: (typeof bookings)[number]) => ({
     id: booking.id,
@@ -73,6 +76,9 @@ const AdminDashboardPage = async (): Promise<JSX.Element> => {
     <AdminDashboardClient
       bookings={bookingsData}
       unpaidBalances={unpaidBalancesData}
+      emailFailures={attention.emailFailures}
+      transferReviews={attention.transferReviews}
+      expiredTransfers={attention.expiredTransfers}
       todayFormatted={todayFormatted}
     />
   );

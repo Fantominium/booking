@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth/password";
+import { publicRateLimitResponse } from "@/lib/middleware/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,16 @@ const resetPassword = async (email: string, newPassword: string): Promise<void> 
 
 export const POST = async (request: Request): Promise<NextResponse> => {
   try {
+    const rateLimitResponse = await publicRateLimitResponse({
+      request,
+      namespace: "password-reset-confirm",
+      maxRequests: 5,
+      windowSeconds: 60 * 60,
+    });
+    if (rateLimitResponse) {
+      return rateLimitResponse as NextResponse;
+    }
+
     const body = await request.json();
     const parsed = confirmSchema.safeParse(body);
 
