@@ -126,7 +126,7 @@ describe.skipIf(!isIsolatedTestDatabase)("PostgreSQL transfer lifecycle and outb
     expect(queueAdd).toHaveBeenCalledWith(
       "EXPIRY_NOTICE",
       expect.objectContaining({ bookingId: id }),
-      expect.objectContaining({ jobId: `${id}:EXPIRY_NOTICE` }),
+      expect.objectContaining({ jobId: encodeURIComponent(`${id}:EXPIRY_NOTICE`) }),
     );
   });
 
