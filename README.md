@@ -64,16 +64,14 @@ pnpm worker:email
 
 ## Environment Variables
 
-Use .env.local for host development. The following keys are required by runtime validation:
+Use .env.local for host development. These non-payment keys are required by production runtime validation:
 
 ```dotenv
 DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/truflow_booking_dev
-STRIPE_SECRET_KEY=sk_test_...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
 RESEND_API_KEY=re_...
+EMAIL_FROM_ADDRESS=bookings@example.test
 NEXTAUTH_SECRET=replace_with_generated_secret
-WEBHOOK_URL_TOKEN=replace_with_generated_token
+IDEMPOTENCY_HMAC_SECRET=separate_32_character_secret_stable_for_at_least_7_days
 REDIS_URL=redis://localhost:6379
 NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
@@ -82,7 +80,9 @@ Notes:
 
 - Copy values from .env.local.example as your baseline.
 - If you use local Docker defaults, set DATABASE_URL to postgresql://postgres:devpassword@localhost:5432/truflow_booking_dev?schema=public.
-- Use test keys locally for Stripe and Resend.
+- Stripe configuration is intentionally not used or required for this bank-transfer-only release.
+- Keep `IDEMPOTENCY_HMAC_SECRET` separate from the auth secret and stable for at least seven days; rotation invalidates retries within that retention window.
+- Use test credentials for email delivery during local development.
 - Do not commit .env files.
 
 ## Seeded Local Admin (Local/Test Only)
@@ -100,6 +100,7 @@ The local development setup includes these processes:
 
 - Web application on port 3000
 - Email worker process
+- Maintenance worker process (transfer expiry and privacy-token/audit cleanup)
 - PostgreSQL on port 5432
 - Redis on port 6379
 
@@ -124,6 +125,8 @@ Health check:
 curl http://localhost:3000/api/health
 ```
 
+`docker-compose.yml` is the production baseline: PostgreSQL and Redis publish no ports, sit on an internal-only network, Redis requires `REDIS_PASSWORD`, and every secret is a required variable. `docker-compose.override.yml` is loaded automatically for development and publishes the two services on `127.0.0.1` only. Deploy with `docker compose -f docker-compose.yml up -d` (explicit `-f` skips the override) and supply secrets from the deployment secret store, not `.env.compose.example`.
+
 Stop containers:
 
 ```bash
@@ -136,6 +139,7 @@ docker compose --env-file .env.compose.example down -v
 # Development
 pnpm dev
 pnpm worker:email
+pnpm worker:maintenance
 
 # Quality
 pnpm typecheck
@@ -158,6 +162,7 @@ pnpm build-storybook
 - Booking flow loads at http://localhost:3000/book?type=SESSION
 - Admin login page loads at http://localhost:3000/admin/login
 - Worker process starts without Redis or database connection errors
+- Maintenance worker starts and registers recurring expiry/privacy jobs
 - Prisma migrations and seed complete successfully
 
 ## Troubleshooting

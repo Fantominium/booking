@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +10,10 @@ type RouteParams = {
 };
 
 export const GET = async (_request: Request, { params }: RouteParams): Promise<NextResponse> => {
+  if (!(await getAdminSession())) {
+    return createAdminUnauthorizedResponse();
+  }
+
   const { id } = await params;
 
   const booking = await prisma.booking.findUnique({

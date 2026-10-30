@@ -14,7 +14,9 @@ describe("CheckoutForm", () => {
     await user.type(screen.getByLabelText("Full name"), "Jane Doe");
     await user.type(screen.getByLabelText("Email"), "jane@example.com");
     await user.type(screen.getByLabelText("Phone"), "5555555555");
-    await user.click(screen.getByRole("button", { name: "Continue to payment" }));
+    await user.click(
+      screen.getByRole("button", { name: "Continue to bank transfer instructions" }),
+    );
 
     expect(onSubmit).toHaveBeenCalledWith({
       customerName: "Jane Doe",
@@ -24,7 +26,7 @@ describe("CheckoutForm", () => {
     });
   });
 
-  it("allows the customer to choose bank transfer", async () => {
+  it("presents bank transfer as the only payment method", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn().mockResolvedValue(undefined);
 
@@ -33,8 +35,10 @@ describe("CheckoutForm", () => {
     await user.type(screen.getByLabelText("Full name"), "Jane Doe");
     await user.type(screen.getByLabelText("Email"), "jane@example.com");
     await user.type(screen.getByLabelText("Phone"), "5555555555");
-    await user.click(screen.getByRole("radio", { name: /reserve with bank transfer/i }));
-    await user.click(screen.getByRole("button", { name: "Continue to payment" }));
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Continue to bank transfer instructions" }),
+    );
 
     expect(onSubmit).toHaveBeenCalledWith({
       customerName: "Jane Doe",

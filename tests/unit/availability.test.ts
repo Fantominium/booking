@@ -16,6 +16,10 @@ describe("availability calculation", () => {
   ];
 
   const settings = { maxBookingsPerDay: 5, bufferMinutes: 15 };
+  const calculationContext = {
+    timeZone: "UTC",
+    now: new Date(Date.UTC(2026, 1, 1)),
+  };
 
   it("returns slots within business hours", () => {
     const slots = calculateAvailableSlotsForDate({
@@ -25,6 +29,7 @@ describe("availability calculation", () => {
       businessHours,
       overrides: [],
       settings,
+      ...calculationContext,
     });
 
     expect(slots.length).toBeGreaterThan(0);
@@ -47,12 +52,13 @@ describe("availability calculation", () => {
         },
       ],
       settings,
+      ...calculationContext,
     });
 
     expect(slots).toHaveLength(0);
   });
 
-  it("respects buffer time", () => {
+  it("enforces the 60-minute minimum even when a smaller buffer is configured", () => {
     const slots = calculateAvailableSlotsForDate({
       date: baseDate,
       service,
@@ -60,9 +66,56 @@ describe("availability calculation", () => {
       businessHours,
       overrides: [],
       settings: { ...settings, bufferMinutes: 30 },
+      ...calculationContext,
     });
 
-    expect(slots[0].end.getTime() - slots[0].start.getTime()).toBe(90 * 60 * 1000);
+    expect(slots[0].end.getTime() - slots[0].start.getTime()).toBe(120 * 60 * 1000);
+  });
+
+  it("enforces at least 60 minutes between reservation intervals", () => {
+    const slots = calculateAvailableSlotsForDate({
+      date: baseDate,
+      service,
+      bookings: [
+        {
+          startTime: new Date(Date.UTC(2026, 1, 10, 10, 0, 0)),
+          endTime: new Date(Date.UTC(2026, 1, 10, 12, 0, 0)),
+          status: "CONFIRMED",
+        },
+      ],
+      businessHours: [
+        {
+          ...businessHours[0],
+          closingTime: new Date("1970-01-01T16:00:00Z"),
+        },
+      ],
+      overrides: [],
+      settings,
+      ...calculationContext,
+    });
+    const nextSlotAfterBooking = slots.find(
+      (slot) => slot.start >= new Date(Date.UTC(2026, 1, 10, 10, 0, 0)),
+    );
+
+    expect(nextSlotAfterBooking?.start.toISOString()).toContain("T12:00");
+    expect(nextSlotAfterBooking!.end.getTime() - nextSlotAfterBooking!.start.getTime()).toBe(
+      120 * 60 * 1000,
+    );
+  });
+
+  it("interprets business hours in the approved America/Barbados timezone", () => {
+    const slots = calculateAvailableSlotsForDate({
+      date: baseDate,
+      service,
+      bookings: [],
+      businessHours,
+      overrides: [],
+      settings,
+      timeZone: "America/Barbados",
+      now: new Date(Date.UTC(2026, 1, 1)),
+    });
+
+    expect(slots[0].start.toISOString()).toBe("2026-02-10T13:00:00.000Z");
   });
 
   it("respects unavailable business-hour ranges", () => {
@@ -83,6 +136,7 @@ describe("availability calculation", () => {
       ],
       overrides: [],
       settings,
+      ...calculationContext,
     });
 
     expect(slots.some((slot) => slot.start.toISOString().includes("T10:00"))).toBe(false);
@@ -104,9 +158,30 @@ describe("availability calculation", () => {
         },
       ],
       settings,
+      ...calculationContext,
     });
 
     expect(slots).toHaveLength(0);
+  });
+
+  it.each(["CANCELLED", "EXPIRED"] as const)("releases the slot of a %s booking", (status) => {
+    const slots = calculateAvailableSlotsForDate({
+      date: baseDate,
+      service,
+      bookings: [
+        {
+          startTime: new Date(Date.UTC(2026, 1, 10, 9, 0, 0)),
+          endTime: new Date(Date.UTC(2026, 1, 10, 10, 15, 0)),
+          status,
+        },
+      ],
+      businessHours,
+      overrides: [],
+      settings,
+      ...calculationContext,
+    });
+
+    expect(slots[0].start.toISOString()).toContain("T09:00");
   });
 
   it("respects daily booking cap", () => {
@@ -143,6 +218,7 @@ describe("availability calculation", () => {
       businessHours,
       overrides: [],
       settings: { ...settings, maxBookingsPerDay: 1 },
+      ...calculationContext,
     });
 
     expect(slots).toHaveLength(0);

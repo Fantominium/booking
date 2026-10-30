@@ -12,3 +12,9 @@ export const EMAIL_QUEUE_NAME = "email-queue";
 export const emailQueue = new Queue(EMAIL_QUEUE_NAME, {
   connection: redisConnection,
 });
+
+export const MAINTENANCE_QUEUE_NAME = "maintenance-queue";
+
+export const maintenanceQueue = new Queue(MAINTENANCE_QUEUE_NAME, {
+  connection: redisConnection,
+});

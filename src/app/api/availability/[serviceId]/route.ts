@@ -5,16 +5,25 @@ import {
   getAvailabilityCache,
   setAvailabilityCache,
 } from "@/lib/cache/availability";
-import { calculateAvailableSlotsForDate } from "@/lib/services/availability";
+import { fromZonedTime } from "date-fns-tz";
+
+import { calculateAvailableSlotsForDate, getBusinessDayBounds } from "@/lib/services/availability";
 import { prisma } from "@/lib/prisma";
 import { resolveServiceDurationOption } from "@/lib/service-duration-options";
 
 export const dynamic = "force-dynamic";
+const BUSINESS_TIME_ZONE = "America/Barbados";
 
 const parseDate = (value: string): Date => {
   const [year, month, day] = value.split("-").map(Number);
   return new Date(Date.UTC(year, month - 1, day));
 };
+
+const getDayBounds = (date: Date): ReturnType<typeof getBusinessDayBounds> =>
+  getBusinessDayBounds(
+    fromZonedTime(`${date.toISOString().slice(0, 10)}T00:00:00`, BUSINESS_TIME_ZONE),
+    BUSINESS_TIME_ZONE,
+  );
 
 const addDays = (date: Date, days: number): Date => {
   const next = new Date(date);
@@ -38,7 +47,7 @@ export const GET = async (
   }
 
   const service = await prisma.service.findUnique({
-    where: { id: serviceId },
+    where: { id: serviceId, isActive: true },
   });
 
   if (!service) {
@@ -59,6 +68,7 @@ export const GET = async (
     blockedRanges: entry.blackoutRanges,
   }));
   const overrides = await prisma.dateOverride.findMany();
+  const now = new Date();
   const requestedDuration = Number.parseInt(durationMinParam ?? "", 10);
   const selectedOption = resolveServiceDurationOption(
     service,
@@ -80,12 +90,12 @@ export const GET = async (
 
   if (dateParam) {
     const targetDate = parseDate(dateParam);
+    const dayBounds = getDayBounds(targetDate);
     const dayBookings = await prisma.booking.findMany({
       where: {
-        serviceId: service.id,
         startTime: {
-          gte: targetDate,
-          lt: addDays(targetDate, 1),
+          gte: dayBounds.start,
+          lt: dayBounds.end,
         },
       },
     });
@@ -100,6 +110,8 @@ export const GET = async (
       businessHours,
       overrides,
       settings,
+      timeZone: BUSINESS_TIME_ZONE,
+      now,
     });
 
     const payload = {
@@ -121,12 +133,12 @@ export const GET = async (
   let cursor = startDate;
 
   while (cursor <= endDate) {
+    const dayBounds = getDayBounds(cursor);
     const dayBookings = await prisma.booking.findMany({
       where: {
-        serviceId: service.id,
         startTime: {
-          gte: cursor,
-          lt: addDays(cursor, 1),
+          gte: dayBounds.start,
+          lt: dayBounds.end,
         },
       },
     });
@@ -141,6 +153,8 @@ export const GET = async (
       businessHours,
       overrides,
       settings,
+      timeZone: BUSINESS_TIME_ZONE,
+      now,
     });
 
     if (slots.length > 0) {

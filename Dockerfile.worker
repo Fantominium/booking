@@ -10,4 +10,5 @@ COPY . .
 RUN pnpm exec prisma generate
 ENV NODE_ENV=production
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=5 CMD pgrep -f "email-worker.ts" || exit 1
+USER node
 CMD ["pnpm", "worker:email"]

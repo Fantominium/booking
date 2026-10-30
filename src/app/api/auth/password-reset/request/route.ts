@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { randomBytes } from "crypto";
+import { publicRateLimitResponse } from "@/lib/middleware/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,16 @@ const createPasswordResetToken = async (email: string): Promise<string> => {
 
 export const POST = async (request: Request): Promise<NextResponse> => {
   try {
+    const rateLimitResponse = await publicRateLimitResponse({
+      request,
+      namespace: "password-reset-request",
+      maxRequests: 5,
+      windowSeconds: 60 * 60,
+    });
+    if (rateLimitResponse) {
+      return rateLimitResponse as NextResponse;
+    }
+
     const body = await request.json();
     const parsed = requestSchema.safeParse(body);
 
@@ -47,11 +58,8 @@ export const POST = async (request: Request): Promise<NextResponse> => {
 
     // Always return same message to prevent email enumeration
     if (admin) {
-      const token = await createPasswordResetToken(email);
-
-      // TODO: Queue email with token
-      // await emailService.queuePasswordResetEmail(email, token);
-      console.log(`Password reset token for ${email}: ${token}`);
+      // Email delivery is not implemented yet; the token must never be logged.
+      await createPasswordResetToken(email);
     }
 
     return NextResponse.json({

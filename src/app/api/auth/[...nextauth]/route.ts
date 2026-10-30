@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 import { verifyPassword } from "@/lib/auth/password";
 import { env } from "@/lib/config/env";
+import { publicRateLimitResponse } from "@/lib/middleware/rate-limit";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -76,6 +77,28 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
-const handler = NextAuth(authOptions);
+const nextAuthHandler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST };
+type AuthRouteContext = Parameters<typeof nextAuthHandler>[1];
+
+export const GET = nextAuthHandler;
+
+export const POST = async (request: Request, context: AuthRouteContext): Promise<Response> => {
+  const segments = new URL(request.url).pathname.split("/").filter(Boolean).slice(2);
+  if (segments[0] === "callback" && segments[1] === "credentials") {
+    if (segments.length > 2) {
+      return Response.json({ error: "Not found" }, { status: 404 });
+    }
+    const limited = await publicRateLimitResponse({
+      request,
+      namespace: "login",
+      maxRequests: 10,
+      windowSeconds: 15 * 60,
+    });
+    if (limited) {
+      return limited;
+    }
+  }
+
+  return nextAuthHandler(request, context);
+};

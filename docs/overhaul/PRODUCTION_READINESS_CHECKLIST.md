@@ -42,9 +42,13 @@ Use this checklist before declaring the platform ready for production deployment
 
 ## Environment And Operations
 
-- [ ] Production environment variables are configured securely
+- [ ] Bank-transfer-only production environment variables are configured through a secret store; Stripe values are absent and not required
 - [ ] Secrets are managed through the hosting or deployment secret store
+- [ ] PostgreSQL and Redis are isolated on private infrastructure; paid managed database services are out of scope
+- [ ] Production web and worker containers run non-root with restricted ports and verified health checks
 - [ ] Database migrations have been reviewed and are ready for production use
+- [ ] PostgreSQL backup restore drill is attached and meets approved RPO/RTO
+- [ ] Worker, queue age, email delivery, database, and Redis alert delivery is demonstrated
 - [ ] Rollback approach is documented
 - [ ] Preview or staging verification has completed successfully
 - [ ] Operational owners are identified for release approval
@@ -62,3 +66,5 @@ Use this checklist before declaring the platform ready for production deployment
 - [ ] QA or test approval complete
 - [ ] Product or business approval complete where required
 - [ ] Release evidence attached to the decision record
+- [ ] Route-to-scenario matrix has no unmapped route or outcome branch
+- [ ] Stripe deferral is acknowledged; card, PaymentIntent, webhook, and refund readiness are not release gates

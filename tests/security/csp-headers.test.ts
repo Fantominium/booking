@@ -20,4 +20,9 @@ describe("security headers", () => {
     expect(csp).toContain("default-src 'self'");
     expect(csp).toContain("frame-src");
   });
+
+  it("does not allow deferred Stripe scripts, frames, or API connections", async () => {
+    const csp = await getCspValue();
+    expect(csp).not.toContain("stripe.com");
+  });
 });

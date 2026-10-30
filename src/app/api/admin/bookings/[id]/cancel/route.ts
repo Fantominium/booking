@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
 import { cancelBooking } from "@/lib/services/booking";
 import { prisma } from "@/lib/prisma";
 
@@ -10,6 +11,10 @@ type RouteParams = {
 };
 
 export const POST = async (_request: Request, { params }: RouteParams): Promise<NextResponse> => {
+  if (!(await getAdminSession())) {
+    return createAdminUnauthorizedResponse();
+  }
+
   const { id } = await params;
 
   const booking = await prisma.booking.findUnique({

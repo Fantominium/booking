@@ -51,7 +51,7 @@ export const proxy = async (request: NextRequest): Promise<NextResponse> => {
   response.headers.set("X-XSS-Protection", "1; mode=block");
   response.headers.set(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline' js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' api.stripe.com; frame-src js.stripe.com; font-src 'self' data:",
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.resend.com; frame-src 'none'; font-src 'self' data:",
   );
 
   if (process.env.NODE_ENV === "production") {

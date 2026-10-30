@@ -1,11 +1,12 @@
 import { addMinutes, differenceInMinutes, isBefore } from "date-fns";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
 export type AvailabilitySlot = {
   start: Date;
   end: Date;
 };
 
-type BookingStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
+type BookingStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED" | "EXPIRED";
 
 type ServiceInput = {
   durationMin: number;
@@ -50,11 +51,27 @@ const getTimeParts = (time: Date): { hours: number; minutes: number } => {
   return { hours: time.getUTCHours(), minutes: time.getUTCMinutes() };
 };
 
-const buildDateWithTime = (date: Date, time: Date): Date => {
+const buildDateWithTime = (date: Date, time: Date, timeZone: string): Date => {
   const { hours, minutes } = getTimeParts(time);
-  return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), hours, minutes, 0),
-  );
+  const dateKey = date.toISOString().slice(0, 10);
+  const timeKey = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00`;
+  return fromZonedTime(`${dateKey}T${timeKey}`, timeZone);
+};
+
+export const getBusinessDayBounds = (
+  instant: Date,
+  timeZone: string,
+): { start: Date; end: Date } => {
+  const local = toZonedTime(instant, timeZone);
+  const localDate = new Date(Date.UTC(local.getFullYear(), local.getMonth(), local.getDate()));
+  const nextDate = addMinutes(localDate, 24 * 60);
+  const localDateKey = localDate.toISOString().slice(0, 10);
+  const nextDateKey = nextDate.toISOString().slice(0, 10);
+
+  return {
+    start: fromZonedTime(`${localDateKey}T00:00:00`, timeZone),
+    end: fromZonedTime(`${nextDateKey}T00:00:00`, timeZone),
+  };
 };
 
 const isDateWithinRange = (date: Date, startDate: Date, endDate: Date): boolean => {
@@ -69,7 +86,9 @@ const isOverlapping = (a: AvailabilitySlot, b: AvailabilitySlot): boolean => {
 };
 
 const getDailyBookingsCount = (bookings: BookingInput[]): number => {
-  return bookings.filter((booking) => booking.status !== "CANCELLED").length;
+  return bookings.filter(
+    (booking) => booking.status !== "CANCELLED" && booking.status !== "EXPIRED",
+  ).length;
 };
 
 export const calculateAvailableSlotsForDate = (params: {
@@ -79,8 +98,10 @@ export const calculateAvailableSlotsForDate = (params: {
   businessHours: BusinessHoursInput[];
   overrides: DateOverrideInput[];
   settings: SystemSettingsInput;
+  timeZone: string;
+  now: Date;
 }): AvailabilitySlot[] => {
-  const { date, service, bookings, businessHours, overrides, settings } = params;
+  const { date, service, bookings, businessHours, overrides, settings, timeZone, now } = params;
 
   if (getDailyBookingsCount(bookings) >= settings.maxBookingsPerDay) {
     return [];
@@ -105,9 +126,10 @@ export const calculateAvailableSlotsForDate = (params: {
     return [];
   }
 
-  const slotDuration = service.durationMin + settings.bufferMinutes;
-  const dayStart = buildDateWithTime(date, openingTime);
-  const dayEnd = buildDateWithTime(date, closingTime);
+  const minimumBufferMinutes = Math.max(settings.bufferMinutes, 60);
+  const slotDuration = service.durationMin + minimumBufferMinutes;
+  const dayStart = buildDateWithTime(date, openingTime, timeZone);
+  const dayEnd = buildDateWithTime(date, closingTime, timeZone);
 
   const intervalMinutes = 15;
   const totalMinutes = differenceInMinutes(dayEnd, dayStart);
@@ -115,7 +137,11 @@ export const calculateAvailableSlotsForDate = (params: {
 
   const slotStarts = Array.from({ length: steps }, (_, index) =>
     addMinutes(dayStart, index * intervalMinutes),
-  ).filter((start) => isBefore(addMinutes(start, slotDuration), addMinutes(dayEnd, 1)));
+  ).filter(
+    (start) =>
+      !isBefore(start, addMinutes(now, 120)) &&
+      isBefore(addMinutes(start, slotDuration), addMinutes(dayEnd, 1)),
+  );
 
   return slotStarts
     .map((start: (typeof slotStarts)[number]) => ({
@@ -126,15 +152,21 @@ export const calculateAvailableSlotsForDate = (params: {
       (slot) =>
         !dayConfig?.blockedRanges.some((blockedRange) =>
           isOverlapping(slot, {
-            start: buildDateWithTime(date, blockedRange.startTime),
-            end: buildDateWithTime(date, blockedRange.endTime),
+            start: buildDateWithTime(date, blockedRange.startTime, timeZone),
+            end: buildDateWithTime(date, blockedRange.endTime, timeZone),
           }),
         ),
     )
     .filter(
       (slot) =>
-        !bookings.some((booking: (typeof bookings)[number]) =>
-          isOverlapping(slot, { start: booking.startTime, end: booking.endTime }),
+        !bookings.some(
+          (booking: (typeof bookings)[number]) =>
+            booking.status !== "CANCELLED" &&
+            booking.status !== "EXPIRED" &&
+            isOverlapping(slot, {
+              start: booking.startTime,
+              end: booking.endTime,
+            }),
         ),
     );
 };

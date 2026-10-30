@@ -7,7 +7,7 @@ export type CheckoutData = {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
-  paymentMethod: "CARD" | "BANK_TRANSFER";
+  paymentMethod: "BANK_TRANSFER";
 };
 
 type CheckoutFormProps = {
@@ -89,50 +89,15 @@ export const CheckoutForm = ({ onSubmit }: CheckoutFormProps): JSX.Element => {
           required
         />
       </label>
-      <fieldset className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-        <legend className="px-1 text-sm font-semibold text-slate-950">Payment options</legend>
-        {/* TODO: Card deposit payment — coming soon; unhide when Stripe integration is live
-        <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-800">
-          <input
-            id="payment-method-card"
-            type="radio"
-            name="paymentMethod"
-            value="CARD"
-            checked={formData.paymentMethod === "CARD"}
-            onChange={handleChange}
-          />
-          <label htmlFor="payment-method-card" className="flex cursor-pointer flex-col gap-1">
-            <span className="font-semibold text-slate-950">Pay deposit now by card</span>
-            <span>Secure the booking online now and handle any remaining balance later.</span>
-          </label>
-        </div>
-        */}
-        <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-800">
-          <input
-            id="payment-method-bank-transfer"
-            type="radio"
-            name="paymentMethod"
-            value="BANK_TRANSFER"
-            checked={formData.paymentMethod === "BANK_TRANSFER"}
-            onChange={handleChange}
-          />
-          <label
-            htmlFor="payment-method-bank-transfer"
-            className="flex cursor-pointer flex-col gap-1"
-          >
-            <span className="font-semibold text-slate-950">Reserve with bank transfer</span>
-            <span>
-              Reserve the booking now and receive the bank details and transfer reference on the
-              confirmation screen.
-            </span>
-          </label>
-        </div>
-      </fieldset>
+      <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-800">
+        Reserve with bank transfer. Your booking remains pending until the transfer is verified.
+        Instructions and a transfer reference will appear on the confirmation screen.
+      </p>
       <button
         type="submit"
         className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
         disabled={isSubmitting}
-        aria-label="Continue to payment"
+        aria-label="Continue to bank transfer instructions"
       >
         {isSubmitting ? "Processing" : "Continue"}
       </button>

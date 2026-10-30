@@ -19,7 +19,7 @@ The local development environment currently requires:
 - email worker process
 - PostgreSQL database
 - Redis
-- test-mode payment and email configuration values
+- bank-transfer booking and test-mode email configuration values
 
 ## Environment Variables
 
@@ -28,14 +28,12 @@ The local environment currently expects the keys listed in `.env` or a local ove
 Required values include:
 
 - `DATABASE_URL`
-- `STRIPE_SECRET_KEY`
-- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-- `STRIPE_WEBHOOK_SECRET`
 - `RESEND_API_KEY`
 - `NEXTAUTH_SECRET`
-- `WEBHOOK_URL_TOKEN`
 - `REDIS_URL`
 - `NEXT_PUBLIC_API_URL`
+
+Stripe and webhook secrets are intentionally not required for this bank-transfer-only release.
 
 ## Local/Test-Only Admin Credentials
 
@@ -94,8 +92,7 @@ Future revisions of this document should maintain troubleshooting guidance for:
 - Redis unavailable
 - Prisma migration failures
 - failed local seed
-- Stripe test-mode configuration issues
-- webhook secret or webhook forwarding mismatch
+- bank-transfer instruction configuration issues
 - worker boot failures
 
 ## Future Overhaul Expectations

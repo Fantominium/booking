@@ -1,11 +1,17 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { assertDestructiveSeedAllowed } from "../src/lib/config/production-safety";
 
 const prisma = new PrismaClient();
 
 const buildTime = (time: string): Date => new Date(`1970-01-01T${time}:00.000Z`);
 
 const seed = async (): Promise<void> => {
+  assertDestructiveSeedAllowed({
+    nodeEnv: process.env.NODE_ENV,
+    databaseUrl: process.env.DATABASE_URL,
+  });
+
   // Clear all existing services (no bookings in dev/seed environment)
   // Clear dependent records first, then services
   await prisma.paymentAuditLog.deleteMany({});
@@ -119,8 +125,7 @@ const seed = async (): Promise<void> => {
       },
       {
         name: "Sports Massage – Mobile",
-        description:
-          "Performance-focused athletic recovery therapy delivered at your location.",
+        description: "Performance-focused athletic recovery therapy delivered at your location.",
         offeringType: "SESSION",
         durationMin: 60,
         priceCents: 23000,
@@ -197,14 +202,14 @@ const seed = async (): Promise<void> => {
     where: { id: "settings-default" },
     update: {
       maxBookingsPerDay: 8,
-      bufferMinutes: 15,
+      bufferMinutes: 60,
       bankTransferInstructions:
         "Bank transfer available. Account name: TruFlow Wellness. Sort code: 12-34-56. Account number: 12345678. Use your booking reference in the payment memo.",
     },
     create: {
       id: "settings-default",
       maxBookingsPerDay: 8,
-      bufferMinutes: 15,
+      bufferMinutes: 60,
       bankTransferInstructions:
         "Bank transfer available. Account name: TruFlow Wellness. Sort code: 12-34-56. Account number: 12345678. Use your booking reference in the payment memo.",
     },

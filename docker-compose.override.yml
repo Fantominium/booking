@@ -1,0 +1,32 @@
+# Development-only layer, loaded automatically by `docker compose up`. Never deploy with this file.
+# Ports are published on loopback only so host tooling (prisma, vitest, psql) works without exposing services to the LAN.
+services:
+  postgres:
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-truflow_booking_dev}
+    # Published ports require a non-internal network.
+    networks: [data, edge]
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  redis:
+    # Loopback-only and password-free in dev so the default REDIS_URL=redis://localhost:6379 keeps working.
+    command: ["redis-server"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+    networks: [data, edge]
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  web:
+    environment: &dev-env
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-truflow_booking_dev}?schema=public
+      REDIS_URL: redis://redis:6379
+      RESEND_API_KEY: re_placeholder
+      EMAIL_FROM_ADDRESS: bookings@example.test
+      NEXTAUTH_SECRET: dev_secret
+      IDEMPOTENCY_HMAC_SECRET: dev_idempotency_hmac_secret_at_least_32_chars
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+
+  worker:
+    environment: *dev-env

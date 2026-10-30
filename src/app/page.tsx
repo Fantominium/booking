@@ -14,7 +14,7 @@ const Home = (): JSX.Element => {
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-slate-700 dark:text-slate-200">
               Start with a guided session, a hosted event, or a rental booking. Every route leads to
-              availability, customer details, and a final payment choice.
+              availability, customer details, and clear bank transfer instructions.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link
@@ -37,7 +37,7 @@ const Home = (): JSX.Element => {
                   Book a session
                 </span>
                 <span className="mt-1 block text-sm leading-6 text-slate-700 dark:text-slate-200">
-                  One-to-one appointments with secure deposit or bank transfer.
+                  One-to-one appointments reserved with bank transfer.
                 </span>
               </Link>
               <Link
@@ -48,7 +48,7 @@ const Home = (): JSX.Element => {
                   Reserve an event
                 </span>
                 <span className="mt-1 block text-sm leading-6 text-slate-700 dark:text-slate-200">
-                  Hosted group experiences with clear availability and payment steps.
+                  Hosted group experiences with clear availability and transfer instructions.
                 </span>
               </Link>
               <Link
@@ -87,7 +87,7 @@ const Home = (): JSX.Element => {
               Clear payment choices
             </h3>
             <p className="text-gold-900 dark:text-foreground text-sm leading-6">
-              Card deposits and bank transfer reservations are explained before you commit.
+              Bank transfer reservations remain pending until payment is verified.
             </p>
           </div>
 

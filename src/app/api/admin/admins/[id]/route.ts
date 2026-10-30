@@ -1,14 +1,8 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { getServerSession } from "next-auth";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { createAdminUnauthorizedResponse, getAdminSession } from "@/lib/auth/admin";
 
 export const dynamic = "force-dynamic";
-
-const checkAuthentication = async (): Promise<boolean> => {
-  const session = await getServerSession(authOptions);
-  return !!session?.user;
-};
 
 const deleteAdmin = async (id: string): Promise<{ success: boolean; error?: string }> => {
   // Check if admin exists
@@ -35,14 +29,12 @@ const deleteAdmin = async (id: string): Promise<{ success: boolean; error?: stri
 };
 
 export const DELETE = async (
-  _request: NextRequest,
+  _request: Request,
   context: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> => {
   try {
-    const isAuthenticated = await checkAuthentication();
-
-    if (!isAuthenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!(await getAdminSession())) {
+      return createAdminUnauthorizedResponse();
     }
 
     const { id } = await context.params;
